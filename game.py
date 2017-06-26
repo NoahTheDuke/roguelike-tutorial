@@ -163,7 +163,7 @@ def initialize_game():
 
     ''' begin main game loop '''
     while not tdl.event.is_window_closed():
-        render_all()
+        render_all(
         tdl.flush()
 
         for obj in objects:
