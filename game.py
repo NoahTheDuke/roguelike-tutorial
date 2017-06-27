@@ -3,6 +3,7 @@
 
 import tdl
 from random import randint
+import colors
 
 # Constants
 SCREEN_WIDTH = 80
@@ -12,6 +13,7 @@ MAP_HEIGHT = 45
 ROOM_MAX_SIZE = 10
 ROOM_MIN_SIZE = 6
 MAX_ROOMS = 30
+MAX_ROOM_MONSTERS = 3
 
 # FOV
 FOV_ALGO = 'SHADOW'
@@ -27,7 +29,9 @@ color_dark_ground_ex = (50, 50, 100)
 color_light_ground = (200, 180, 50)
 
 # Global variables
-has_moved = True
+objects = []
+game_state = 'idle'
+player_action = None
 
 # Set custom font
 tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
@@ -40,15 +44,17 @@ CON = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
 
 class GameObject:
     ''' Main class of game objects'''
-    def __init__(self, x, y, char, color):
+    def __init__(self, x, y, char, color,blocks=False):
         self.x = x
         self.y = y
         self.char = char
         self.color = color
+        self.blocks = blocks
+        objects.append(self)
     
     def move(self, dx, dy):
         ''' Move the object '''
-        if not my_map[self.x + dx][self.y + dy].blocked:
+        if not is_blocked(self.x + dx, self.y + dy):
             self.x += dx
             self.y += dy
         if self == player:
@@ -109,37 +115,45 @@ def handle_keys():
     if not keypress:
         return
     '''
- 
-    #movement keys
-    if user_input.key in ['UP','KP8']:
-        player.move(0,-1)
- 
-    elif user_input.key in ['DOWN','KP2']:
-        player.move(0,1)
- 
-    elif user_input.key in ['LEFT','KP4']:
-        player.move(-1,0)
- 
-    elif user_input.key in ['RIGHT','KP6']:
-        player.move(1,0)
 
-    elif user_input.key in ['KP9']:
-        player.move(1,-1)
+    if user_input.key == 'ENTER' and user_input.alt:
+        #Alt+Enter: toggle fullscreen
+        tdl.set_fullscreen(not tdl.get_fullscreen())
+    elif user_input.key == 'ESCAPE':
+        return 'exit'  #exit game
 
-    elif user_input.key in ['KP7']:
-        player.move(-1,-1)    
+    if game_state == 'playing':
+        #movement keys
+        if user_input.key in ['UP','KP8']:
+            player.move(0,-1)
+    
+        elif user_input.key in ['DOWN','KP2']:
+            player.move(0,1)
+    
+        elif user_input.key in ['LEFT','KP4']:
+            player.move(-1,0)
+    
+        elif user_input.key in ['RIGHT','KP6']:
+            player.move(1,0)
 
-    elif user_input.key in ['KP1']:
-        player.move(-1,1)    
+        elif user_input.key in ['KP9']:
+            player.move(1,-1)
 
-    elif user_input.key in ['KP3']:
-        player.move(1,1)           
+        elif user_input.key in ['KP7']:
+            player.move(-1,-1)    
 
-    elif user_input.key in ['KP5']:
-        player.move(0,0)
+        elif user_input.key in ['KP1']:
+            player.move(-1,1)    
 
-    elif user_input.key in ['q','0']:
-        return True
+        elif user_input.key in ['KP3']:
+            player.move(1,1)           
+
+        elif user_input.key in ['KP5']:
+            player.move(0,0)
+            return 'pass'
+
+        else:
+            return 'pass'
 
 def make_map():
     ''' Sets up the game's map '''
@@ -198,6 +212,9 @@ def make_map():
                     #first move vertically, then horizontally
                     create_v_tunnel(prev_y, new_y, prev_x)
                     create_h_tunnel(prev_x, new_x, new_y)
+                
+                #Fill room with monsters
+                place_objects(new_room)
 
         #finally, append the new room to the list
         rooms.append(new_room)
@@ -273,26 +290,60 @@ def create_v_tunnel(y1, y2, x):
         my_map[x][y].blocked = False
         my_map[x][y].block_sight = False        
 
+def place_objects(room):
+    ''' choose random number of monsters '''
+    num_monsters = randint(0, MAX_ROOM_MONSTERS)
+ 
+    for i in range(num_monsters):
+        #choose random spot for this monster
+        x = randint(room.x1, room.x2)
+        y = randint(room.y1, room.y2)
+        while is_blocked(x, y):
+            x = randint(room.x1, room.x2)
+            y = randint(room.y1, room.y2)
+ 
+        if randint(0, 100) < 80:  #80% chance of getting an orc
+            #create an orc
+            monster = GameObject(x, y, 'o', colors.desaturated_green,blocks=True)
+        else:
+            #create a troll
+            monster = GameObject(x, y, 'T', colors.darker_green,blocks=True)
+ 
+        objects.append(monster)
+
+def is_blocked(x, y):
+    '''first test the map tile'''
+    if my_map[x][y].blocked:
+        return True
+ 
+    #now check for any blocking objects
+    for obj in objects:
+        if obj.blocks and obj.x == x and obj.y == y:
+            return True
+ 
+    return False
+
 def main_loop():
     ''' begin main game loop '''
+    global game_state, player_action
+    game_state = 'playing'
     while not tdl.event.is_window_closed():
         render_all()
         tdl.flush()
 
         for obj in objects:
             obj.clear()
-        exit_game = handle_keys()
-        if exit_game:
+        player_action = handle_keys()
+        if player_action == 'exit':
             break
 
 def initialize_game():
     ''' launches the game '''
 
-    global objects, player, npc
+    global player
 
-    player = GameObject(25, 23, '@', (255,255,255))
+    player = GameObject(randint(MAP_HEIGHT,MAP_WIDTH),randint(MAP_HEIGHT,MAP_WIDTH), '@', colors.white, blocks=True)
     #npc = GameObject(SCREEN_WIDTH//2 - 5, SCREEN_HEIGHT//2, 'H', (255,255,0))
-    objects = [player]
     make_map()
     fov_recompute()
     main_loop()
