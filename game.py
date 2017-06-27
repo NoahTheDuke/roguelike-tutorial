@@ -9,11 +9,25 @@ SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
 MAP_WIDTH = 80
 MAP_HEIGHT = 45
-color_dark_wall = (34, 49, 63)
-color_dark_ground = (103, 128, 159)
 ROOM_MAX_SIZE = 10
 ROOM_MIN_SIZE = 6
 MAX_ROOMS = 30
+
+# FOV
+FOV_ALGO = 'SHADOW'
+FOV_LIGHT_WALLS = True
+TORCH_RADIUS = 10
+
+# Dungeon colors
+color_dark_wall = (0, 0, 100)
+color_dark_wall_ex = (25, 25, 100)
+color_light_wall = (130, 110, 50)
+color_dark_ground = (0, 0, 100)
+color_dark_ground_ex = (50, 50, 100)
+color_light_ground = (200, 180, 50)
+
+# Global variables
+has_moved = True
 
 # Set custom font
 tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
@@ -37,10 +51,13 @@ class GameObject:
         if not my_map[self.x + dx][self.y + dy].blocked:
             self.x += dx
             self.y += dy
+        if self == player:
+            fov_recompute()
     
     def draw(self):
         ''' Draw the object '''
-        CON.draw_char(self.x, self.y, self.char, self.color)
+        if (self.x, self.y) in visible_tiles:
+            CON.draw_char(self.x, self.y, self.char, self.color)
 
     def clear(self):
         ''' Clear the object '''
@@ -51,6 +68,7 @@ class Tile:
     ''' a map tile '''
     def __init__(self, blocked, block_sight = None):
         self.blocked = blocked
+        self.explored = False
  
         #by default, if a tile is blocked, it also blocks sight
         if block_sight is None: block_sight = blocked
@@ -187,19 +205,51 @@ def make_map():
 
 def render_all():
     ''' draw all game objects '''
-
     for y in range(MAP_HEIGHT):
         for x in range(MAP_WIDTH):
+            visible = (x, y) in visible_tiles
             wall = my_map[x][y].block_sight
-            if wall:
-                CON.draw_char(x, y, None, fg=None, bg=color_dark_wall)
+            if not visible:
+                #it's out of the player's FOV but explored
+                if my_map[x][y].explored:
+                    if wall:
+                        CON.draw_char(x, y, None, fg=None, bg=color_dark_wall_ex)
+                    else:
+                        CON.draw_char(x, y, None, fg=None, bg=color_dark_ground_ex)
             else:
-                CON.draw_char(x, y, '.', fg=(255,255,0), bg=color_dark_ground)
-    
+                #it's visible
+                if wall:
+                    CON.draw_char(x, y, None, fg=None, bg=color_light_wall)
+                else:
+                    CON.draw_char(x, y, None, fg=None, bg=color_light_ground)
+                my_map[x][y].explored = True
     for obj in objects:
         obj.draw()
         
     ROOT.blit(CON , 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)        
+
+def is_visible_tile(x, y):
+    global my_map
+ 
+    if x >= MAP_WIDTH or x < 0:
+        return False
+    elif y >= MAP_HEIGHT or y < 0:
+        return False
+    elif my_map[x][y].blocked == True:
+        return False
+    elif my_map[x][y].block_sight == True:
+        return False
+    else:
+        return True
+
+def fov_recompute():
+    ''' Recomputes the player's FOV '''
+    global visible_tiles
+    visible_tiles = tdl.map.quickFOV(player.x, player.y,
+                                        is_visible_tile,
+                                        fov=FOV_ALGO,
+                                        radius=TORCH_RADIUS,
+                                        lightWalls=FOV_LIGHT_WALLS)
 
 def create_room(room):
     ''' Create a room in the dungeon '''
@@ -244,6 +294,7 @@ def initialize_game():
     #npc = GameObject(SCREEN_WIDTH//2 - 5, SCREEN_HEIGHT//2, 'H', (255,255,0))
     objects = [player]
     make_map()
+    fov_recompute()
     main_loop()
 
 initialize_game()
