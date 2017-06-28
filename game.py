@@ -177,7 +177,6 @@ def handle_keys():
             player_move_or_attack(1,1)           
 
         elif user_input.key in ['KP5']:
-            player_move_or_attack(0,0)
             return 'pass'
 
         else:
