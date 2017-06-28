@@ -75,17 +75,41 @@ class GameObject:
         dx = other.x - self.x
         dy = other.y - self.y
         return math.sqrt(dx ** 2 + dy ** 2)
+    
+    def send_to_back(self):
+        '''make this object be drawn first, so all others appear above it if they're in the same tile.'''
+        global gameobjects
+        gameobjects.remove(self)
+        gameobjects.insert(0, self)
 
 class Fighter:
-    #combat-related properties and methods (monster, player, NPC).
-    def __init__(self, hp, defense, power):
+    ''' combat-related properties and methods (monster, player, NPC) '''
+    def __init__(self, hp, defense, power,death_function=None):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
         self.power = power
+        self.death_function = death_function
+    def take_damage(self, damage):
+        '''apply damage if possible'''
+        if damage > 0:
+            self.hp -= damage
+        if self.hp <= 0:
+            if self.death_function:
+                self.death_function(self.owner)
+    def attack(self, target):
+        '''a simple formula for attack damage'''
+        damage = self.power - target.fighter.defense
+
+        if damage > 0:
+            #make the target take some damage
+            print(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.')
+            target.fighter.take_damage(damage)
+        else:
+            print(self.owner.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
 
 class BasicMonster:
-    #AI for a basic monster. 
+    '''AI for a basic monster.'''
     def take_turn(self):
         monster = self.owner
         if (monster.x, monster.y) in visible_tiles:
@@ -96,7 +120,7 @@ class BasicMonster:
  
             #close enough, attack! (if the player is still alive.)
             elif player.fighter.hp > 0:
-                print('The attack of the ' + monster.name + ' bounces off your shiny metal armor!')
+                monster.fighter.attack(player)
 
 class Tile:
     ''' a map tile '''
@@ -177,7 +201,7 @@ def handle_keys():
             player_move_or_attack(1,1)           
 
         elif user_input.key in ['KP5']:
-            return 'pass'
+            return ''
 
         else:
             return 'pass'
@@ -284,7 +308,7 @@ def place_objects(room):
  
         if randint(0, 100) < 80:  #80% chance of getting an orc
             #create an orc
-            fighter_component = Fighter(hp=10, defense=0, power=3)
+            fighter_component = Fighter(hp=10, defense=0, power=3,death_function=monster_death)
             ai_component = BasicMonster()
             monster = GameObject(x, y,'Orc', 'o', colors.desaturated_green,blocks=True,fighter=fighter_component,ai=BasicMonster())
         else:
@@ -292,8 +316,6 @@ def place_objects(room):
             fighter_component = Fighter(hp=16, defense=1, power=4)
             ai_component = BasicMonster()
             monster = GameObject(x, y,'Troll','T', colors.darker_green,blocks=True,fighter=fighter_component,ai=BasicMonster())
- 
-        gameobjects.append(monster)
 
 def render_all():
     ''' draw all game objects '''
@@ -316,9 +338,13 @@ def render_all():
                     CON.draw_char(x, y, None, fg=None, bg=settings.color_light_ground)
                 my_map[x][y].explored = True
     for obj in gameobjects:
-        obj.draw()
+        if obj != player:
+            obj.draw()
+    player.draw()
         
-    ROOT.blit(CON , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)        
+    ROOT.blit(CON , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
+    CON.draw_str(1, settings.SCREEN_HEIGHT - 2, 'HP: ' + str(player.fighter.hp) + '/' + 
+                 str(player.fighter.max_hp) + ' ')        
 
 def fov_recompute():
     ''' Recomputes the player's FOV '''
@@ -365,16 +391,38 @@ def player_move_or_attack(dx, dy):
     #try to find an attackable object there
     target = None
     for obj in gameobjects:
-        if obj.x == x and obj.y == y:
+        if obj.fighter and obj.x == x and obj.y == y:
             target = obj
             break
  
     #attack if target found, move otherwise
     if target is not None:
-        print('The ' + target.name + ' laughs at your puny efforts to attack him!')
+        player.fighter.attack(target)
     else:
         player.move(dx, dy)
         fov_recompute()
+
+def player_death(player):
+    '''the game ended!'''
+    global game_state
+    print('You died!')
+    game_state = 'dead'
+ 
+    #for added effect, transform the player into a corpse!
+    player.char = '%'
+    player.color = colors.dark_red
+ 
+def monster_death(monster):
+    '''transform it into a nasty corpse! it doesn't block, can't be
+    attacked and doesn't move'''
+    print(monster.name.capitalize() + ' is dead!')
+    monster.char = '%'
+    monster.color = colors.dark_red
+    monster.blocks = False
+    monster.fighter = None
+    monster.ai = None
+    monster.name = 'remains of ' + monster.name
+    monster.send_to_back()
 
 def main_loop():
     ''' begin main game loop '''
@@ -398,7 +446,7 @@ def initialize_game():
     ''' launches the game '''
 
     global player
-    fighter_component = Fighter(hp=30, defense=2, power=5)
+    fighter_component = Fighter(hp=30, defense=2, power=5,death_function=player_death)
     player = GameObject(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, blocks=True,fighter=fighter_component)
     #npc = GameObject(settings.SCREEN_WIDTH//2 - 5, settings.SCREEN_HEIGHT//2, 'H', (255,255,0))
     make_map()
