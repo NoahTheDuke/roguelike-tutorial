@@ -6,24 +6,25 @@ from random import randint
 import colors
 import settings
 import math
+import textwrap
 
-# Global variablesgam
+# Global variables
 game_state = 'idle'
 player_action = None
 gameobjects = []
 my_map = []
+game_msgs = []
 
 # Set custom font
 tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
 
 # initialize the window
-ROOT = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
-CON = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
+root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
+con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
+panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
 
 class GameObject:
     ''' Main class of game objects'''
-    global gameobjects
-
     def __init__(self, x, y,  name,char, color, blocks=False, fighter=None, ai=None):
         self.x = x
         self.y = y
@@ -39,7 +40,8 @@ class GameObject:
         self.ai = ai #let the AI component know who owns it
         if self.ai:  
             self.ai.owner = self
-
+        
+        global gameobjects
         gameobjects.append(self)
     
     def move(self, dx, dy):
@@ -51,11 +53,11 @@ class GameObject:
     def draw(self):
         ''' Draw the object '''
         if (self.x, self.y) in visible_tiles:
-            CON.draw_char(self.x, self.y, self.char, self.color)
+            con.draw_char(self.x, self.y, self.char, self.color)
 
     def clear(self):
         ''' Clear the object '''
-        CON.draw_char(self.x, self.y, ' ', self.color, bg=None)
+        con.draw_char(self.x, self.y, ' ', self.color, bg=None)
     
     def move_towards(self, target_x, target_y):
         ''' Move Gameobject towards intended target '''
@@ -103,14 +105,15 @@ class Fighter:
 
         if damage > 0:
             #make the target take some damage
-            print(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.')
+            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.')
             target.fighter.take_damage(damage)
         else:
-            print(self.owner.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
+            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
 
 class BasicMonster:
     '''AI for a basic monster.'''
     def take_turn(self):
+        '''let the monster take a turn'''
         monster = self.owner
         if (monster.x, monster.y) in visible_tiles:
  
@@ -327,24 +330,37 @@ def render_all():
                 #it's out of the player's FOV but explored
                 if my_map[x][y].explored:
                     if wall:
-                        CON.draw_char(x, y, None, fg=None, bg=settings.color_dark_wall)
+                        con.draw_char(x, y, None, fg=None, bg=settings.color_dark_wall)
                     else:
-                        CON.draw_char(x, y, None, fg=None, bg=settings.color_dark_ground)
+                        con.draw_char(x, y, None, fg=None, bg=settings.color_dark_ground)
             else:
                 #it's visible
                 if wall:
-                    CON.draw_char(x, y, None, fg=None, bg=settings.color_light_wall)
+                    con.draw_char(x, y, None, fg=None, bg=settings.color_light_wall)
                 else:
-                    CON.draw_char(x, y, None, fg=None, bg=settings.color_light_ground)
+                    con.draw_char(x, y, None, fg=None, bg=settings.color_light_ground)
                 my_map[x][y].explored = True
     for obj in gameobjects:
         if obj != player:
             obj.draw()
     player.draw()
         
-    ROOT.blit(CON , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
-    CON.draw_str(1, settings.SCREEN_HEIGHT - 2, 'HP: ' + str(player.fighter.hp) + '/' + 
-                 str(player.fighter.max_hp) + ' ')        
+    root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
+    #prepare to render the GUI panel
+    panel.clear(fg=colors.white, bg=colors.black)
+ 
+    #show the player's stats
+    render_bar(1, 1, settings.BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
+        colors.light_red, colors.darker_red)
+    
+    #print the game messages, one line at a time
+    y = 1
+    for (line, color) in game_msgs:
+        panel.draw_str(settings.MSG_X, y, line, bg=None, fg=color)
+        y += 1
+ 
+    #blit the contents of "panel" to the root console
+    root.blit(panel, 0, settings.PANEL_Y, settings.SCREEN_WIDTH, settings.PANEL_HEIGHT, 0, 0)     
 
 def fov_recompute():
     ''' Recomputes the player's FOV '''
@@ -405,7 +421,7 @@ def player_move_or_attack(dx, dy):
 def player_death(player):
     '''the game ended!'''
     global game_state
-    print('You died!')
+    message('You died!')
     game_state = 'dead'
  
     #for added effect, transform the player into a corpse!
@@ -415,7 +431,7 @@ def player_death(player):
 def monster_death(monster):
     '''transform it into a nasty corpse! it doesn't block, can't be
     attacked and doesn't move'''
-    print(monster.name.capitalize() + ' is dead!')
+    message(monster.name.capitalize() + ' is dead!')
     monster.char = '%'
     monster.color = colors.dark_red
     monster.blocks = False
@@ -423,6 +439,34 @@ def monster_death(monster):
     monster.ai = None
     monster.name = 'remains of ' + monster.name
     monster.send_to_back()
+
+def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
+    '''render a bar (HP, experience, etc). first calculate the width of the bar'''
+    bar_width = int(float(value) / maximum * total_width)
+ 
+    #render the background first
+    panel.draw_rect(x, y, total_width, 1, None, bg=back_color)
+ 
+    #now render the bar on top
+    if bar_width > 0:
+        panel.draw_rect(x, y, bar_width, 1, None, bg=bar_color)
+    
+     #finally, some centered text with the values
+    text = name + ': ' + str(value) + '/' + str(maximum)
+    x_centered = x + (total_width-len(text))//2
+    panel.draw_str(x_centered, y, text, fg=colors.white, bg=None)
+
+def message(new_msg, color = colors.white):
+    '''split the message if necessary, among multiple lines'''
+    new_msg_lines = textwrap.wrap(new_msg, settings.MSG_WIDTH)
+ 
+    for line in new_msg_lines:
+        #if the buffer is full, remove the first line to make room for the new one
+        if len(game_msgs) == settings.MSG_HEIGHT:
+            del game_msgs[0]
+ 
+        #add the new line as a tuple, with the text and the color
+        game_msgs.append((line, color))
 
 def main_loop():
     ''' begin main game loop '''
@@ -451,6 +495,8 @@ def initialize_game():
     #npc = GameObject(settings.SCREEN_WIDTH//2 - 5, settings.SCREEN_HEIGHT//2, 'H', (255,255,0))
     make_map()
     fov_recompute()
+    #a warm welcoming message!
+    message('Welcome stranger! Prepare to perish in the Tombs of the Ancient Kings.', colors.red)
     main_loop()
 
 initialize_game()
