@@ -1,3 +1,5 @@
+'''selection of pre-defined colors'''
+
 # grey levels
 black=(0,0,0)
 darkest_grey=(31,31,31)

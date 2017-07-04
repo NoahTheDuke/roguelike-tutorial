@@ -12,6 +12,7 @@ import textwrap
 game_state = 'idle'
 player_action = None
 gameobjects = []
+inventory = []
 my_map = []
 game_msgs = []
 
@@ -25,7 +26,7 @@ panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
 
 class GameObject:
     ''' Main class of game objects'''
-    def __init__(self, x, y,  name,char, color, blocks=False, fighter=None, ai=None):
+    def __init__(self, x, y,  name,char, color, blocks=False, fighter=None, ai=None,item=None):
         self.x = x
         self.y = y
         self.char = char
@@ -41,7 +42,10 @@ class GameObject:
         if self.ai:  
             self.ai.owner = self
         
-        global gameobjects
+        self.item = item
+        if self.item:  #let the Item component know who owns it
+            self.item.owner = self
+        
         gameobjects.append(self)
     
     def move(self, dx, dy):
@@ -80,7 +84,6 @@ class GameObject:
     
     def send_to_back(self):
         '''make this object be drawn first, so all others appear above it if they're in the same tile.'''
-        global gameobjects
         gameobjects.remove(self)
         gameobjects.insert(0, self)
 
@@ -154,6 +157,17 @@ class Rect:
         return (self.x1 <= other.x2 and self.x2 >= other.x1 and
                 self.y1 <= other.y2 and self.y2 >= other.y1)
 
+class Item:
+    '''an item that can be picked up and used.'''
+    def pick_up(self):
+        '''add to the player's inventory and remove from the map'''
+        if len(inventory) >= 26:
+            message('Your inventory is full, cannot pick up ' + self.owner.name + '.', colors.red)
+        else:
+            inventory.append(self.owner)
+            gameobjects.remove(self.owner)
+            message('You picked up a ' + self.owner.name + '!', colors.green)
+
 def handle_keys():
     ''' Handles all key input made by the player '''
  
@@ -205,6 +219,16 @@ def handle_keys():
 
         elif user_input.key in ['KP5']:
             return ''
+        
+        elif user_input.text == 'g':
+            #pick up an item
+            for obj in gameobjects:  #look for an item in the player's tile
+                if obj.x == player.x and obj.y == player.y and obj.item:
+                    obj.item.pick_up()
+                    break
+                else:
+                    message('There is nothing to pick up here!')
+                    break
 
         else:
             return 'pass'
@@ -297,28 +321,44 @@ def create_v_tunnel(y1, y2, x):
         my_map[x][y].blocked = False
         my_map[x][y].block_sight = False        
 
+def ran_room_post(room,check_block=True):
+    '''returns a random position within a room for an object'''
+    x = randint(room.x1+1, room.x2-1)
+    y = randint(room.y1+1, room.y2-1)
+    if check_block:
+        while is_blocked(x, y):
+            x = randint(room.x1+1, room.x2-1)
+            y = randint(room.y1+1, room.y2-1)
+    return [x,y]
 def place_objects(room):
-    ''' choose random number of monsters '''
+    ''' place objects in room '''
     num_monsters = randint(0, settings.MAX_ROOM_MONSTERS)
  
     for i in range(num_monsters):
         #choose random spot for this monster
-        x = randint(room.x1, room.x2)
-        y = randint(room.y1, room.y2)
-        while is_blocked(x, y):
-            x = randint(room.x1, room.x2)
-            y = randint(room.y1, room.y2)
- 
+        pos = ran_room_post(room)    
+    
         if randint(0, 100) < 80:  #80% chance of getting an orc
             #create an orc
             fighter_component = Fighter(hp=10, defense=0, power=3,death_function=monster_death)
             ai_component = BasicMonster()
-            monster = GameObject(x, y,'Orc', 'o', colors.desaturated_green,blocks=True,fighter=fighter_component,ai=BasicMonster())
+            monster = GameObject(pos[0], pos[1],'Orc', 'o', colors.desaturated_green,blocks=True,fighter=fighter_component,ai=BasicMonster())
         else:
             #create a troll
-            fighter_component = Fighter(hp=16, defense=1, power=4)
+            fighter_component = Fighter(hp=16, defense=1, power=4,death_function=monster_death)
             ai_component = BasicMonster()
-            monster = GameObject(x, y,'Troll','T', colors.darker_green,blocks=True,fighter=fighter_component,ai=BasicMonster())
+            monster = GameObject(pos[0], pos[1],'Troll','T', colors.darker_green,blocks=True,fighter=fighter_component,ai=BasicMonster())
+    
+    num_items = randint(0, settings.MAX_ROOM_ITEMS)
+    for i in range(num_items):
+        #choose random spot for this item
+        pos = ran_room_post(room)
+ 
+        #only place it if the tile is not blocked
+        #create a healing potion
+        item_component = Item()
+        item = GameObject(pos[0], pos[1], 'healing potion', '!', colors.violet,item=item_component)
+        item.send_to_back()  #items appear below other objects
 
 def render_all():
     ''' draw all game objects '''
@@ -432,13 +472,17 @@ def monster_death(monster):
     '''transform it into a nasty corpse! it doesn't block, can't be
     attacked and doesn't move'''
     message(monster.name.capitalize() + ' is dead!')
-    monster.char = '%'
-    monster.color = colors.dark_red
-    monster.blocks = False
-    monster.fighter = None
-    monster.ai = None
-    monster.name = 'remains of ' + monster.name
-    monster.send_to_back()
+    #monster.char = '%'
+    #monster.color = colors.dark_red
+    #monster.blocks = False
+    #monster.fighter = None
+    #monster.ai = None
+    #monster.name = 'remains of ' + monster.name
+    #monster.send_to_back()
+    item_component = Item()
+    item = GameObject(monster.x,monster.y, (monster.name + ' corpse'), '%', colors.dark_red,item=item_component)
+    gameobjects.remove(monster)
+    item.send_to_back()
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
     '''render a bar (HP, experience, etc). first calculate the width of the bar'''
