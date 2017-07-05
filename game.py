@@ -7,6 +7,7 @@ import colors
 import settings
 import math
 import textwrap
+import random
 
 # Global variables
 game_state = 'idle'
@@ -92,7 +93,9 @@ class Fighter:
     def __init__(self, hp, defense, power,death_function=None):
         self.max_hp = hp
         self.hp = hp
+        self.max_defense = defense
         self.defense = defense
+        self.max_power = power
         self.power = power
         self.death_function = death_function
     def take_damage(self, damage):
@@ -117,6 +120,11 @@ class Fighter:
         self.hp += amount
         if self.hp > self.max_hp:
             self.hp = self.max_hp
+    def modpwr(self, amount):
+        self.power += amount
+        if self.power == 1:
+            self.power = 1    
+
 class BasicMonster:
     '''AI for a basic monster.'''
     def take_turn(self):
@@ -351,32 +359,47 @@ def ran_room_post(room,check_block=True):
 def place_objects(room):
     ''' place objects in room '''
     num_monsters = randint(0, settings.MAX_ROOM_MONSTERS)
- 
     for i in range(num_monsters):
         #choose random spot for this monster
         pos = ran_room_post(room)    
-    
-        if randint(0, 100) < 80:  #80% chance of getting an orc
-            #create an orc
-            fighter_component = Fighter(hp=10, defense=0, power=3,death_function=monster_death)
-            ai_component = BasicMonster()
-            monster = GameObject(pos[0], pos[1],'Orc', 'o', colors.desaturated_green,blocks=True,fighter=fighter_component,ai=BasicMonster())
-        else:
-            #create a troll
-            fighter_component = Fighter(hp=16, defense=1, power=4,death_function=monster_death)
-            ai_component = BasicMonster()
-            monster = GameObject(pos[0], pos[1],'Troll','T', colors.darker_green,blocks=True,fighter=fighter_component,ai=BasicMonster())
+        place_monster(pos)
     
     num_items = randint(0, settings.MAX_ROOM_ITEMS)
     for i in range(num_items):
         #choose random spot for this item
         pos = ran_room_post(room)
- 
-        #only place it if the tile is not blocked
-        #create a healing potion
-        item_component = Item(use_function=cast_heal,use_value=10)
-        item = GameObject(pos[0], pos[1], 'healing potion', '!', colors.violet,item=item_component)
-        item.send_to_back()  #items appear below other objects
+        place_item(pos)
+
+def place_monster(pos):
+    '''creates a new monster at the given position'''
+    # list of possible items
+    # index:(chance,name,symbol,color,use_function(can be empty),use_value(can be empty))
+    monsters = {
+            'orc1':(80,'Orc','o',colors.desaturated_green,(10, 0, 3,monster_death),BasicMonster()),
+            'orc2':(80,'Orc','o',colors.desaturated_green,(12, 0, 3,monster_death),BasicMonster()),
+            'troll1':(20,'Troll','T',colors.darkest_green,(16, 1, 4,monster_death),BasicMonster()),
+        }
+    m = random.choice(list(monsters.keys()))
+    while (randint(0,100) > monsters[m][0]):
+        m = random.choice(list(monsters.keys()))
+    fighter_component = Fighter(monsters[m][4][0],monsters[m][4][1],monsters[m][4][2],monsters[m][4][3])
+    monster = GameObject(pos[0], pos[1],monsters[m][1], monsters[m][2], monsters[m][3],blocks=True,fighter=fighter_component,ai=monsters[m][5])
+
+def place_item(pos):
+    '''creates a new item at the given position'''
+    # list of possible items
+    # index:(chance,name,symbol,color,use_function(can be empty),use_value(can be empty))
+    items = {
+        'heal1':(90,'healing potion','!',colors.violet,cast_heal,10),
+        'power1':(50,'power potion','!',colors.red,cast_powerup,1),
+        'power2':(20,'power potion','!',colors.red,cast_powerup,-1)    #cursed
+    }
+    i = random.choice(list(items.keys()))
+    while (randint(0,100) > items[i][0]):
+        i = random.choice(list(items.keys()))
+    item_component = Item(use_function=items[i][4],use_value=items[i][5])
+    item = GameObject(pos[0], pos[1], items[i][1], items[i][2], items[i][3],item=item_component)
+    item.send_to_back()  #items appear below other objects
 
 def render_all():
     ''' draw all game objects '''
@@ -410,6 +433,10 @@ def render_all():
     #show the player's stats
     render_bar(1, 1, settings.BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
         colors.light_red, colors.darker_red)
+    render_bar(1, 2, settings.BAR_WIDTH, 'PWR', player.fighter.power, player.fighter.max_power,
+        colors.black, colors.black)
+    render_bar(1, 3, settings.BAR_WIDTH, 'DEF', player.fighter.defense, player.fighter.max_defense,
+        colors.black, colors.black)       
     
     #print the game messages, one line at a time
     y = 1
@@ -490,14 +517,7 @@ def monster_death(monster):
     '''transform it into a nasty corpse! it doesn't block, can't be
     attacked and doesn't move'''
     message(monster.name.capitalize() + ' is dead!')
-    #monster.char = '%'
-    #monster.color = colors.dark_red
-    #monster.blocks = False
-    #monster.fighter = None
-    #monster.ai = None
-    #monster.name = 'remains of ' + monster.name
-    #monster.send_to_back()
-    item_component = Item()
+    item_component = Item(eat_corpse,monster.name)
     item = GameObject(monster.x,monster.y, (monster.name + ' corpse'), '%', colors.dark_red,item=item_component)
     gameobjects.remove(monster)
     item.send_to_back()
@@ -579,6 +599,17 @@ def cast_heal(hp):
 
     message('Your wounds start to feel better!', colors.light_violet)
     player.fighter.heal(hp)
+
+def cast_powerup(pwr):
+    '''modify characters power'''
+    if (pwr > 0):
+        message('Your power has been increased!', colors.light_violet)
+    else:
+        message('The potion of power was cursed!', colors.light_violet)
+
+    player.fighter.modpwr(pwr)
+def eat_corpse(name):
+    message('You eat the corpse of a ' + name + '. It is disgusting!')
 
 def inventory_menu(header):
     '''show a menu with each item of the inventory as an option'''
