@@ -112,7 +112,11 @@ class Fighter:
             target.fighter.take_damage(damage)
         else:
             message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
-
+    def heal(self, amount):
+        #heal by the given amount, without going over the maximum
+        self.hp += amount
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
 class BasicMonster:
     '''AI for a basic monster.'''
     def take_turn(self):
@@ -159,6 +163,9 @@ class Rect:
 
 class Item:
     '''an item that can be picked up and used.'''
+    def __init__(self, use_function=None,use_value=None):
+        self.use_function = use_function
+        self.use_value = use_value
     def pick_up(self):
         '''add to the player's inventory and remove from the map'''
         if len(inventory) >= 26:
@@ -167,7 +174,13 @@ class Item:
             inventory.append(self.owner)
             gameobjects.remove(self.owner)
             message('You picked up a ' + self.owner.name + '!', colors.green)
-
+    def use(self):
+        '''just call the "use_function" if it is defined'''
+        if self.use_function is None:
+            message('The ' + self.owner.name + ' cannot be used.')
+        else:
+            if self.use_function(self.use_value) != 'cancelled': #the use_function is called and unless it isn't cancelled, True is returned
+                inventory.remove(self.owner)  #destroy after use, unless it was cancelled for some reason
 def handle_keys():
     ''' Handles all key input made by the player '''
  
@@ -222,14 +235,19 @@ def handle_keys():
         
         elif user_input.text == 'g':
             #pick up an item
+            found_something = False
             for obj in gameobjects:  #look for an item in the player's tile
                 if obj.x == player.x and obj.y == player.y and obj.item:
                     obj.item.pick_up()
+                    found_something = True
                     break
-                else:
-                    message('There is nothing to pick up here!')
-                    break
-
+            if not found_something:
+                message('There is nothing to pick up here!')
+        elif user_input.text == 'i':
+            #show the inventory, pressing a key returns the corresponding item
+            chosen_item = inventory_menu('Press the key next to an item to use it, or any other to cancel.\n')
+            if chosen_item is not None: #if an item was selected, call it's use function
+                chosen_item.use()
         else:
             return 'pass'
 
@@ -356,7 +374,7 @@ def place_objects(room):
  
         #only place it if the tile is not blocked
         #create a healing potion
-        item_component = Item()
+        item_component = Item(use_function=cast_heal,use_value=10)
         item = GameObject(pos[0], pos[1], 'healing potion', '!', colors.violet,item=item_component)
         item.send_to_back()  #items appear below other objects
 
@@ -511,6 +529,69 @@ def message(new_msg, color = colors.white):
  
         #add the new line as a tuple, with the text and the color
         game_msgs.append((line, color))
+
+def menu(header, options, width):
+    '''display a simple menu to the player'''
+    if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
+    #calculate total height for the header (after textwrap) and one line per option
+    header_wrapped = textwrap.wrap(header, width)
+    header_height = len(header_wrapped)
+    height = len(options) + header_height
+
+    #create an off-screen console that represents the menu's window
+    window = tdl.Console(width, height)
+ 
+    #print the header, with wrapped text
+    window.draw_rect(0, 0, width, height, None, fg=colors.white, bg=None)
+    for i, line in enumerate(header_wrapped):
+        window.draw_str(0, 0+i, header_wrapped[i])
+
+    y = header_height
+    letter_index = ord('a') #ord returns the ascii code for a string-letter
+    for option_text in options:
+        text = '(' + chr(letter_index) + ') ' + option_text
+        window.draw_str(0, y, text, bg=None)
+        y += 1
+        letter_index += 1 #by incrementing the ascii code for the letter, we go through the alphabet
+
+    #blit the contents of "window" to the root console
+    x = settings.SCREEN_WIDTH//2 - width//2
+    y = settings.SCREEN_HEIGHT//2 - height//2
+    root.blit(window, x, y, width, height, 0, 0)
+
+    #present the root console to the player and wait for a key-press
+    tdl.flush()
+    key = tdl.event.key_wait()
+    key_char = key.char
+    if key_char == '':
+        key_char = ' ' # placeholder
+    
+    index = ord(key_char) - ord('a')
+    if index >= 0 and index < len(options):
+        return index
+    return None
+
+def cast_heal(hp):
+    '''heal the player'''
+    if player.fighter.hp == player.fighter.max_hp:
+        message('You are already at full health.', colors.red)
+        return 'cancelled'
+
+    message('Your wounds start to feel better!', colors.light_violet)
+    player.fighter.heal(hp)
+
+def inventory_menu(header):
+    '''show a menu with each item of the inventory as an option'''
+    if len(inventory) == 0:
+        message('Inventory is empty.')
+    else:
+        options = [item.name for item in inventory]
+        index = menu(header, options, settings.INVENTORY_WIDTH)
+        #if an item was chosen, return it
+        if index is None or len(inventory) == 0:
+            return None
+        return inventory[index].item
+    
 
 def main_loop():
     ''' begin main game loop '''
