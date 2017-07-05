@@ -171,9 +171,10 @@ class Rect:
 
 class Item:
     '''an item that can be picked up and used.'''
-    def __init__(self, use_function=None,use_value=None):
+    def __init__(self, use_function=None,param1=None,param2=None):
         self.use_function = use_function
-        self.use_value = use_value
+        self.param1 = param1
+        self.param2 = param2
     def pick_up(self):
         '''add to the player's inventory and remove from the map'''
         if len(inventory) >= 26:
@@ -187,8 +188,17 @@ class Item:
         if self.use_function is None:
             message('The ' + self.owner.name + ' cannot be used.')
         else:
-            if self.use_function(self.use_value) != 'cancelled': #the use_function is called and unless it isn't cancelled, True is returned
+            if self.use_function(self.param1,self.param2) != 'cancelled': #the use_function is called and unless it isn't cancelled, True is returned
                 inventory.remove(self.owner)  #destroy after use, unless it was cancelled for some reason
+
+    def drop(self):
+        '''add to the map and remove from the player's inventory. also, place it at the player's coordinates'''
+        gameobjects.append(self.owner)
+        inventory.remove(self.owner)
+        self.owner.x = player.x
+        self.owner.y = player.y
+        message('You dropped a ' + self.owner.name + '.', colors.yellow)
+                   
 def handle_keys():
     ''' Handles all key input made by the player '''
  
@@ -256,6 +266,12 @@ def handle_keys():
             chosen_item = inventory_menu('Press the key next to an item to use it, or any other to cancel.\n')
             if chosen_item is not None: #if an item was selected, call it's use function
                 chosen_item.use()
+        elif user_input.text == 'd':
+            #show the inventory; if an item is selected, drop it
+            chosen_item = inventory_menu('Press the key next to an item to' + 
+            'drop it, or any other to cancel.\n')
+            if chosen_item is not None:
+                chosen_item.drop()
         else:
             return 'pass'
 
@@ -372,12 +388,12 @@ def place_objects(room):
 
 def place_monster(pos):
     '''creates a new monster at the given position'''
-    # list of possible items
-    # index:(chance,name,symbol,color,use_function(can be empty),use_value(can be empty))
+    # list of possible monsters
+    # index:(chance,name,symbol,color,fighter values(tuple),AI class)
     monsters = {
             'orc1':(80,'Orc','o',colors.desaturated_green,(10, 0, 3,monster_death),BasicMonster()),
             'orc2':(80,'Orc','o',colors.desaturated_green,(12, 0, 3,monster_death),BasicMonster()),
-            'troll1':(20,'Troll','T',colors.darkest_green,(16, 1, 4,monster_death),BasicMonster()),
+            'troll1':(20,'Troll','T',colors.darkest_green,(16, 1, 4,monster_death),BasicMonster())
         }
     m = random.choice(list(monsters.keys()))
     while (randint(0,100) > monsters[m][0]):
@@ -388,16 +404,18 @@ def place_monster(pos):
 def place_item(pos):
     '''creates a new item at the given position'''
     # list of possible items
-    # index:(chance,name,symbol,color,use_function(can be empty),use_value(can be empty))
+    # index:(chance,name,symbol,color,use_function(can be empty),param1,param2)
     items = {
-        'heal1':(90,'healing potion','!',colors.violet,cast_heal,10),
-        'power1':(50,'power potion','!',colors.red,cast_powerup,1),
-        'power2':(20,'power potion','!',colors.red,cast_powerup,-1)    #cursed
+        'heal1':(70,'healing potion','!',colors.violet,cast_heal,10,None),
+        'power1':(50,'power potion','!',colors.red,cast_powerup,1,None),
+        'power2':(20,'power potion','!',colors.red,cast_powerup,-1,None),    #cursed
+        'scroll1':(30,'scroll of lightning bolt','#',colors.light_yellow,cast_lightning,20,5),
+        'scroll2':(10,'scroll of lightning bolt','#',colors.light_yellow,cast_lightning,8,0)  #cursed
     }
     i = random.choice(list(items.keys()))
     while (randint(0,100) > items[i][0]):
         i = random.choice(list(items.keys()))
-    item_component = Item(use_function=items[i][4],use_value=items[i][5])
+    item_component = Item(use_function=items[i][4],param1=items[i][5],param2=items[i][6])
     item = GameObject(pos[0], pos[1], items[i][1], items[i][2], items[i][3],item=item_component)
     item.send_to_back()  #items appear below other objects
 
@@ -591,23 +609,58 @@ def menu(header, options, width):
         return index
     return None
 
-def cast_heal(hp):
+def cast_heal(hp,range):
     '''heal the player'''
-    if player.fighter.hp == player.fighter.max_hp:
-        message('You are already at full health.', colors.red)
-        return 'cancelled'
+    if range == None:
+        if player.fighter.hp == player.fighter.max_hp:
+            message('You are already at full health.', colors.red)
+            return 'cancelled'
 
-    message('Your wounds start to feel better!', colors.light_violet)
-    player.fighter.heal(hp)
+        message('Your wounds start to feel better!', colors.light_violet)
+        player.fighter.heal(hp)
 
-def cast_powerup(pwr):
+def cast_powerup(pwr,range):
     '''modify characters power'''
-    if (pwr > 0):
-        message('Your power has been increased!', colors.light_violet)
-    else:
-        message('The potion of power was cursed!', colors.light_violet)
+    if range == None:
+        if (pwr > 0):
+            message('Your power has been increased!', colors.light_violet)
+        else:
+            message('The potion of power was cursed!', colors.light_violet)
 
     player.fighter.modpwr(pwr)
+
+def cast_lightning(pwr,range):
+    '''zap something'''
+    #find closest enemy (inside a maximum range) and damage it
+    if range == 0:
+        monster = player
+        message('The scroll of lightning was cursed!', colors.light_violet)
+    else:
+        monster = closest_monster(range)
+
+    if monster is None:  #no enemy found within maximum range
+        message('No enemy is close enough to strike.', colors.red)
+        return 'cancelled'
+
+    #zap it!
+    message('A lighting bolt strikes the ' + monster.name + ' with a loud thunder! The damage is '
+        + str(pwr) + ' hit points.', colors.light_blue)
+    monster.fighter.take_damage(pwr)
+
+def closest_monster(max_range):
+    '''find closest enemy, up to a maximum range, and in the player's FOV'''
+    closest_enemy = None
+    closest_dist = max_range + 1  #start with (slightly more than) maximum range
+ 
+    for obj in gameobjects:
+        if obj.fighter and not obj == player and (obj.x, obj.y) in visible_tiles:
+            #calculate distance between this object and the player
+            dist = player.distance_to(obj)
+            if dist < closest_dist:  #it's closer, so remember it
+                closest_enemy = obj
+                closest_dist = dist
+    return closest_enemy
+
 def eat_corpse(name):
     message('You eat the corpse of a ' + name + '. It is disgusting!')
 
