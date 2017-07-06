@@ -8,6 +8,7 @@ import settings
 import math
 import textwrap
 import random
+from keyhandler import handle_keys
 
 # Global variables
 game_state = 'idle'
@@ -38,6 +39,7 @@ class GameObject:
         self.fighter = fighter #let the fighter component know who owns it
         if self.fighter: #By default fighter is None thus this check only passes if a value for fighter has been set
             self.fighter.owner = self
+        
         
         self.ai = ai #let the AI component know who owns it
         if self.ai:  
@@ -198,82 +200,7 @@ class Item:
         self.owner.x = player.x
         self.owner.y = player.y
         message('You dropped a ' + self.owner.name + '.', colors.yellow)
-                   
-def handle_keys():
-    ''' Handles all key input made by the player '''
- 
-    # turn-based
-    user_input = tdl.event.key_wait()
 
-    '''
-    #realtime (delete line above)
-    keypress = False
-    for event in tdl.event.get():
-        if event.type == 'KEYDOWN':
-           user_input = event
-           keypress = True
-    if not keypress:
-        return
-    '''
-
-    if user_input.key == 'ENTER' and user_input.alt:
-        #Alt+Enter: toggle fullscreen
-        tdl.set_fullscreen(not tdl.get_fullscreen())
-    elif user_input.key == 'ESCAPE':
-        return 'exit'  #exit game
-
-    if game_state == 'playing':
-        #movement keys
-        if user_input.key in ['UP','KP8']:
-            player_move_or_attack(0,-1)
-    
-        elif user_input.key in ['DOWN','KP2']:
-            player_move_or_attack(0,1)
-    
-        elif user_input.key in ['LEFT','KP4']:
-            player_move_or_attack(-1,0)
-    
-        elif user_input.key in ['RIGHT','KP6']:
-            player_move_or_attack(1,0)
-
-        elif user_input.key in ['KP9']:
-            player_move_or_attack(1,-1)
-
-        elif user_input.key in ['KP7']:
-            player_move_or_attack(-1,-1)    
-
-        elif user_input.key in ['KP1']:
-            player_move_or_attack(-1,1)    
-
-        elif user_input.key in ['KP3']:
-            player_move_or_attack(1,1)           
-
-        elif user_input.key in ['KP5']:
-            return ''
-        
-        elif user_input.text == 'g':
-            #pick up an item
-            found_something = False
-            for obj in gameobjects:  #look for an item in the player's tile
-                if obj.x == player.x and obj.y == player.y and obj.item:
-                    obj.item.pick_up()
-                    found_something = True
-                    break
-            if not found_something:
-                message('There is nothing to pick up here!')
-        elif user_input.text == 'i':
-            #show the inventory, pressing a key returns the corresponding item
-            chosen_item = inventory_menu('Press the key next to an item to use it, or any other to cancel.\n')
-            if chosen_item is not None: #if an item was selected, call it's use function
-                chosen_item.use()
-        elif user_input.text == 'd':
-            #show the inventory; if an item is selected, drop it
-            chosen_item = inventory_menu('Press the key next to an item to' + 
-            'drop it, or any other to cancel.\n')
-            if chosen_item is not None:
-                chosen_item.drop()
-        else:
-            return 'pass'
 
 def make_map():
     ''' Sets up the game's map '''
@@ -363,7 +290,7 @@ def create_v_tunnel(y1, y2, x):
         my_map[x][y].blocked = False
         my_map[x][y].block_sight = False        
 
-def ran_room_post(room,check_block=True):
+def ran_room_pos(room,check_block=True):
     '''returns a random position within a room for an object'''
     x = randint(room.x1+1, room.x2-1)
     y = randint(room.y1+1, room.y2-1)
@@ -377,13 +304,13 @@ def place_objects(room):
     num_monsters = randint(0, settings.MAX_ROOM_MONSTERS)
     for i in range(num_monsters):
         #choose random spot for this monster
-        pos = ran_room_post(room)    
+        pos = ran_room_pos(room)    
         place_monster(pos)
     
     num_items = randint(0, settings.MAX_ROOM_ITEMS)
     for i in range(num_items):
         #choose random spot for this item
-        pos = ran_room_post(room)
+        pos = ran_room_pos(room)
         place_item(pos)
 
 def place_monster(pos):
@@ -415,6 +342,7 @@ def place_item(pos):
     i = random.choice(list(items.keys()))
     while (randint(0,100) > items[i][0]):
         i = random.choice(list(items.keys()))
+    name,symbol,color,use_function,param1,param2 = items[i][1], items[i][2], items[i][3],items[i][4],items[i][5],items[i][6]
     item_component = Item(use_function=items[i][4],param1=items[i][5],param2=items[i][6])
     item = GameObject(pos[0], pos[1], items[i][1], items[i][2], items[i][3],item=item_component)
     item.send_to_back()  #items appear below other objects
@@ -646,7 +574,7 @@ def cast_lightning(pwr,range):
     message('A lighting bolt strikes the ' + monster.name + ' with a loud thunder! The damage is '
         + str(pwr) + ' hit points.', colors.light_blue)
     monster.fighter.take_damage(pwr)
-
+    
 def closest_monster(max_range):
     '''find closest enemy, up to a maximum range, and in the player's FOV'''
     closest_enemy = None
@@ -661,7 +589,7 @@ def closest_monster(max_range):
                 closest_dist = dist
     return closest_enemy
 
-def eat_corpse(name):
+def eat_corpse(name,pwr):
     message('You eat the corpse of a ' + name + '. It is disgusting!')
 
 def inventory_menu(header):
@@ -679,7 +607,6 @@ def inventory_menu(header):
 
 def main_loop():
     ''' begin main game loop '''
-    global game_state, player_action
     game_state = 'playing'
     while not tdl.event.is_window_closed():
         render_all()
@@ -687,17 +614,39 @@ def main_loop():
 
         for obj in gameobjects:
             obj.clear()
-        player_action = handle_keys()
-        if player_action == 'exit':
+        player_action = handle_keys(tdl.event.key_wait())
+        if 'exit' in player_action:
             break
-        if game_state == 'playing' and player_action != 'pass':
+        elif 'fullscreen' in player_action:
+            tdl.set_fullscreen(not tdl.get_fullscreen())
+        elif game_state == 'playing' and player_action != 'pass':
+            if 'move' in player_action:
+                x,y = player_action['move']
+                player_move_or_attack(x,y)
+            elif 'get' in player_action:
+                found_something = False
+                for obj in gameobjects:  #look for an item in the player's tile
+                    if obj.x == player.x and obj.y == player.y and obj.item:
+                        obj.item.pick_up()
+                        found_something = True
+                        break
+                if not found_something:
+                    message('There is nothing to pick up here!')
+            elif 'inventory' in player_action:
+                #show the inventory, pressing a key returns the corresponding item
+                chosen_item = inventory_menu('Press the key next to an item to %s it, or any other to cancel.\n' % player_action['inventory'])
+                if chosen_item is not None: #if an item was selected, call it's use or drop function
+                    if (player_action['inventory'] == 'use'):
+                        chosen_item.use()
+                    elif (player_action['inventory'] == 'drop'):
+                        chosen_item.drop()
+            # AI takes turn
             for obj in gameobjects:
                 if obj.ai:
                     obj.ai.take_turn()
 
 def initialize_game():
     ''' launches the game '''
-
     global player
     fighter_component = Fighter(hp=30, defense=2, power=5,death_function=player_death)
     player = GameObject(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, blocks=True,fighter=fighter_component)
