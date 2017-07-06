@@ -9,13 +9,14 @@ import math
 import textwrap
 import random
 from keyhandler import handle_keys
+from map_util import GameMap,make_map
+#from gameobjects import GameObject, Fighter
 
 # Global variables
 game_state = 'idle'
 player_action = None
 gameobjects = []
 inventory = []
-my_map = []
 game_msgs = []
 
 # Set custom font
@@ -51,22 +52,21 @@ class GameObject:
         
         gameobjects.append(self)
     
-    def move(self, dx, dy):
+    def move(self, dx, dy,game_map):
         ''' Move the object '''
-        if not is_blocked(self.x + dx, self.y + dy):
+        if game_map.walkable[self.x+dx,self.y+dy]:
             self.x += dx
             self.y += dy
     
     def draw(self):
         ''' Draw the object '''
-        if (self.x, self.y) in visible_tiles:
-            con.draw_char(self.x, self.y, self.char, self.color)
+        con.draw_char(self.x, self.y, self.char, self.color)
 
     def clear(self):
         ''' Clear the object '''
         con.draw_char(self.x, self.y, ' ', self.color, bg=None)
     
-    def move_towards(self, target_x, target_y):
+    def move_towards(self, target_x, target_y,game_map):
         ''' Move Gameobject towards intended target '''
         #vector from this object to the target, and distance
         dx = target_x - self.x
@@ -77,7 +77,7 @@ class GameObject:
         #convert to integer so the movement is restricted to the map grid
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
-        self.move(dx, dy)
+        self.move(dx, dy,game_map)
     
     def distance_to(self, other):
         '''return the distance to another object'''
@@ -129,47 +129,18 @@ class Fighter:
 
 class BasicMonster:
     '''AI for a basic monster.'''
-    def take_turn(self):
+    def take_turn(self,game_map,player):
         '''let the monster take a turn'''
         monster = self.owner
-        if (monster.x, monster.y) in visible_tiles:
+        if game_map.fov[monster.x, monster.y]:
  
             #move towards player if far away
             if monster.distance_to(player) >= 2:
-                monster.move_towards(player.x, player.y)
+                monster.move_towards(player.x, player.y,game_map)
  
             #close enough, attack! (if the player is still alive.)
             elif player.fighter.hp > 0:
                 monster.fighter.attack(player)
-
-class Tile:
-    ''' a map tile '''
-    def __init__(self, blocked, block_sight = None):
-        self.blocked = blocked
-        self.explored = False
- 
-        #by default, if a tile is blocked, it also blocks sight
-        if block_sight is None: block_sight = blocked
-        self.block_sight = block_sight# Wall colors
-
-class Rect:
-    ''' a rectangle on the map. used to characterize a room. '''
-    def __init__(self, x, y, w, h):
-        self.x1 = x
-        self.y1 = y
-        self.x2 = x + w
-        self.y2 = y + h
-
-    def center(self):
-        ''' returns center '''
-        center_x = (self.x1 + self.x2) // 2
-        center_y = (self.y1 + self.y2) // 2
-        return (center_x, center_y)
- 
-    def intersect(self, other):
-        ''' returns true if this rectangle intersects with another one '''
-        return (self.x1 <= other.x2 and self.x2 >= other.x1 and
-                self.y1 <= other.y2 and self.y2 >= other.y1)
 
 class Item:
     '''an item that can be picked up and used.'''
@@ -200,120 +171,32 @@ class Item:
         self.owner.x = player.x
         self.owner.y = player.y
         message('You dropped a ' + self.owner.name + '.', colors.yellow)
-
-
-def make_map():
-    ''' Sets up the game's map '''
-    global my_map
-
-    #fill map with "unblocked" tiles
-    my_map = [[Tile(True)
-    for y in range(settings.MAP_HEIGHT)]
-        for x in range(settings.MAP_WIDTH)]
-
-    rooms = []
-    num_rooms = 0
- 
-    for r in range(settings.MAX_ROOMS):
-        #random width and height
-        w = randint(settings.ROOM_MIN_SIZE, settings.ROOM_MAX_SIZE)
-        h = randint(settings.ROOM_MIN_SIZE, settings.ROOM_MAX_SIZE)
-        #random position without going out of the boundaries of the map
-        x = randint(0, settings.MAP_WIDTH-w-1)
-        y = randint(0, settings.MAP_HEIGHT-h-1)
-
-        #"Rect" class makes rectangles easier to work with
-        new_room = Rect(x, y, w, h)
- 
-        #run through the other rooms and see if they intersect with this one
-        failed = False
-        for other_room in rooms:
-            if new_room.intersect(other_room):
-                failed = True
-                break
-        if not failed:
-            #this means there are no intersections, so this room is valid
-
-            #"paint" it to the map's tiles
-            create_room(new_room)
-
-            #center coordinates of new room, will be useful later
-            (new_x, new_y) = new_room.center()
-
-            if num_rooms == 0:
-                #this is the first room, where the player starts at
-                player.x = new_x
-                player.y = new_y
-            else:
-                #all rooms after the first:
-                #connect it to the previous room with a tunnel
-
-                #center coordinates of previous room
-                (prev_x, prev_y) = rooms[num_rooms-1].center()
-
-                #toss a coin (random number that is either 0 or 1)
-                if randint(0, 1):
-                    #first move horizontally, then vertically
-                    create_h_tunnel(prev_x, new_x, prev_y)
-                    create_v_tunnel(prev_y, new_y, new_x)
-                else:
-                    #first move vertically, then horizontally
-                    create_v_tunnel(prev_y, new_y, prev_x)
-                    create_h_tunnel(prev_x, new_x, new_y)
-                
-                #Fill room with monsters
-                place_objects(new_room)
-
-        #finally, append the new room to the list
-        rooms.append(new_room)
-        num_rooms += 1
-
-def create_room(room):
-    ''' Create a room in the dungeon '''
-    global my_map
-    #go through the tiles in the rectangle and make them passable
-    for x in range(room.x1, room.x2 + 1):
-        for y in range(room.y1, room.y2 + 1):
-            my_map[x][y].blocked = False
-            my_map[x][y].block_sight = False
- 
-def create_h_tunnel(x1, x2, y):
-    global my_map
-    for x in range(min(x1, x2), max(x1, x2) + 1):
-        my_map[x][y].blocked = False
-        my_map[x][y].block_sight = False
- 
-def create_v_tunnel(y1, y2, x):
-    global my_map
-    #vertical tunnel
-    for y in range(min(y1, y2), max(y1, y2) + 1):
-        my_map[x][y].blocked = False
-        my_map[x][y].block_sight = False        
-
-def ran_room_pos(room,check_block=True):
+      
+def ran_room_pos(room,game_map):
     '''returns a random position within a room for an object'''
-    x = randint(room.x1+1, room.x2-1)
-    y = randint(room.y1+1, room.y2-1)
-    if check_block:
-        while is_blocked(x, y):
-            x = randint(room.x1+1, room.x2-1)
-            y = randint(room.y1+1, room.y2-1)
+    for i in range(room.w*room.h):
+        x = randint(room.x1+1, room.x2-1)
+        y = randint(room.y1+1, room.y2-1)
+        if game_map.walkable[x,y]:
+            break
     return [x,y]
-def place_objects(room):
-    ''' place objects in room '''
-    num_monsters = randint(0, settings.MAX_ROOM_MONSTERS)
-    for i in range(num_monsters):
-        #choose random spot for this monster
-        pos = ran_room_pos(room)    
-        place_monster(pos)
-    
-    num_items = randint(0, settings.MAX_ROOM_ITEMS)
-    for i in range(num_items):
-        #choose random spot for this item
-        pos = ran_room_pos(room)
-        place_item(pos)
 
-def place_monster(pos):
+def place_objects(game_map):
+    ''' place objects in room '''
+    for room in game_map.rooms:
+        num_monsters = randint(0, settings.MAX_ROOM_MONSTERS)
+        for i in range(num_monsters):
+            #choose random spot for this monster
+            x,y = ran_room_pos(room,game_map)    
+            place_monster(x,y)
+        
+        num_items = randint(0, settings.MAX_ROOM_ITEMS)
+        for i in range(num_items):
+            #choose random spot for this item
+            x,y = ran_room_pos(room,game_map)
+            place_item(x,y)
+
+def place_monster(x,y):
     '''creates a new monster at the given position'''
     # list of possible monsters
     # index:(chance,name,symbol,color,fighter values(tuple),AI class)
@@ -325,10 +208,11 @@ def place_monster(pos):
     m = random.choice(list(monsters.keys()))
     while (randint(0,100) > monsters[m][0]):
         m = random.choice(list(monsters.keys()))
-    fighter_component = Fighter(monsters[m][4][0],monsters[m][4][1],monsters[m][4][2],monsters[m][4][3])
-    monster = GameObject(pos[0], pos[1],monsters[m][1], monsters[m][2], monsters[m][3],blocks=True,fighter=fighter_component,ai=monsters[m][5])
+    name,symbol,color,stats,ai = monsters[m][1], monsters[m][2], monsters[m][3],monsters[m][4],monsters[m][5]
+    fighter_component = Fighter(stats[0],stats[1],stats[2],stats[3])
+    monster = GameObject(x,y,name,symbol,color,blocks=True,fighter=fighter_component,ai=ai)
 
-def place_item(pos):
+def place_item(x,y):
     '''creates a new item at the given position'''
     # list of possible items
     # index:(chance,name,symbol,color,use_function(can be empty),param1,param2)
@@ -343,19 +227,18 @@ def place_item(pos):
     while (randint(0,100) > items[i][0]):
         i = random.choice(list(items.keys()))
     name,symbol,color,use_function,param1,param2 = items[i][1], items[i][2], items[i][3],items[i][4],items[i][5],items[i][6]
-    item_component = Item(use_function=items[i][4],param1=items[i][5],param2=items[i][6])
-    item = GameObject(pos[0], pos[1], items[i][1], items[i][2], items[i][3],item=item_component)
+    item_component = Item(use_function=use_function,param1=param1,param2=param2)
+    item = GameObject(x,y, name, symbol, color,item=item_component)
     item.send_to_back()  #items appear below other objects
 
-def render_all():
+def render_all(game_map,player):
     ''' draw all game objects '''
     for y in range(settings.MAP_HEIGHT):
         for x in range(settings.MAP_WIDTH):
-            visible = (x, y) in visible_tiles
-            wall = my_map[x][y].block_sight
-            if not visible:
+            wall = not game_map.transparent[x,y]
+            if not game_map.fov[x, y]:
                 #it's out of the player's FOV but explored
-                if my_map[x][y].explored:
+                if game_map.explored[x][y]:
                     if wall:
                         con.draw_char(x, y, None, fg=None, bg=settings.color_dark_wall)
                     else:
@@ -366,9 +249,9 @@ def render_all():
                     con.draw_char(x, y, None, fg=None, bg=settings.color_light_wall)
                 else:
                     con.draw_char(x, y, None, fg=None, bg=settings.color_light_ground)
-                my_map[x][y].explored = True
+                game_map.explored[x][y] = True
     for obj in gameobjects:
-        if obj != player:
+        if obj != player and game_map.fov[obj.x,obj.y]:
             obj.draw()
     player.draw()
         
@@ -393,42 +276,36 @@ def render_all():
     #blit the contents of "panel" to the root console
     root.blit(panel, 0, settings.PANEL_Y, settings.SCREEN_WIDTH, settings.PANEL_HEIGHT, 0, 0)     
 
-def fov_recompute():
+def fov_recompute(player,game_map):
     ''' Recomputes the player's FOV '''
-    global visible_tiles
-    visible_tiles = tdl.map.quickFOV(player.x, player.y,
-                                        is_visible_tile,
-                                        fov=settings.FOV_ALGO,
-                                        radius=settings.TORCH_RADIUS,
-                                        lightWalls=settings.FOV_LIGHT_WALLS)
+    game_map.compute_fov(player.x, player.y,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,light_walls=settings.FOV_LIGHT_WALLS)
 
-def is_blocked(x, y):
-    '''first test the map tile'''
-    if my_map[x][y].blocked:
-        return True
+# def is_blocked(game_map,x, y):
+#     '''first test the map tile'''
+#     if not game_map.walkable[x,y]:
+#         return True
  
-    #now check for any blocking objects
-    for obj in gameobjects:
-        if obj.blocks and obj.x == x and obj.y == y:
-            return True
- 
-    return False
+#     #now check for any blocking objects
+#     for obj in gameobjects:
+#         if obj.blocks and obj.x == x and obj.y == y:
+#             return True
+#     return False
 
-def is_visible_tile(x, y):
+def is_visible_tile(game_map,x, y):
     ''' Determine whether a tile is visibile or not '''
 
     if x >= settings.MAP_WIDTH or x < 0:
         return False
     elif y >= settings.MAP_HEIGHT or y < 0:
         return False
-    elif my_map[x][y].blocked == True:
+    elif not game_map.walkable[x,y]:
         return False
-    elif my_map[x][y].block_sight == True:
+    elif not game_map.transparent[x,y]:
         return False
     else:
         return True
 
-def player_move_or_attack(dx, dy):
+def player_move_or_attack(player,dx, dy,game_map):
     ''' Makes the player character either move or attack '''
 
     #the coordinates the player is moving to/attacking
@@ -446,8 +323,8 @@ def player_move_or_attack(dx, dy):
     if target is not None:
         player.fighter.attack(target)
     else:
-        player.move(dx, dy)
-        fov_recompute()
+        player.move(dx, dy,game_map)
+        fov_recompute(player,game_map)
 
 def player_death(player):
     '''the game ended!'''
@@ -575,13 +452,13 @@ def cast_lightning(pwr,range):
         + str(pwr) + ' hit points.', colors.light_blue)
     monster.fighter.take_damage(pwr)
     
-def closest_monster(max_range):
+def closest_monster(max_range,game_map):
     '''find closest enemy, up to a maximum range, and in the player's FOV'''
     closest_enemy = None
     closest_dist = max_range + 1  #start with (slightly more than) maximum range
  
     for obj in gameobjects:
-        if obj.fighter and not obj == player and (obj.x, obj.y) in visible_tiles:
+        if obj.fighter and not obj == player and game_map.fov[obj.x, obj.y]:
             #calculate distance between this object and the player
             dist = player.distance_to(obj)
             if dist < closest_dist:  #it's closer, so remember it
@@ -605,11 +482,11 @@ def inventory_menu(header):
         return inventory[index].item
     
 
-def main_loop():
+def main_loop(game_map,player):
     ''' begin main game loop '''
     game_state = 'playing'
     while not tdl.event.is_window_closed():
-        render_all()
+        render_all(game_map,player)
         tdl.flush()
 
         for obj in gameobjects:
@@ -622,7 +499,7 @@ def main_loop():
         elif game_state == 'playing' and player_action != 'pass':
             if 'move' in player_action:
                 x,y = player_action['move']
-                player_move_or_attack(x,y)
+                player_move_or_attack(player,x,y,game_map)
             elif 'get' in player_action:
                 found_something = False
                 for obj in gameobjects:  #look for an item in the player's tile
@@ -643,18 +520,18 @@ def main_loop():
             # AI takes turn
             for obj in gameobjects:
                 if obj.ai:
-                    obj.ai.take_turn()
+                    obj.ai.take_turn(game_map,player)
 
 def initialize_game():
     ''' launches the game '''
-    global player
     fighter_component = Fighter(hp=30, defense=2, power=5,death_function=player_death)
     player = GameObject(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, blocks=True,fighter=fighter_component)
-    #npc = GameObject(settings.SCREEN_WIDTH//2 - 5, settings.SCREEN_HEIGHT//2, 'H', (255,255,0))
-    make_map()
-    fov_recompute()
+    game_map = GameMap(settings.MAP_WIDTH,settings.MAP_HEIGHT)
+    make_map(game_map,player)
+    place_objects(game_map)
+    fov_recompute(player,game_map)
     #a warm welcoming message!
     message('Welcome stranger! Prepare to perish in the Tombs of the Ancient Kings.', colors.red)
-    main_loop()
+    main_loop(game_map,player)
 
 initialize_game()
