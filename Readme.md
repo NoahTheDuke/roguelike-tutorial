@@ -1,0 +1,1 @@
+A simple Roguelike based on [url=http://www.roguebasin.com/index.php?title=Roguelike_Tutorial,_using_python3%2Btdl]Roguebasin's Roguelike Tutorial[/url] for Python3, with some tweaks here and there.
