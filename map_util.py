@@ -5,7 +5,7 @@ from random import randint
 from tdl.map import Map
 
 class GameMap(Map):
-    def __init__(self, width, height,rooms=0):
+    def __init__(self, width, height,rooms=[]):
         super().__init__(width, height)
         self.rooms = rooms
         self.explored = [[False for y in range(height)] for x in range(width)]
@@ -102,11 +102,9 @@ def make_map(game_map,player):
                     #first move vertically, then horizontally
                     create_v_tunnel(game_map,prev_y, new_y, prev_x)
                     create_h_tunnel(game_map,prev_x, new_x, new_y)
-                
-                #Fill room with monsters
-                #place_objects(new_room)
 
-        #finally, append the new room to the list
-        rooms.append(new_room)
-        num_rooms += 1
+            #append the new room to the list
+            rooms.append(new_room)
+            num_rooms += 1
+    
     game_map.rooms = rooms

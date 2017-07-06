@@ -183,6 +183,7 @@ def ran_room_pos(room,game_map):
 
 def place_objects(game_map):
     ''' place objects in room '''
+    print(len(game_map.rooms))
     for room in game_map.rooms:
         num_monsters = randint(0, settings.MAX_ROOM_MONSTERS)
         for i in range(num_monsters):
