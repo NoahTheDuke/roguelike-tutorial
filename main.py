@@ -1,5 +1,6 @@
 #! python3
 ''' A simple roguelike based on an online tutorial '''
+# TODO: adding ,con,root,panel where relevant
 
 import tdl
 from random import randint
@@ -12,20 +13,12 @@ from keyhandler import handle_keys
 from map_util import GameMap,make_map
 #from gameobjects import GameObject, Fighter
 
-# Global variables
+# Global variables | NOTE: These need to be moved into the relevant functions and passed around as arguments
 game_state = 'idle'
 player_action = None
 gameobjects = []
 inventory = []
 game_msgs = []
-
-# Set custom font
-tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
-
-# initialize the window
-root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
-con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
-panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
 
 class GameObject:
     ''' Main class of game objects'''
@@ -57,6 +50,8 @@ class GameObject:
         if game_map.walkable[self.x+dx,self.y+dy]:
             self.x += dx
             self.y += dy
+            if not self.ai: #if the player has moved, recalculate FOV | NOTE: This should be moved elsewhere
+                fov_recompute(self,game_map)
     
     def draw(self):
         ''' Draw the object '''
@@ -232,7 +227,7 @@ def place_item(x,y):
     item = GameObject(x,y, name, symbol, color,item=item_component)
     item.send_to_back()  #items appear below other objects
 
-def render_all(game_map,player):
+def render_all(game_map,player,con,root,panel):
     ''' draw all game objects '''
     for y in range(settings.MAP_HEIGHT):
         for x in range(settings.MAP_WIDTH):
@@ -281,31 +276,6 @@ def fov_recompute(player,game_map):
     ''' Recomputes the player's FOV '''
     game_map.compute_fov(player.x, player.y,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,light_walls=settings.FOV_LIGHT_WALLS)
 
-# def is_blocked(game_map,x, y):
-#     '''first test the map tile'''
-#     if not game_map.walkable[x,y]:
-#         return True
- 
-#     #now check for any blocking objects
-#     for obj in gameobjects:
-#         if obj.blocks and obj.x == x and obj.y == y:
-#             return True
-#     return False
-
-def is_visible_tile(game_map,x, y):
-    ''' Determine whether a tile is visibile or not '''
-
-    if x >= settings.MAP_WIDTH or x < 0:
-        return False
-    elif y >= settings.MAP_HEIGHT or y < 0:
-        return False
-    elif not game_map.walkable[x,y]:
-        return False
-    elif not game_map.transparent[x,y]:
-        return False
-    else:
-        return True
-
 def player_move_or_attack(player,dx, dy,game_map):
     ''' Makes the player character either move or attack '''
 
@@ -325,7 +295,6 @@ def player_move_or_attack(player,dx, dy,game_map):
         player.fighter.attack(target)
     else:
         player.move(dx, dy,game_map)
-        fov_recompute(player,game_map)
 
 def player_death(player):
     '''the game ended!'''
@@ -483,11 +452,11 @@ def inventory_menu(header):
         return inventory[index].item
     
 
-def main_loop(game_map,player):
+def main_loop(game_map,player,con,root,panel):
     ''' begin main game loop '''
     game_state = 'playing'
     while not tdl.event.is_window_closed():
-        render_all(game_map,player)
+        render_all(game_map,player,con,root,panel)
         tdl.flush()
 
         for obj in gameobjects:
@@ -525,14 +494,33 @@ def main_loop(game_map,player):
 
 def initialize_game():
     ''' launches the game '''
+    
+    # Set custom font
+    tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
+
+    # initialize the window
+    root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
+    con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
+    panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
+
+    # create the player
     fighter_component = Fighter(hp=30, defense=2, power=5,death_function=player_death)
     player = GameObject(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, blocks=True,fighter=fighter_component)
+    
+    # create the map
     game_map = GameMap(settings.MAP_WIDTH,settings.MAP_HEIGHT)
     make_map(game_map,player)
+    
+    # place objects in the map
     place_objects(game_map)
+
+    # initialize FOV
     fov_recompute(player,game_map)
-    #a warm welcoming message!
+    
+    # a warm welcoming message!
     message('Welcome stranger! Prepare to perish in the Tombs of the Ancient Kings.', colors.red)
-    main_loop(game_map,player)
+    
+    # begin the main game loop
+    main_loop(game_map,player,con,root,panel)
 
 initialize_game()
