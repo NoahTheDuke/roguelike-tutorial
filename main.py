@@ -145,15 +145,15 @@ class Item:
             inventory.append(self.owner)
             gameobjects.remove(self.owner)
             message('You picked up a ' + self.owner.name + '!', colors.green)
-    def use(self):
+    def use(self,player):
         '''just call the "use_function" if it is defined'''
         if self.use_function is None:
             message('The ' + self.owner.name + ' cannot be used.')
         else:
-            if self.use_function(self.param1,self.param2) != 'cancelled': #the use_function is called and unless it isn't cancelled, True is returned
+            if self.use_function(player,self.param1,self.param2) != 'cancelled': #the use_function is called and unless it isn't cancelled, True is returned
                 inventory.remove(self.owner)  #destroy after use, unless it was cancelled for some reason
 
-    def drop(self):
+    def drop(self,player):
         '''add to the map and remove from the player's inventory. also, place it at the player's coordinates'''
         gameobjects.append(self.owner)
         inventory.remove(self.owner)
@@ -268,21 +268,9 @@ def monster_death(monster):
 
 
 
-def message(new_msg, color = colors.white):
-    '''split the message if necessary, among multiple lines'''
-    new_msg_lines = textwrap.wrap(new_msg, settings.MSG_WIDTH)
- 
-    for line in new_msg_lines:
-        #if the buffer is full, remove the first line to make room for the new one
-        if len(game_msgs) == settings.MSG_HEIGHT:
-            del game_msgs[0]
- 
-        #add the new line as a tuple, with the text and the color
-        game_msgs.append((line, color))
 
 
-
-def cast_heal(hp,range):
+def cast_heal(player,hp,range):
     '''heal the player'''
     if range == None:
         if player.fighter.hp == player.fighter.max_hp:
@@ -292,7 +280,7 @@ def cast_heal(hp,range):
         message('Your wounds start to feel better!', colors.light_violet)
         player.fighter.heal(hp)
 
-def cast_powerup(pwr,range):
+def cast_powerup(player,pwr,range):
     '''modify characters power'''
     if range == None:
         if (pwr > 0):
@@ -302,7 +290,7 @@ def cast_powerup(pwr,range):
 
     player.fighter.modpwr(pwr)
 
-def cast_lightning(pwr,range):
+def cast_lightning(player,pwr,range):
     '''zap something'''
     #find closest enemy (inside a maximum range) and damage it
     if range == 0:
@@ -337,9 +325,19 @@ def closest_monster(max_range,game_map):
 def eat_corpse(name,pwr):
     message('You eat the corpse of a ' + name + '. It is disgusting!')
 
+def message(new_msg, color = colors.white):
+    '''split the message if necessary, among multiple lines'''
+    new_msg_lines = textwrap.wrap(new_msg, settings.MSG_WIDTH)
+ 
+    for line in new_msg_lines:
+        #if the buffer is full, remove the first line to make room for the new one
+        if len(game_msgs) == settings.MSG_HEIGHT:
+            del game_msgs[0]
+ 
+        #add the new line as a tuple, with the text and the color
+        game_msgs.append((line, color))
 
-
-# Global variables | NOTE: These need to be moved into the relevant functions and passed around as arguments
+# Global variables
 gameobjects = []
 game_msgs = []
 inventory = []
@@ -377,9 +375,9 @@ def main_loop(game_map,player,con,root,panel):
                 chosen_item = inventory_menu('Press the key next to an item to %s it, or any other to cancel.\n' % player_action['inventory'],root,inventory)
                 if chosen_item is not None: #if an item was selected, call it's use or drop function
                     if (player_action['inventory'] == 'use'):
-                        chosen_item.use()
+                        chosen_item.use(player)
                     elif (player_action['inventory'] == 'drop'):
-                        chosen_item.drop()
+                        chosen_item.drop(player)
             # AI takes turn
             for obj in gameobjects:
                 if obj.ai:
