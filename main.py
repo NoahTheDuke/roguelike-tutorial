@@ -40,12 +40,19 @@ class GameObject:
         gameobjects.append(self)
     
     def move(self, dx, dy,game_map):
-        ''' Move the object '''
+        ''' Move the object, after checking if the target space is legitimate '''
+        
         if game_map.walkable[self.x+dx,self.y+dy]:
-            self.x += dx
-            self.y += dy
-            if not self.ai: #if the player has moved, recalculate FOV | NOTE: This should be moved elsewhere
-                fov_recompute(self,game_map)
+            check = True
+            for obj in gameobjects:
+                if obj.blocks and [obj.x,obj.y] == [self.x+dx,self.y+dy]:
+                    check = False
+                    break
+            if check:
+                self.x += dx
+                self.y += dy
+                if not self.ai: #if the player has moved, recalculate FOV | NOTE: This should be eventually moved elsewhere
+                    fov_recompute(self,game_map)
     
     def draw(self,con):
         ''' Draw the object '''
@@ -249,7 +256,6 @@ def player_move_or_attack(player,dx, dy,game_map):
 
 def player_death(player):
     '''the game ended!'''
-    global game_state
     message('You died!')
     game_state = 'dead'
  
@@ -265,10 +271,6 @@ def monster_death(monster):
     item = GameObject(monster.x,monster.y, (monster.name + ' corpse'), '%', colors.dark_red,item=item_component)
     gameobjects.remove(monster)
     item.send_to_back()
-
-
-
-
 
 def cast_heal(player,hp,range):
     '''heal the player'''
