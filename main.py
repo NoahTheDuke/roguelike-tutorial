@@ -11,14 +11,8 @@ import textwrap
 import random
 from keyhandler import handle_keys
 from map_util import GameMap,make_map
+from render_util import render_all
 #from gameobjects import GameObject, Fighter
-
-# Global variables | NOTE: These need to be moved into the relevant functions and passed around as arguments
-game_state = 'idle'
-player_action = None
-gameobjects = []
-inventory = []
-game_msgs = []
 
 class GameObject:
     ''' Main class of game objects'''
@@ -53,11 +47,11 @@ class GameObject:
             if not self.ai: #if the player has moved, recalculate FOV | NOTE: This should be moved elsewhere
                 fov_recompute(self,game_map)
     
-    def draw(self):
+    def draw(self,con):
         ''' Draw the object '''
         con.draw_char(self.x, self.y, self.char, self.color)
 
-    def clear(self):
+    def clear(self,con):
         ''' Clear the object '''
         con.draw_char(self.x, self.y, ' ', self.color, bg=None)
     
@@ -227,50 +221,7 @@ def place_item(x,y):
     item = GameObject(x,y, name, symbol, color,item=item_component)
     item.send_to_back()  #items appear below other objects
 
-def render_all(game_map,player,con,root,panel):
-    ''' draw all game objects '''
-    for y in range(settings.MAP_HEIGHT):
-        for x in range(settings.MAP_WIDTH):
-            wall = not game_map.transparent[x,y]
-            if not game_map.fov[x, y]:
-                #it's out of the player's FOV but explored
-                if game_map.explored[x][y]:
-                    if wall:
-                        con.draw_char(x, y, None, fg=None, bg=settings.color_dark_wall)
-                    else:
-                        con.draw_char(x, y, None, fg=None, bg=settings.color_dark_ground)
-            else:
-                #it's visible
-                if wall:
-                    con.draw_char(x, y, None, fg=None, bg=settings.color_light_wall)
-                else:
-                    con.draw_char(x, y, None, fg=None, bg=settings.color_light_ground)
-                game_map.explored[x][y] = True
-    for obj in gameobjects:
-        if obj != player and game_map.fov[obj.x,obj.y]:
-            obj.draw()
-    player.draw()
-        
-    root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
-    #prepare to render the GUI panel
-    panel.clear(fg=colors.white, bg=colors.black)
- 
-    #show the player's stats
-    render_bar(1, 1, settings.BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
-        colors.light_red, colors.darker_red)
-    render_bar(1, 2, settings.BAR_WIDTH, 'PWR', player.fighter.power, player.fighter.max_power,
-        colors.black, colors.black)
-    render_bar(1, 3, settings.BAR_WIDTH, 'DEF', player.fighter.defense, player.fighter.max_defense,
-        colors.black, colors.black)       
-    
-    #print the game messages, one line at a time
-    y = 1
-    for (line, color) in game_msgs:
-        panel.draw_str(settings.MSG_X, y, line, bg=None, fg=color)
-        y += 1
- 
-    #blit the contents of "panel" to the root console
-    root.blit(panel, 0, settings.PANEL_Y, settings.SCREEN_WIDTH, settings.PANEL_HEIGHT, 0, 0)     
+     
 
 def fov_recompute(player,game_map):
     ''' Recomputes the player's FOV '''
@@ -315,21 +266,7 @@ def monster_death(monster):
     gameobjects.remove(monster)
     item.send_to_back()
 
-def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
-    '''render a bar (HP, experience, etc). first calculate the width of the bar'''
-    bar_width = int(float(value) / maximum * total_width)
- 
-    #render the background first
-    panel.draw_rect(x, y, total_width, 1, None, bg=back_color)
- 
-    #now render the bar on top
-    if bar_width > 0:
-        panel.draw_rect(x, y, bar_width, 1, None, bg=bar_color)
-    
-     #finally, some centered text with the values
-    text = name + ': ' + str(value) + '/' + str(maximum)
-    x_centered = x + (total_width-len(text))//2
-    panel.draw_str(x_centered, y, text, fg=colors.white, bg=None)
+
 
 def message(new_msg, color = colors.white):
     '''split the message if necessary, among multiple lines'''
@@ -450,18 +387,25 @@ def inventory_menu(header):
         if index is None or len(inventory) == 0:
             return None
         return inventory[index].item
-    
 
+# Global variables | NOTE: These need to be moved into the relevant functions and passed around as arguments
+game_state = 'idle'
+player_action = None
+gameobjects = []
+inventory = []
+game_msgs = []
+    
 def main_loop(game_map,player,con,root,panel):
     ''' begin main game loop '''
     game_state = 'playing'
     while not tdl.event.is_window_closed():
-        render_all(game_map,player,con,root,panel)
+        render_all(game_map,player,gameobjects,game_msgs,con,root,panel)
         tdl.flush()
 
         for obj in gameobjects:
-            obj.clear()
+            obj.clear(con)
         player_action = handle_keys(tdl.event.key_wait())
+        
         if 'exit' in player_action:
             break
         elif 'fullscreen' in player_action:
@@ -506,7 +450,7 @@ def initialize_game():
     # create the player
     fighter_component = Fighter(hp=30, defense=2, power=5,death_function=player_death)
     player = GameObject(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, blocks=True,fighter=fighter_component)
-    
+
     # create the map
     game_map = GameMap(settings.MAP_WIDTH,settings.MAP_HEIGHT)
     make_map(game_map,player)
