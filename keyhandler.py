@@ -49,6 +49,3 @@ def handle_keys(user_input):
 
     elif user_input.text == 'd':
         return {'inventory':'drop'}
-
-    else:
-        return 'pass'

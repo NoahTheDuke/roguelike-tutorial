@@ -204,7 +204,6 @@ def ran_room_pos(room):
 
 def place_objects():
     ''' place objects in room '''
-    print(len(glob.game_map.rooms))
     for room in glob.game_map.rooms:
         num_monsters = randint(0, settings.MAX_ROOM_MONSTERS)
         for i in range(num_monsters):
@@ -254,11 +253,3 @@ def place_item(x,y):
     item = GameObject(x,y, name, symbol, color,item=item_component)
     item.send_to_back()  #items appear below other objects
 
-# def monster_death(monster):
-#     '''transform it into a nasty corpse! it doesn't block, can't be
-#     attacked and doesn't move'''
-#     message(monster.name.capitalize() + ' is dead!')
-#     item_component = Item(iu.eat_corpse,monster.name)
-#     item = GameObject(monster.x,monster.y, (monster.name + ' corpse'), '%', colors.dark_red,item=item_component)
-#     glob.gameobjects.remove(monster)
-#     item.send_to_back()

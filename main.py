@@ -18,52 +18,55 @@ def main_loop(con,root,panel):
         tdl.flush()
         for obj in glob.gameobjects:
             obj.clear(con)
-
-        player_action = handle_keys(tdl.event.key_wait()) # Wait for player input
-        game_state = 'playing'  # Game state is set to playing by default
-        if 'exit' in player_action:
-            break
-        elif 'fullscreen' in player_action:
-            tdl.set_fullscreen(not tdl.get_fullscreen())
-            game_state = 'paused'
         
-        elif glob.player.fighter.hp > 0:
-            if 'move' in player_action:
-                x,y = player_action['move']
-                glob.player.move(x,y,glob.player.is_running)
-            elif 'running' in player_action:
-                game_state == 'paused'
-                if (glob.player.is_running):
-                    message('You stop running.')
-                    glob.player.is_running = False
-                else:
-                    message('You start to run.')
-                    glob.player.is_running = True
-            
-            elif 'get' in player_action:
-                found_something = False
-                for obj in glob.gameobjects:  #look for an item in the glob.player's tile
-                    if obj.x == glob.player.x and obj.y == glob.player.y and obj.item:
-                        obj.item.pick_up()
-                        found_something = True
-                        break
-                if not found_something:
-                    message('There is nothing to pick up here!')
-            
-            elif 'inventory' in player_action:
+        game_state = 'playing'  # Game state is set to playing by default
+        player_action = handle_keys(tdl.event.key_wait())
+
+        if not player_action == None:
+            if 'exit' in player_action:
+                break
+            elif 'fullscreen' in player_action:
+                tdl.set_fullscreen(not tdl.get_fullscreen())
                 game_state = 'paused'
-                #show the glob.inventory, pressing a key returns the corresponding item
-                chosen_item = inventory_menu('Press the key next to an item to %s it, or any other to cancel.\n' % player_action['inventory'],root)
-                if chosen_item is not None: #if an item was selected, call it's use or drop function
-                    if (player_action['inventory'] == 'use'):
-                        chosen_item.use()
-                    elif (player_action['inventory'] == 'drop'):
-                        chosen_item.drop()
             
-            # AI takes turn, if game_state is not set to pause
+            if glob.player.fighter.hp > 0:
+                if 'move' in player_action:
+                    x,y = player_action['move']
+                    glob.player.move(x,y,glob.player.is_running)
+                elif 'running' in player_action:
+                    game_state = 'paused'
+                    if (glob.player.is_running):
+                        message('You stop running.')
+                        glob.player.is_running = False
+                    else:
+                        message('You start to run.')
+                        glob.player.is_running = True
+                
+                elif 'get' in player_action:
+                    found_something = False
+                    for obj in glob.gameobjects:  #look for an item in the glob.player's tile
+                        if obj.x == glob.player.x and obj.y == glob.player.y and obj.item:
+                            obj.item.pick_up()
+                            found_something = True
+                            break
+                    if not found_something:
+                        message('There is nothing to pick up here!')
+                
+                elif 'inventory' in player_action:
+                    game_state = 'paused'
+                    #show the glob.inventory, pressing a key returns the corresponding item
+                    chosen_item = inventory_menu('Press the key next to an item to %s it, or any other to cancel.\n' % player_action['inventory'],root)
+                    if chosen_item is not None: #if an item was selected, call it's use or drop function
+                        if (player_action['inventory'] == 'use'):
+                            chosen_item.use()
+                        elif (player_action['inventory'] == 'drop'):
+                            chosen_item.drop()
+                
+            #AI takes turn, if game_state is not set to pause
             if game_state == 'playing':
                 for obj in glob.gameobjects:
-                    if obj.ai:
+                    if obj.ai and glob.game_map.fov[obj.x, obj.y]:
+                        print(str(obj) +' takes turn')
                         obj.ai.take_turn()
 
 def initialize_game():
