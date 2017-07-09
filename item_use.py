@@ -12,12 +12,12 @@ def cast_heal(p1=0,p2=None,**kwargs):
     hp = p1
     range = p2
     if range == None:
-        if glob.player.fighter.hp == glob.player.fighter.max_hp:
+        if glob.player.hp == glob.player.max_hp:
             message('You are already at full health.', colors.red)
             return 'cancelled'
 
         message('Your wounds start to feel better!', colors.light_violet)
-        glob.player.fighter.heal(hp)
+        glob.player.heal(hp)
 
 def cast_powerup(p1=0,**kwargs):
     '''modify characters power'''
@@ -27,7 +27,7 @@ def cast_powerup(p1=0,**kwargs):
     else:
         message('The potion of power was cursed!', colors.light_violet)
 
-    glob.player.fighter.modpwr(pwr)
+    glob.player.modpwr(pwr)
 
 def cast_lightning(p1=0,p2=0):
     '''zap something'''
@@ -47,10 +47,10 @@ def cast_lightning(p1=0,p2=0):
     #zap it!
     message('A lighting bolt strikes the ' + monster.name + ' with a loud thunder! The damage is '
         + str(pwr) + ' hit points.', colors.light_blue)
-    monster.fighter.take_damage(pwr)
+    monster.take_damage(pwr)
 
 def cast_confusion(p1=5,p2=10,**kwargs):
-    '''find closest enemy in-range and confuse it'''
+    '''find closest enemy in-range and confuse it''' #TODO: Make confused monster attack random monsters
     range = p1
     dur = p2
     monster = closest_monster(range)
@@ -71,8 +71,8 @@ def closest_monster(max_range):
     closest_enemy = None
     closest_dist = max_range + 1  #start with (slightly more than) maximum range
  
-    for obj in glob.gameobjects:
-        if obj.fighter and not obj == glob.player and glob.game_map.fov[obj.x, obj.y]:
+    for obj in glob.actors:
+        if not obj.is_player and glob.game_map.fov[obj.x, obj.y]:
             #calculate distance between this object and the glob.player
             dist = glob.player.distance_to(obj)
             if dist < closest_dist:  #it's closer, so remember it

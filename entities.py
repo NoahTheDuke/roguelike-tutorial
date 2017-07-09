@@ -28,26 +28,6 @@ class GameObject:
         
         glob.gameobjects.append(self)
     
-    def move(self, dx, dy):
-        ''' Move the object, after checking if the target space is legitimate '''
-
-        if glob.game_map.walkable[self.x+dx,self.y+dy]:
-            check = True
-            for obj in glob.gameobjects:
-                target = None
-                if [obj.x,obj.y] == [self.x+dx,self.y+dy] and obj.blocks:  # check if there is something in the way
-                    check = False
-                    if obj in glob.actors:                         # if it's another actor, target it
-                        target = obj
-                    break
-            if check and target == None:
-                self.x += dx
-                self.y += dy
-
-            # if blocking object is an enemy target
-            elif not check and target:
-                self.attack(target)
-    
     def draw(self,con):
         ''' Draw the object '''
         con.draw_char(self.x, self.y, self.char, self.color)
@@ -56,18 +36,7 @@ class GameObject:
         ''' Clear the object '''
         con.draw_char(self.x, self.y, ' ', self.color, bg=None)
     
-    def move_towards(self, target):
-        ''' Move Gameobject towards intended target '''
-        #vector from this object to the target, and distance
-        dx = target.x - self.x
-        dy = target.y - self.y
-        distance = math.sqrt(dx ** 2 + dy ** 2)
- 
-        #normalize it to length 1 (preserving direction), then round it and
-        #convert to integer so the movement is restricted to the map grid
-        dx = int(round(dx / distance))
-        dy = int(round(dy / distance))
-        self.move(dx, dy)
+
     
     def distance_to(self, other):
         '''return the distance to another object'''
@@ -86,12 +55,13 @@ class GameObject:
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, glob.player, NPC) '''
-    def __init__(self, x, y,name,char,color,stats=(0,0,0),blocks=False, ai=None):
+    def __init__(self, x, y,name,char,color,stats=(0,0,0),blocks=False, ai=None,is_player = False):
         GameObject.__init__(self, x, y,name,char,color,blocks=True)
         self.hp, self.defense, self.power = stats
         self.max_hp = self.hp
         self.max_defense = self.defense
         self.max_power = self.power
+        self.is_player = is_player
     
         self.ai = ai #let the AI component know who owns it
         if self.ai:  
@@ -103,6 +73,7 @@ class Fighter(GameObject):
             self.hp -= damage
         if self.hp <= 0:
             self.death()
+    
     def attack(self, target):
         '''a simple formula for attack damage'''
         damage = self.power - target.defense
@@ -112,25 +83,19 @@ class Fighter(GameObject):
             target.take_damage(damage)
         else:
             message(self.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
+    
     def heal(self, amount):
         #heal by the given amount, without going over the maximum
         self.hp += amount
         if self.hp > self.max_hp:
             self.hp = self.max_hp
+    
     def modpwr(self, amount):
         self.power += amount
         if self.power == 1:
             self.power = 1
+    
     def death(self):
-        # if not self.ai:
-        #     message('You died!')
-
-        #     #for added effect, transform the glob.player into a corpse!
-        #     glob.player.char = '%'
-        #     glob.player.color = colors.dark_red
-
-        #     game_state = 'ended' # TODO game needs to stop processing inputs after this
-        # else:
         message('The ' + self.name.capitalize() + ' is dead!',colors.green)
         item_component = Item(iu.eat_corpse,self.name)
         item = GameObject(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,item=item_component)
@@ -140,22 +105,13 @@ class Fighter(GameObject):
 class Player(Fighter):
     ''' Class for the player object '''
     def __init__(self, x, y,name,char, color,stats=(30,2,5), blocks=True):
-        Fighter.__init__(self, x, y,name,char,color,stats,blocks)
+        Fighter.__init__(self, x, y,name,char,color,stats,blocks,is_player=True)
         self.is_running = False
         self.is_looking = False
         self.is_dead = False
-    
-    def death(self):
-        message('You died!')
-
-        #for added effect, transform the glob.player into a corpse!
-        glob.player.char = '%'
-        glob.player.color = colors.dark_red
-
-        self.is_dead = True
-    
+      
     def move(self, dx, dy,running=False):
-        ''' Move the object, after checking if the target space is legitimate '''
+        ''' Move the player, after checking if the target space is legitimate'''
 
         running = running
 
@@ -192,8 +148,17 @@ class Player(Fighter):
                 self.is_running = False
                 self.take_damage(1)
         
-        elif not self.ai:
+        else:
             message('Something blocks your way.')
+    
+    def death(self):
+        message('You died!')
+
+        #for added effect, transform the glob.player into a corpse!
+        glob.player.char = '%'
+        glob.player.color = colors.dark_red
+
+        self.is_dead = True
 
 class Item:
     '''an item that can be picked up and used.'''
@@ -275,7 +240,7 @@ def place_item(x,y):
         'p_pwr_cur':(20,'power potion','!',colors.red,iu.cast_powerup,-1,None),    #cursed
         'scr_lightning':(30,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,20,5),
         'scr_lightning_cur':(10,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,8,0),  #cursed
-        'scr_conf':(100,'scroll of confusion','#',colors.light_yellow,iu.cast_confusion,10,5)
+        'scr_conf':(100,'scroll of confusion','#',colors.light_yellow,iu.cast_confusion,10,8)
     }
 
     i = random.choice(list(items.keys()))
