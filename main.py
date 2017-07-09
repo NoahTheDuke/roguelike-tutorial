@@ -67,7 +67,7 @@ def initialize_game():
     ''' initializes & launches the game '''
     
     # Set custom font
-    tdl.set_font('arial10x10.png', greyscale=True, altLayout=True)
+    tdl.set_font('resources/arial10x10.png', greyscale=True, altLayout=True)
 
     # initialize the window
     root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
