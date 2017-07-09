@@ -2,17 +2,18 @@
 
 import tdl
 import settings
+import global_vars as glob
 import colors
 import textwrap
         
-def render_all(game_map,player,gameobjects,game_msgs,con,root,panel):
+def render_all(con,root,panel):
     ''' draw all game objects '''
     for y in range(settings.MAP_HEIGHT):
         for x in range(settings.MAP_WIDTH):
-            wall = not game_map.transparent[x,y]
-            if not game_map.fov[x, y]:
-                #it's out of the player's FOV but explored
-                if game_map.explored[x][y]:
+            wall = not glob.game_map.transparent[x,y]
+            if not glob.game_map.fov[x, y]:
+                #it's out of the glob.player's FOV but explored
+                if glob.game_map.explored[x][y]:
                     if wall:
                         con.draw_char(x, y, None, fg=None, bg=settings.color_dark_wall)
                     else:
@@ -23,9 +24,9 @@ def render_all(game_map,player,gameobjects,game_msgs,con,root,panel):
                     con.draw_char(x, y, None, fg=None, bg=settings.color_light_wall)
                 else:
                     con.draw_char(x, y, None, fg=None, bg=settings.color_light_ground)
-                game_map.explored[x][y] = True
-    for obj in gameobjects:
-        if game_map.fov[obj.x,obj.y]:
+                glob.game_map.explored[x][y] = True
+    for obj in glob.gameobjects:
+        if glob.game_map.fov[obj.x,obj.y]:
             obj.draw(con)
             #con.draw_char(obj.x, obj.y, obj.char, obj.color)
    # con.draw_char(obj.x, obj.y, obj.char, obj.color)
@@ -34,37 +35,37 @@ def render_all(game_map,player,gameobjects,game_msgs,con,root,panel):
     #prepare to render the GUI panel
     panel.clear(fg=colors.white, bg=colors.black)
  
-    #show the player's stats
-    render_bar(panel,1, 1, settings.BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp,
+    #show the glob.player's stats
+    render_bar(panel,1, 1, settings.BAR_WIDTH, 'HP', glob.player.fighter.hp, glob.player.fighter.max_hp,
         colors.light_red, colors.darker_red)
-    render_bar(panel,1, 2, settings.BAR_WIDTH, 'PWR', player.fighter.power, player.fighter.max_power,
+    render_bar(panel,1, 2, settings.BAR_WIDTH, 'PWR', glob.player.fighter.power, glob.player.fighter.max_power,
         colors.black, colors.black)
-    render_bar(panel,1, 3, settings.BAR_WIDTH, 'DEF', player.fighter.defense, player.fighter.max_defense,
+    render_bar(panel,1, 3, settings.BAR_WIDTH, 'DEF', glob.player.fighter.defense, glob.player.fighter.max_defense,
         colors.black, colors.black)       
     
     #print the game messages, one line at a time
     y = 1
-    for (line, color) in game_msgs:
+    for (line, color) in glob.game_msgs:
         panel.draw_str(settings.MSG_X, y, line, bg=None, fg=color)
         y += 1
  
     #blit the contents of "panel" to the root console
     root.blit(panel, 0, settings.PANEL_Y, settings.SCREEN_WIDTH, settings.PANEL_HEIGHT, 0, 0)
 
-def inventory_menu(header,root,inventory):
+def inventory_menu(header,root):
     '''show a menu with each item of the inventory as an option'''
-    if len(inventory) == 0:
+    if len(glob.inventory) == 0:
         message('Inventory is empty.')
     else:
-        options = [item.name for item in inventory]
+        options = [item.name for item in glob.inventory]
         index = menu(header, options, settings.INVENTORY_WIDTH,root)
         #if an item was chosen, return it
-        if index is None or len(inventory) == 0:
+        if index is None or len(glob.inventory) == 0:
             return None
-        return inventory[index].item
+        return glob.inventory[index].item
 
 def menu(header, options, width,root):
-    '''display a simple menu to the player'''
+    '''display a simple menu to the glob.player'''
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
     #calculate total height for the header (after textwrap) and one line per option
     header_wrapped = textwrap.wrap(header, width)
@@ -92,7 +93,7 @@ def menu(header, options, width,root):
     y = settings.SCREEN_HEIGHT//2 - height//2
     root.blit(window, x, y, width, height, 0, 0)
 
-    #present the root console to the player and wait for a key-press
+    #present the root console to the glob.player and wait for a key-press
     tdl.flush()
     key = tdl.event.key_wait()
     key_char = key.char
@@ -119,3 +120,15 @@ def render_bar(panel,x, y, total_width, name, value, maximum, bar_color, back_co
     text = name + ': ' + str(value) + '/' + str(maximum)
     x_centered = x + (total_width-len(text))//2
     panel.draw_str(x_centered, y, text, fg=colors.white, bg=None)
+
+def message(new_msg, color = colors.white):
+    '''split the message if necessary, among multiple lines'''
+    new_msg_lines = textwrap.wrap(new_msg, settings.MSG_WIDTH)
+ 
+    for line in new_msg_lines:
+        #if the buffer is full, remove the first line to make room for the new one
+        if len(glob.game_msgs) == settings.MSG_HEIGHT:
+            del glob.game_msgs[0]
+ 
+        #add the new line as a tuple, with the text and the color
+        glob.game_msgs.append((line, color))
