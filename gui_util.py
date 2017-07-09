@@ -2,8 +2,8 @@
 
 import tdl
 import settings
-import global_vars as glob
 import colors
+import global_vars as glob
 import textwrap
         
 def render_all(con,root,panel):

@@ -84,7 +84,7 @@ def make_map():
             (new_x, new_y) = new_room.center()
 
             if num_rooms == 0:
-                #this is the first room, where the glob.player starts at
+                #this is the first room, where the player starts at
                 glob.player.x = new_x
                 glob.player.y = new_y
             else:

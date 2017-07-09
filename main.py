@@ -6,75 +6,10 @@ from random import randint
 import colors
 import settings
 import global_vars as glob
-import math
-import random
-import textwrap
 from keyhandler import handle_keys
-from entities import GameObject, Fighter, BasicMonster, Item
+from entities import GameObject, Fighter,Item, place_objects
 from map_util import GameMap,make_map, fov_recompute
 from gui_util import render_all, inventory_menu, message
-import item_use as iu
-
-def ran_room_pos(room):
-    '''returns a random position within a room for an object'''
-    for i in range(room.w*room.h):
-        x = randint(room.x1+1, room.x2-1)
-        y = randint(room.y1+1, room.y2-1)
-        if glob.game_map.walkable[x,y]:
-            break
-    return [x,y]
-
-def place_objects():
-    ''' place objects in room '''
-    print(len(glob.game_map.rooms))
-    for room in glob.game_map.rooms:
-        num_monsters = randint(0, settings.MAX_ROOM_MONSTERS)
-        for i in range(num_monsters):
-            #choose random spot for this monster
-            x,y = ran_room_pos(room)    
-            place_monster(x,y)
-        
-        num_items = randint(0, settings.MAX_ROOM_ITEMS)
-        for i in range(num_items):
-            #choose random spot for this item
-            x,y = ran_room_pos(room)
-            place_item(x,y)
-
-def place_monster(x,y):
-    '''creates a new monster at the given position'''
-    # list of possible monsters
-    # index:(chance,name,symbol,color,fighter values(tuple),AI class)
-    monsters = {
-            'orc1':(80,'Orc','o',colors.desaturated_green,(10, 0, 3,monster_death),BasicMonster()),
-            'orc2':(80,'Orc','o',colors.desaturated_green,(12, 0, 3,monster_death),BasicMonster()),
-            'troll1':(20,'Troll','T',colors.darkest_green,(16, 1, 4,monster_death),BasicMonster())
-        }
-    m = random.choice(list(monsters.keys()))
-    while (randint(0,100) > monsters[m][0]):
-        m = random.choice(list(monsters.keys()))
-    name,symbol,color,stats,ai = monsters[m][1], monsters[m][2], monsters[m][3],monsters[m][4],monsters[m][5]
-    fighter_component = Fighter(stats[0],stats[1],stats[2],stats[3])
-    monster = GameObject(x,y,name,symbol,color,blocks=True,fighter=fighter_component,ai=ai)
-
-def place_item(x,y):
-    '''creates a new item at the given position'''
-    # list of possible items
-    # index:(chance,name,symbol,color,use_function(can be empty),param1,param2)
-    items = {
-        'heal1':(70,'healing potion','!',colors.violet,iu.cast_heal,10,None),
-        'power1':(50,'power potion','!',colors.red,iu.cast_powerup,1,None),
-        'power2':(20,'power potion','!',colors.red,iu.cast_powerup,-1,None),    #cursed
-        'scroll1':(30,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,20,5),
-        'scroll2':(10,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,8,0)  #cursed
-    }
-    i = random.choice(list(items.keys()))
-    while (randint(0,100) > items[i][0]):
-        i = random.choice(list(items.keys()))
-    name,symbol,color,use_function,param1,param2 = items[i][1], items[i][2], items[i][3],items[i][4],items[i][5],items[i][6]
-    item_component = Item(use_function=use_function,param1=param1,param2=param2)
-    item = GameObject(x,y, name, symbol, color,item=item_component)
-    item.send_to_back()  #items appear below other objects
-
 
 def player_move_or_attack(dx, dy):
     ''' Makes the glob.player character either move or attack '''
@@ -105,15 +40,6 @@ def player_death(player):
     glob.player.color = colors.dark_red
 
     return 'dead'
- 
-def monster_death(monster):
-    '''transform it into a nasty corpse! it doesn't block, can't be
-    attacked and doesn't move'''
-    message(monster.name.capitalize() + ' is dead!')
-    item_component = Item(iu.eat_corpse,monster.name)
-    item = GameObject(monster.x,monster.y, (monster.name + ' corpse'), '%', colors.dark_red,item=item_component)
-    glob.gameobjects.remove(monster)
-    item.send_to_back()
     
 def main_loop(con,root,panel):
     ''' begin main game loop '''
