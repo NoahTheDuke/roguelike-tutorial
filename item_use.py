@@ -5,6 +5,7 @@ import settings
 import colors
 import global_vars as glob
 from gui_util import message
+from ai_util import ConfusedMonster
 
 def cast_heal(p1=0,p2=None,**kwargs):
     '''heal the player'''
@@ -47,6 +48,20 @@ def cast_lightning(p1=0,p2=0):
     message('A lighting bolt strikes the ' + monster.name + ' with a loud thunder! The damage is '
         + str(pwr) + ' hit points.', colors.light_blue)
     monster.fighter.take_damage(pwr)
+
+def cast_confusion(p1=5,p2=10,**kwargs):
+    '''find closest enemy in-range and confuse it'''
+    range = p1
+    dur = p2
+    monster = closest_monster(range)
+    if monster is None:  #no enemy found within maximum range
+        message('No enemy is close enough to confuse.', colors.red)
+        return 'cancelled'
+    else:
+        old_ai = monster.ai
+        monster.ai = ConfusedMonster(old_ai,num_turns=dur)
+        monster.ai.owner = monster  #tell the new component who owns it
+        message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!', colors.light_green)
 
 def eat_corpse(p1='',**kwargs):
     message('You eat the corpse of a ' + p1 + '. It is disgusting!')

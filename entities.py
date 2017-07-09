@@ -1,4 +1,5 @@
 ''' Code related to entitity creation '''
+# TODO: split item-related code into own module
 
 import settings
 import colors
@@ -11,6 +12,8 @@ from gui_util import message
 from ai_util import BasicMonster
 import item_use as iu
 
+# TODO transform these into proper generatos
+
 class GameObject:
     ''' Main class of game objects'''
     def __init__(self, x, y,  name,char, color, blocks=False, fighter=None, ai=None,item=None):
@@ -20,11 +23,11 @@ class GameObject:
         self.color = color
         self.blocks = blocks
         self.name = name
+        self.is_running = False
 
         self.fighter = fighter #let the fighter component know who owns it
         if self.fighter: #By default fighter is None thus this check only passes if a value for fighter has been set
             self.fighter.owner = self
-        
         
         self.ai = ai #let the AI component know who owns it
         if self.ai:  
@@ -36,20 +39,46 @@ class GameObject:
         
         glob.gameobjects.append(self)
     
-    def move(self, dx, dy):
+    def move(self, dx, dy,running=False):
         ''' Move the object, after checking if the target space is legitimate '''
-        
+
+        running = running
+
         if glob.game_map.walkable[self.x+dx,self.y+dy]:
             check = True
             for obj in glob.gameobjects:
-                if obj.blocks and [obj.x,obj.y] == [self.x+dx,self.y+dy]:
+                target = None
+                if [obj.x,obj.y] == [self.x+dx,self.y+dy] and obj.blocks:  # check if there is something in the way
                     check = False
+                    if obj.fighter:                         # if it's a hostile entity, target it
+                        target = obj
                     break
-            if check:
+            if check and target == None:
                 self.x += dx
                 self.y += dy
-                if not self.ai: #if the glob.player has moved, recalculate FOV | NOTE: This should be eventually moved elsewhere
+                if not self.ai: #if player has moved, recalculate FOV | NOTE: This should be eventually moved elsewhere
                     fov_recompute()
+                
+                # if entity is running, re-call the move function once
+                if (running):
+
+                    self.move(dx,dy,running=False)
+            
+            # if blocking object is an enemy target
+            elif not check and not target == None:
+                if running:
+                    message('You bump into the ' + target.name,colors.red)
+                    self.is_running = False
+                else:
+                    self.fighter.attack(target)
+            
+        elif running: # if the player crashes into a wall
+                message('You run into something.',colors.red)
+                self.is_running = False
+                self.fighter.take_damage(1)
+        
+        else:
+            message('Something blocks your way.')
     
     def draw(self,con):
         ''' Draw the object '''
@@ -85,14 +114,13 @@ class GameObject:
 
 class Fighter:
     ''' combat-related properties and methods (monster, glob.player, NPC) '''
-    def __init__(self, hp, defense, power,death_function=None):
+    def __init__(self, hp, defense, power):
         self.max_hp = hp
         self.hp = hp
         self.max_defense = defense
         self.defense = defense
         self.max_power = power
         self.power = power
-        self.death_function = death_function
     def take_damage(self, damage):
         '''apply damage if possible'''
         if damage > 0:
@@ -102,8 +130,8 @@ class Fighter:
                 self.death_function(self.owner)
     def attack(self, target):
         '''a simple formula for attack damage'''
+        # TODO: Check for friendly fire
         damage = self.power - target.fighter.defense
-
         if damage > 0:
             #make the target take some damage
             message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.')
@@ -118,7 +146,22 @@ class Fighter:
     def modpwr(self, amount):
         self.power += amount
         if self.power == 1:
-            self.power = 1    
+            self.power = 1
+    def death(self):
+        if not self.ai:
+            message('You died!')
+
+            #for added effect, transform the glob.player into a corpse!
+            glob.player.char = '%'
+            glob.player.color = colors.dark_red
+
+            game_state = 'ended' # TODO game needs to stop processing inputs after this
+        else:
+            message(monster.name.capitalize() + ' is dead!')
+            item_component = Item(iu.eat_corpse,monster.name)
+            item = GameObject(monster.x,monster.y, (monster.name + ' corpse'), '%', colors.dark_red,item=item_component)
+            glob.gameobjects.remove(monster)
+            item.send_to_back()
 
 class Item:
     '''an item that can be picked up and used.'''
@@ -178,31 +221,32 @@ def place_objects():
 
 def place_monster(x,y):
     '''creates a new monster at the given position'''
-    # list of possible monsters
-    # index:(chance,name,symbol,color,fighter values(tuple),AI class)
+    
     monsters = {
-            'orc1':(80,'Orc','o',colors.desaturated_green,(10, 0, 3,monster_death),BasicMonster()),
-            'orc2':(80,'Orc','o',colors.desaturated_green,(12, 0, 3,monster_death),BasicMonster()),
-            'troll1':(20,'Troll','T',colors.darkest_green,(16, 1, 4,monster_death),BasicMonster())
-        }
+        'orc1':(80,'Orc','o',colors.desaturated_green,(10, 0, 3),BasicMonster()),
+        'orc2':(80,'Orc','o',colors.desaturated_green,(12, 0, 3),BasicMonster()),
+        'troll1':(20,'Troll','T',colors.darkest_green,(16, 1, 4),BasicMonster())
+    }
+
     m = random.choice(list(monsters.keys()))
     while (randint(0,100) > monsters[m][0]):
         m = random.choice(list(monsters.keys()))
     name,symbol,color,stats,ai = monsters[m][1], monsters[m][2], monsters[m][3],monsters[m][4],monsters[m][5]
-    fighter_component = Fighter(stats[0],stats[1],stats[2],stats[3])
+    fighter_component = Fighter(stats[0],stats[1],stats[2])
     monster = GameObject(x,y,name,symbol,color,blocks=True,fighter=fighter_component,ai=ai)
 
 def place_item(x,y):
     '''creates a new item at the given position'''
-    # list of possible items
-    # index:(chance,name,symbol,color,use_function(can be empty),param1,param2)
+
     items = {
-        'heal1':(70,'healing potion','!',colors.violet,iu.cast_heal,10,None),
-        'power1':(50,'power potion','!',colors.red,iu.cast_powerup,1,None),
-        'power2':(20,'power potion','!',colors.red,iu.cast_powerup,-1,None),    #cursed
-        'scroll1':(30,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,20,5),
-        'scroll2':(10,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,8,0)  #cursed
+        'p_pwr':(70,'healing potion','!',colors.violet,iu.cast_heal,10,None),
+        'p_pwr':(50,'power potion','!',colors.red,iu.cast_powerup,1,None),
+        'p_pwr_cur':(20,'power potion','!',colors.red,iu.cast_powerup,-1,None),    #cursed
+        'scr_lightning':(30,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,20,5),
+        'scr_lightning_cur':(10,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,8,0),  #cursed
+        'scr_conf':(100,'scroll of confusion','#',colors.light_yellow,iu.cast_confusion,10,5)
     }
+
     i = random.choice(list(items.keys()))
     while (randint(0,100) > items[i][0]):
         i = random.choice(list(items.keys()))
@@ -211,11 +255,11 @@ def place_item(x,y):
     item = GameObject(x,y, name, symbol, color,item=item_component)
     item.send_to_back()  #items appear below other objects
 
-def monster_death(monster):
-    '''transform it into a nasty corpse! it doesn't block, can't be
-    attacked and doesn't move'''
-    message(monster.name.capitalize() + ' is dead!')
-    item_component = Item(iu.eat_corpse,monster.name)
-    item = GameObject(monster.x,monster.y, (monster.name + ' corpse'), '%', colors.dark_red,item=item_component)
-    glob.gameobjects.remove(monster)
-    item.send_to_back()
+# def monster_death(monster):
+#     '''transform it into a nasty corpse! it doesn't block, can't be
+#     attacked and doesn't move'''
+#     message(monster.name.capitalize() + ' is dead!')
+#     item_component = Item(iu.eat_corpse,monster.name)
+#     item = GameObject(monster.x,monster.y, (monster.name + ' corpse'), '%', colors.dark_red,item=item_component)
+#     glob.gameobjects.remove(monster)
+#     item.send_to_back()
