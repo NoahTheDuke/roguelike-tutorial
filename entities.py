@@ -77,7 +77,7 @@ class GameObject:
                 self.is_running = False
                 self.fighter.take_damage(1)
         
-        else:
+        elif not self.ai:
             message('Something blocks your way.')
     
     def draw(self,con):
@@ -126,8 +126,7 @@ class Fighter:
         if damage > 0:
             self.hp -= damage
         if self.hp <= 0:
-            if self.death_function:
-                self.death_function(self.owner)
+            self.death(self.owner)
     def attack(self, target):
         '''a simple formula for attack damage'''
         # TODO: Check for friendly fire
@@ -147,8 +146,8 @@ class Fighter:
         self.power += amount
         if self.power == 1:
             self.power = 1
-    def death(self):
-        if not self.ai:
+    def death(self,owner):
+        if not owner.ai:
             message('You died!')
 
             #for added effect, transform the glob.player into a corpse!
@@ -157,10 +156,10 @@ class Fighter:
 
             game_state = 'ended' # TODO game needs to stop processing inputs after this
         else:
-            message(monster.name.capitalize() + ' is dead!')
-            item_component = Item(iu.eat_corpse,monster.name)
-            item = GameObject(monster.x,monster.y, (monster.name + ' corpse'), '%', colors.dark_red,item=item_component)
-            glob.gameobjects.remove(monster)
+            message(owner.name.capitalize() + ' is dead!')
+            item_component = Item(iu.eat_corpse,owner.name)
+            item = GameObject(owner.x,owner.y, (owner.name + ' corpse'), '%', colors.dark_red,item=item_component)
+            glob.gameobjects.remove(owner)
             item.send_to_back()
 
 class Item:

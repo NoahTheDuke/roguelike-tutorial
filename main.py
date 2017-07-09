@@ -13,24 +13,26 @@ from entities import GameObject, Fighter,Item, place_objects
 
 def main_loop(con,root,panel):
     ''' begin main game loop '''
-    game_state = 'playing'
     while not tdl.event.is_window_closed():
         render_all(con,root,panel)
         tdl.flush()
-
         for obj in glob.gameobjects:
             obj.clear(con)
-        player_action = handle_keys(tdl.event.key_wait())
-        
+
+        player_action = handle_keys(tdl.event.key_wait()) # Wait for player input
+        game_state = 'playing'  # Game state is set to playing by default
         if 'exit' in player_action:
             break
         elif 'fullscreen' in player_action:
             tdl.set_fullscreen(not tdl.get_fullscreen())
-        elif player_action != 'pass' and player.hp > 0:
+            game_state = 'paused'
+        
+        elif glob.player.fighter.hp > 0:
             if 'move' in player_action:
                 x,y = player_action['move']
                 glob.player.move(x,y,glob.player.is_running)
             elif 'running' in player_action:
+                game_state == 'paused'
                 if (glob.player.is_running):
                     message('You stop running.')
                     glob.player.is_running = False
@@ -47,6 +49,7 @@ def main_loop(con,root,panel):
                         break
                 if not found_something:
                     message('There is nothing to pick up here!')
+            
             elif 'inventory' in player_action:
                 game_state = 'paused'
                 #show the glob.inventory, pressing a key returns the corresponding item
@@ -56,8 +59,8 @@ def main_loop(con,root,panel):
                         chosen_item.use()
                     elif (player_action['inventory'] == 'drop'):
                         chosen_item.drop()
-                game_state = 'playing'
-            # AI takes turn
+            
+            # AI takes turn, if game_state is not set to pause
             if game_state == 'playing':
                 for obj in glob.gameobjects:
                     if obj.ai:
