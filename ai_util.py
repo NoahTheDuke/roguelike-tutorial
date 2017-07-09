@@ -17,8 +17,8 @@ class BasicMonster:
                 monster.move_towards(glob.player)
  
             #close enough, attack! (if the glob.player is still alive.)
-            elif glob.player.fighter.hp > 0:
-                monster.fighter.attack(glob.player)
+            elif glob.player.hp > 0:
+                monster.attack(glob.player)
 
 class ConfusedMonster:
     '''AI for a confused monster'''

@@ -12,37 +12,24 @@ from gui_util import message
 from ai_util import BasicMonster
 import item_use as iu
 
-# TODO transform these into proper generatos
-
 class GameObject:
     ''' Main class of game objects'''
-    def __init__(self, x, y,  name,char, color, blocks=False, fighter=None, ai=None,item=None):
+    def __init__(self, x, y,name,char,color,blocks=False, item=None):
         self.x = x
         self.y = y
         self.char = char
         self.color = color
         self.blocks = blocks
         self.name = name
-        self.is_running = False
 
-        self.fighter = fighter #let the fighter component know who owns it
-        if self.fighter: #By default fighter is None thus this check only passes if a value for fighter has been set
-            self.fighter.owner = self
-        
-        self.ai = ai #let the AI component know who owns it
-        if self.ai:  
-            self.ai.owner = self
-        
         self.item = item
         if self.item:  #let the Item component know who owns it
             self.item.owner = self
         
         glob.gameobjects.append(self)
     
-    def move(self, dx, dy,running=False):
+    def move(self, dx, dy):
         ''' Move the object, after checking if the target space is legitimate '''
-
-        running = running
 
         if glob.game_map.walkable[self.x+dx,self.y+dy]:
             check = True
@@ -50,35 +37,16 @@ class GameObject:
                 target = None
                 if [obj.x,obj.y] == [self.x+dx,self.y+dy] and obj.blocks:  # check if there is something in the way
                     check = False
-                    if obj.fighter:                         # if it's a hostile entity, target it
+                    if obj in glob.actors:                         # if it's another actor, target it
                         target = obj
                     break
             if check and target == None:
                 self.x += dx
                 self.y += dy
-                if not self.ai: #if player has moved, recalculate FOV | NOTE: This should be eventually moved elsewhere
-                    fov_recompute()
-                
-                # if entity is running, re-call the move function once
-                if (running):
 
-                    self.move(dx,dy,running=False)
-            
             # if blocking object is an enemy target
-            elif not check and not target == None:
-                if running:
-                    message('You bump into the ' + target.name,colors.red)
-                    self.is_running = False
-                else:
-                    self.fighter.attack(target)
-            
-        elif running: # if the player crashes into a wall
-                message('You run into something.',colors.red)
-                self.is_running = False
-                self.fighter.take_damage(1)
-        
-        elif not self.ai:
-            message('Something blocks your way.')
+            elif not check and target:
+                self.attack(target)
     
     def draw(self,con):
         ''' Draw the object '''
@@ -111,32 +79,39 @@ class GameObject:
         '''make this object be drawn first, so all others appear above it if they're in the same tile.'''
         glob.gameobjects.remove(self)
         glob.gameobjects.insert(0, self)
+    def delete(self):
+        '''remove the object from the game'''
+        glob.gameobjects.remove(self)
+        glob.actors.remove(self)
 
-class Fighter:
+class Fighter(GameObject):
     ''' combat-related properties and methods (monster, glob.player, NPC) '''
-    def __init__(self, hp, defense, power):
-        self.max_hp = hp
-        self.hp = hp
-        self.max_defense = defense
-        self.defense = defense
-        self.max_power = power
-        self.power = power
+    def __init__(self, x, y,name,char,color,stats=(0,0,0),blocks=False, ai=None):
+        GameObject.__init__(self, x, y,name,char,color,blocks=True)
+        self.hp, self.defense, self.power = stats
+        self.max_hp = self.hp
+        self.max_defense = self.defense
+        self.max_power = self.power
+    
+        self.ai = ai #let the AI component know who owns it
+        if self.ai:  
+            self.ai.owner = self
+
     def take_damage(self, damage):
         '''apply damage if possible'''
         if damage > 0:
             self.hp -= damage
         if self.hp <= 0:
-            self.death(self.owner)
+            self.death()
     def attack(self, target):
         '''a simple formula for attack damage'''
-        # TODO: Check for friendly fire
-        damage = self.power - target.fighter.defense
+        damage = self.power - target.defense
         if damage > 0:
             #make the target take some damage
-            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.')
-            target.fighter.take_damage(damage)
+            message(self.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.')
+            target.take_damage(damage)
         else:
-            message(self.owner.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
+            message(self.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
     def heal(self, amount):
         #heal by the given amount, without going over the maximum
         self.hp += amount
@@ -146,21 +121,79 @@ class Fighter:
         self.power += amount
         if self.power == 1:
             self.power = 1
-    def death(self,owner):
-        if not owner.ai:
-            message('You died!')
+    def death(self):
+        # if not self.ai:
+        #     message('You died!')
 
-            #for added effect, transform the glob.player into a corpse!
-            glob.player.char = '%'
-            glob.player.color = colors.dark_red
+        #     #for added effect, transform the glob.player into a corpse!
+        #     glob.player.char = '%'
+        #     glob.player.color = colors.dark_red
 
-            game_state = 'ended' # TODO game needs to stop processing inputs after this
-        else:
-            message(owner.name.capitalize() + ' is dead!')
-            item_component = Item(iu.eat_corpse,owner.name)
-            item = GameObject(owner.x,owner.y, (owner.name + ' corpse'), '%', colors.dark_red,item=item_component)
-            glob.gameobjects.remove(owner)
-            item.send_to_back()
+        #     game_state = 'ended' # TODO game needs to stop processing inputs after this
+        # else:
+        message('The ' + self.name.capitalize() + ' is dead!',colors.green)
+        item_component = Item(iu.eat_corpse,self.name)
+        item = GameObject(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,item=item_component)
+        item.send_to_back()
+        self.delete()
+
+class Player(Fighter):
+    ''' Class for the player object '''
+    def __init__(self, x, y,name,char, color,stats=(30,2,5), blocks=True):
+        Fighter.__init__(self, x, y,name,char,color,stats,blocks)
+        self.is_running = False
+        self.is_looking = False
+        self.is_dead = False
+    
+    def death(self):
+        message('You died!')
+
+        #for added effect, transform the glob.player into a corpse!
+        glob.player.char = '%'
+        glob.player.color = colors.dark_red
+
+        self.is_dead = True
+    
+    def move(self, dx, dy,running=False):
+        ''' Move the object, after checking if the target space is legitimate '''
+
+        running = running
+
+        if glob.game_map.walkable[self.x+dx,self.y+dy]:
+            check = True
+            for obj in glob.gameobjects:
+                target = None
+                if [obj.x,obj.y] == [self.x+dx,self.y+dy] and obj.blocks:  # check if there is something in the way
+                    check = False
+                    if obj in glob.actors:                         # if it's another actor, target it
+                        target = obj
+                    break
+            if check and target == None:
+                self.x += dx
+                self.y += dy
+                if not self.ai: #if player has moved, recalculate FOV | NOTE: This should be eventually moved elsewhere
+                    fov_recompute()
+                
+                # if entity is running, re-call the move function once
+                if (running):
+
+                    self.move(dx,dy,running=False)
+            
+            # if blocking object is an enemy target
+            elif not check and not target == None:
+                if running:
+                    message('You bump into the ' + target.name,colors.red)
+                    self.is_running = False
+                else:
+                    self.attack(target)
+            
+        elif running: # if the player crashes into a wall
+                message('You run into something.',colors.red)
+                self.is_running = False
+                self.take_damage(1)
+        
+        elif not self.ai:
+            message('Something blocks your way.')
 
 class Item:
     '''an item that can be picked up and used.'''
@@ -229,9 +262,9 @@ def place_monster(x,y):
     m = random.choice(list(monsters.keys()))
     while (randint(0,100) > monsters[m][0]):
         m = random.choice(list(monsters.keys()))
-    name,symbol,color,stats,ai = monsters[m][1], monsters[m][2], monsters[m][3],monsters[m][4],monsters[m][5]
-    fighter_component = Fighter(stats[0],stats[1],stats[2])
-    monster = GameObject(x,y,name,symbol,color,blocks=True,fighter=fighter_component,ai=ai)
+    name,symbol,color,stats,ai = monsters[m][1], monsters[m][2], monsters[m][3],monsters[m][4],monsters[m][5] 
+    monster = Fighter(x,y,name,symbol,color,stats=(stats[0],stats[1],stats[2]),blocks=True,ai=ai)
+    glob.actors.append(monster)
 
 def place_item(x,y):
     '''creates a new item at the given position'''

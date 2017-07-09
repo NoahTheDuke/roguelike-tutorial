@@ -1,6 +1,7 @@
 # Global variables
 
 gameobjects = []
+actors = []
 game_msgs = []
 inventory = []
 player = None

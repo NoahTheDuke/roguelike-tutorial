@@ -36,11 +36,11 @@ def render_all(con,root,panel):
     panel.clear(fg=colors.white, bg=colors.black)
  
     #show the glob.player's stats
-    render_bar(panel,1, 1, settings.BAR_WIDTH, 'HP', glob.player.fighter.hp, glob.player.fighter.max_hp,
+    render_bar(panel,1, 1, settings.BAR_WIDTH, 'HP', glob.player.hp, glob.player.max_hp,
         colors.light_red, colors.darker_red)
-    render_bar(panel,1, 2, settings.BAR_WIDTH, 'PWR', glob.player.fighter.power, glob.player.fighter.max_power,
+    render_bar(panel,1, 2, settings.BAR_WIDTH, 'PWR', glob.player.power, glob.player.max_power,
         colors.black, colors.black)
-    render_bar(panel,1, 3, settings.BAR_WIDTH, 'DEF', glob.player.fighter.defense, glob.player.fighter.max_defense,
+    render_bar(panel,1, 3, settings.BAR_WIDTH, 'DEF', glob.player.defense, glob.player.max_defense,
         colors.black, colors.black)       
     
     #print the game messages, one line at a time
