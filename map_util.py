@@ -109,7 +109,3 @@ def make_map():
             num_rooms += 1
     
     glob.game_map.rooms = rooms
-
-def fov_recompute():
-    ''' Recomputes the glob.player's FOV '''
-    glob.game_map.compute_fov(glob.player.x, glob.player.y,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,light_walls=settings.FOV_LIGHT_WALLS)

@@ -7,34 +7,47 @@ import colors
 import settings
 import global_vars as glob
 from input_util import handle_keys, process_input
-from map_util import GameMap,make_map, fov_recompute
-from gui_util import render_all, inventory_menu, message
-from entities import GameObject, Fighter, Player, Item, place_objects
+from map_util import GameMap,make_map
+from render_util import render_all, fov_recompute
+from gui_util import inventory_menu, message
+from entities import Player, Cursor
+from generators import place_objects
+from target_util import look_at_ground
 
-def main_loop(con,root,panel):
+def main_loop():
     ''' begin main game loop '''
     while not tdl.event.is_window_closed():
-        render_all(con,root,panel)
+        render_all()
         tdl.flush()
         for obj in glob.gameobjects:
-            obj.clear(con)
+            obj.clear(glob.con)
         
-        game_state = 'playing'  # Game state is set to playing by default
+        glob.player.is_active = True # Player is considered active by default
         player_action = handle_keys(tdl.event.key_wait())
 
         if not player_action == None:
             if 'exit' in player_action:
                 break
+            # elif 'restart' in player_action:
+            #     initialize_game()
+            #     break
             elif 'fullscreen' in player_action:
                 tdl.set_fullscreen(not tdl.get_fullscreen())
-                game_state = 'paused'
-            
-            else:
+                glob.player.is_active = False
+            else:              
                 if not glob.player.is_dead:
-                    game_state = process_input(player_action,game_state,root)
-            
-                #AI takes turn, if game_state is not set to pause
-                if game_state == 'playing':
+                    process_input(player_action)
+                
+                if glob.cursor.is_active:
+                    look_at_ground()
+                
+                #TODO: Get targeting to work
+                #IDEA: suspend all input processing above, while is_targeting
+                # if glob.player.is_targeting:
+                #     target_tile()
+
+                #AI takes turn, if player is not considered inactive
+                if glob.player.is_active:
                     for obj in glob.actors:
                         if obj.ai and glob.game_map.fov[obj.x, obj.y]:
                             obj.ai.take_turn()
@@ -46,13 +59,14 @@ def initialize_game():
     tdl.set_font('resources/arial10x10.png', greyscale=True, altLayout=True)
 
     # initialize the window
-    root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
-    con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
-    panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
+    glob.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
+    glob.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
+    glob.panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
 
-    # create the player
+    # create the player & cursor
     player_stats = (30,2,5) # hp/defense/power
     glob.player = Player(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, stats=player_stats,blocks=True)
+    glob.cursor = Cursor(0,0)
 
     # create the map
     glob.game_map = GameMap(settings.MAP_WIDTH,settings.MAP_HEIGHT)
@@ -68,6 +82,7 @@ def initialize_game():
     message('Welcome stranger! Prepare to perish in the Tombs of the Ancient Kings.', colors.red)
     
     # begin the main game loop
-    main_loop(con,root,panel)
+    tdl.setFPS(settings.LIMIT_FPS)
+    main_loop()
 
 initialize_game()

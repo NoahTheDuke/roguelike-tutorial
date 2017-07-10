@@ -60,10 +60,21 @@ class ConfusedMonster:
     def __init__(self, old_ai, num_turns=5):
         self.old_ai = old_ai
         self.num_turns = num_turns
+
+    def take_turn(self):
+        if self.num_turns > 0:  #still confused...
+                #move in a random direction, and decrease the number of turns confused
+                self.move()
+                self.num_turns -= 1
     
-    def move(self, dx, dy):
-        ''' Move the object, after checking if the target space is legitimate '''
+        else:  #restore the previous AI (this one will be deleted because it's not referenced anymore)
+            self.owner.ai = self.old_ai
+            message('The ' + self.owner.name + ' is no longer confused!', colors.red)
+
+    def move(self):
+        ''' Confused monsters stumble around and attack randomly '''
         x,y = self.owner.x, self.owner.y
+        dx,dy = randint(-1, 1), randint(-1, 1)
         if glob.game_map.walkable[x+dx,y+dy]:
             check = True
             for obj in glob.gameobjects:
@@ -83,13 +94,3 @@ class ConfusedMonster:
                 self.owner.attack(target)
         else:
             message('The ' + self.owner.name + ' bumbs into a wall.', colors.white)
-
-    def take_turn(self):
-        if self.num_turns > 0:  #still confused...
-                #move in a random direction, and decrease the number of turns confused
-                self.move(randint(-1, 1), randint(-1, 1))
-                self.num_turns -= 1
-    
-        else:  #restore the previous AI (this one will be deleted because it's not referenced anymore)
-            self.ai = self.old_ai
-            message('The ' + self.owner.name + ' is no longer confused!', colors.red)

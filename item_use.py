@@ -5,6 +5,7 @@ import settings
 import colors
 import global_vars as glob
 from gui_util import message
+from target_util import target_tile
 from ai_util import ConfusedMonster
 
 def cast_heal(p1=0,p2=None,**kwargs):
@@ -53,7 +54,13 @@ def cast_confusion(p1=5,p2=10,**kwargs):
     '''find closest enemy in-range and confuse it''' #TODO: Make confused monster attack random monsters
     range = p1
     dur = p2
-    monster = closest_monster(range)
+    monster = None
+    if (range > 0):
+        monster = closest_monster(range)
+    else:
+        message('The scroll of confusion was cursed!')
+        monster = glob.player
+    
     if monster is None:  #no enemy found within maximum range
         message('No enemy is close enough to confuse.', colors.red)
         return 'cancelled'
@@ -62,6 +69,25 @@ def cast_confusion(p1=5,p2=10,**kwargs):
         monster.ai = ConfusedMonster(old_ai,num_turns=dur)
         monster.ai.owner = monster  #tell the new component who owns it
         message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!', colors.light_green)
+
+def cast_fireball(p1=10,p2=10):
+    '''ask the player for a target tile to throw a fireball at'''
+    
+    #glob.player.is_targeting = True
+    target_tile()
+
+    # dmg = p1
+    # radius = p2
+    # x, y = target_tile()
+    # if x is None:
+    #     message('Cancelled')
+    #     return 'cancelled'
+    # message('The fireball explodes, burning everything within ' + str(radius) + ' tiles!', colors.orange)
+ 
+    # for obj in glob.gameobjects:  #damage every fighter in range, including the player
+    #     if obj.distance(x, y) <= FIREBALL_RADIUS and obj.fighter:
+    #         message('The ' + obj.name + ' gets burned for ' + str(dmg) + ' hit points.', colors.orange)
+    #         obj.take_damage(dmg)
 
 def eat_corpse(p1='',**kwargs):
     message('You eat the corpse of a ' + p1 + '. It is disgusting!')

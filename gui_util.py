@@ -6,66 +6,21 @@ import colors
 import global_vars as glob
 import textwrap
         
-def render_all(con,root,panel):
-    ''' draw all game objects '''
-    for y in range(settings.MAP_HEIGHT):
-        for x in range(settings.MAP_WIDTH):
-            wall = not glob.game_map.transparent[x,y]
-            if not glob.game_map.fov[x, y]:
-                #it's out of the glob.player's FOV but explored
-                if glob.game_map.explored[x][y]:
-                    if wall:
-                        con.draw_char(x, y, None, fg=None, bg=settings.color_dark_wall)
-                    else:
-                        con.draw_char(x, y, None, fg=None, bg=settings.color_dark_ground)
-            else:
-                #it's visible
-                if wall:
-                    con.draw_char(x, y, None, fg=None, bg=settings.color_light_wall)
-                else:
-                    con.draw_char(x, y, None, fg=None, bg=settings.color_light_ground)
-                glob.game_map.explored[x][y] = True
-    for obj in glob.gameobjects:
-        if glob.game_map.fov[obj.x,obj.y]:
-            obj.draw(con)
-            #con.draw_char(obj.x, obj.y, obj.char, obj.color)
-   # con.draw_char(obj.x, obj.y, obj.char, obj.color)
-        
-    root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
-    #prepare to render the GUI panel
-    panel.clear(fg=colors.white, bg=colors.black)
- 
-    #show the glob.player's stats
-    render_bar(panel,1, 1, settings.BAR_WIDTH, 'HP', glob.player.hp, glob.player.max_hp,
-        colors.light_red, colors.darker_red)
-    render_bar(panel,1, 2, settings.BAR_WIDTH, 'PWR', glob.player.power, glob.player.max_power,
-        colors.black, colors.black)
-    render_bar(panel,1, 3, settings.BAR_WIDTH, 'DEF', glob.player.defense, glob.player.max_defense,
-        colors.black, colors.black)       
-    
-    #print the game messages, one line at a time
-    y = 1
-    for (line, color) in glob.game_msgs:
-        panel.draw_str(settings.MSG_X, y, line, bg=None, fg=color)
-        y += 1
- 
-    #blit the contents of "panel" to the root console
-    root.blit(panel, 0, settings.PANEL_Y, settings.SCREEN_WIDTH, settings.PANEL_HEIGHT, 0, 0)
-
-def inventory_menu(header,root):
+def inventory_menu(header):
     '''show a menu with each item of the inventory as an option'''
     if len(glob.inventory) == 0:
         message('Inventory is empty.')
     else:
         options = [item.name for item in glob.inventory]
-        index = menu(header, options, settings.INVENTORY_WIDTH,root)
+        index = menu(header, options, settings.INVENTORY_WIDTH)
         #if an item was chosen, return it
         if index is None or len(glob.inventory) == 0:
             return None
-        return glob.inventory[index].item
+        return glob.inventory[index]
 
-def menu(header, options, width,root):
+def menu(header, options, width):
     '''display a simple menu to the glob.player'''
+    root = glob.root
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
     #calculate total height for the header (after textwrap) and one line per option
     header_wrapped = textwrap.wrap(header, width)
@@ -104,22 +59,6 @@ def menu(header, options, width,root):
     if index >= 0 and index < len(options):
         return index
     return None
-
-def render_bar(panel,x, y, total_width, name, value, maximum, bar_color, back_color):
-    '''render a bar (HP, experience, etc). first calculate the width of the bar'''
-    bar_width = int(float(value) / maximum * total_width)
- 
-    #render the background first
-    panel.draw_rect(x, y, total_width, 1, None, bg=back_color)
- 
-    #now render the bar on top
-    if bar_width > 0:
-        panel.draw_rect(x, y, bar_width, 1, None, bg=bar_color)
-    
-     #finally, some centered text with the values
-    text = name + ': ' + str(value) + '/' + str(maximum)
-    x_centered = x + (total_width-len(text))//2
-    panel.draw_str(x_centered, y, text, fg=colors.white, bg=None)
 
 def message(new_msg, color = colors.white):
     '''split the message if necessary, among multiple lines'''
