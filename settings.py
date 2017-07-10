@@ -30,7 +30,7 @@ MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
 MSG_HEIGHT = PANEL_HEIGHT - 1
 
 # Dungeon colors
-color_dark_wall = colors.dark_gray
-color_light_wall = colors.dark_gray
-color_dark_ground = colors.grey
-color_light_ground = colors.desaturated_yellow
+color_dark_wall = colors.darkest_sepia
+color_light_wall = colors.dark_sepia
+color_dark_ground = colors.darkest_amber
+color_light_ground = colors.dark_amber

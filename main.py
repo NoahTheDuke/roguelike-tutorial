@@ -29,7 +29,7 @@ def initialize_window():
     main_menu()
 
 def main_menu():
-    img = image_load('resources\menu_background.png')
+    img = image_load('resources\menu_background2.png')
 
     while not tdl.event.is_window_closed():
         #show the background image, at twice the regular console resolution
@@ -99,9 +99,6 @@ def main_loop():
         if not player_action == None:
             if 'exit' in player_action:
                 break
-            # elif 'restart' in player_action:
-            #     initialize_game()
-            #     break
             elif 'fullscreen' in player_action:
                 tdl.set_fullscreen(not tdl.get_fullscreen())
                 glob.player.is_active = False
