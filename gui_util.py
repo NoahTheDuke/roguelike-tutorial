@@ -25,6 +25,8 @@ def menu(header, options, width):
     #calculate total height for the header (after textwrap) and one line per option
     header_wrapped = textwrap.wrap(header, width)
     header_height = len(header_wrapped)
+    if header == '':
+        header_height = 0
     height = len(options) + header_height
 
     #create an off-screen console that represents the menu's window
@@ -54,6 +56,8 @@ def menu(header, options, width):
     key_char = key.char
     if key_char == '':
         key_char = ' ' # placeholder
+    if key.key == 'ENTER' and key.alt:  #(special case) Alt+Enter: toggle fullscreen
+        tdl.set_fullscreen(not tdl.get_fullscreen())
     
     index = ord(key_char) - ord('a')
     if index >= 0 and index < len(options):

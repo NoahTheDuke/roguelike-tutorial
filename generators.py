@@ -12,10 +12,15 @@ from ai_util import BasicMonster
 def ran_room_pos(room):
     '''returns a random position within a room for an object'''
     for i in range(room.w*room.h):
-        x = randint(room.x1+1, room.x2-1)
-        y = randint(room.y1+1, room.y2-1)
-        if glob.game_map.walkable[x,y]:
-            break
+        check = True
+        while check:
+            x = randint(room.x1+1, room.x2-1)
+            y = randint(room.y1+1, room.y2-1)
+            if glob.game_map.walkable[x,y]:
+                #count = lambda obj,x,y : [obj.x,obj.y] == [x,y]
+                if sum([obj.x,obj.y] == [x,y] for obj in glob.actors) <= 0:
+                    check = False
+                    break
     return [x,y]
 
 def place_objects():
