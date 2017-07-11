@@ -1,7 +1,7 @@
 '''map-creation related code for the roguelike tutorial'''
 
 import settings
-import global_vars as glob
+import global_vars as gv
 from random import randint
 from tdl.map import Map
 
@@ -37,19 +37,19 @@ def create_room(room):
     #go through the tiles in the rectangle and make them passable
     for x in range(room.x1, room.x2 + 1):
         for y in range(room.y1, room.y2 + 1):
-            glob.game_map.walkable[x,y] = True
-            glob.game_map.transparent[x,y] = True
+            gv.game_map.walkable[x,y] = True
+            gv.game_map.transparent[x,y] = True
  
 def create_h_tunnel(x1, x2, y):
     for x in range(min(x1, x2), max(x1, x2) + 1):
-        glob.game_map.walkable[x,y] = True
-        glob.game_map.transparent[x,y] = True
+        gv.game_map.walkable[x,y] = True
+        gv.game_map.transparent[x,y] = True
  
 def create_v_tunnel(y1, y2, x):
     #vertical tunnel
     for y in range(min(y1, y2), max(y1, y2) + 1):
-        glob.game_map.walkable[x,y] = True
-        glob.game_map.transparent[x,y] = True
+        gv.game_map.walkable[x,y] = True
+        gv.game_map.transparent[x,y] = True
 
 def make_map():
     ''' Sets up the game's map '''
@@ -85,8 +85,8 @@ def make_map():
 
             if num_rooms == 0:
                 #this is the first room, where the player starts at
-                glob.player.x = new_x
-                glob.player.y = new_y
+                gv.player.x = new_x
+                gv.player.y = new_y
             else:
                 #all rooms after the first:
                 #connect it to the previous room with a tunnel
@@ -108,4 +108,4 @@ def make_map():
             rooms.append(new_room)
             num_rooms += 1
     
-    glob.game_map.rooms = rooms
+    gv.game_map.rooms = rooms

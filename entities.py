@@ -3,7 +3,7 @@
 
 import settings
 import colors
-import global_vars as glob
+import global_vars as gv
 import math
 import item_use as iu
 from gui_util import message
@@ -20,7 +20,7 @@ class GameObject:
         self.name = name
         self.is_item = item
         
-        glob.gameobjects.append(self)
+        gv.gameobjects.append(self)
 
     def draw(self,con):
         ''' Draw the object '''
@@ -36,17 +36,17 @@ class GameObject:
         return math.sqrt(dx ** 2 + dy ** 2) 
     def send_to_back(self):
         '''make this object be drawn first, so all others appear above it if they're in the same tile.'''
-        glob.gameobjects.remove(self)
-        glob.gameobjects.insert(0, self)
+        gv.gameobjects.remove(self)
+        gv.gameobjects.insert(0, self)
     def send_to_front(self):
-        glob.gameobjects.remove(self)
-        glob.gameobjects.insert(len(glob.gameobjects), self)
+        gv.gameobjects.remove(self)
+        gv.gameobjects.insert(len(gv.gameobjects), self)
     def delete(self):
         '''remove the object from the game'''
-        if self in glob.gameobjects:
-            glob.gameobjects.remove(self)
-        if self in glob.actors:
-            glob.actors.remove(self)
+        if self in gv.gameobjects:
+            gv.gameobjects.remove(self)
+        if self in gv.actors:
+            gv.actors.remove(self)
         del self
 
 class Cursor(GameObject):
@@ -56,7 +56,7 @@ class Cursor(GameObject):
         self.is_active = False
 
     def move (self,dx,dy):
-        if glob.game_map.fov[self.x + dx,self.y + dy]:
+        if gv.game_map.fov[self.x + dx,self.y + dy]:
             self.x += dx
             self.y += dy
     
@@ -69,8 +69,8 @@ class Cursor(GameObject):
         self.char = char
         self.color = color
         self.is_active = True
-        self.x = glob.player.x
-        self.y = glob.player.y
+        self.x = gv.player.x
+        self.y = gv.player.y
         self.send_to_front()
     
     def deactivate(self):
@@ -80,7 +80,7 @@ class Cursor(GameObject):
         self.send_to_back()
 
 class Fighter(GameObject):
-    ''' combat-related properties and methods (monster, glob.player, NPC) '''
+    ''' combat-related properties and methods (monster, gv.player, NPC) '''
     def __init__(self, x, y,name,char,color,stats=(0,0,0),blocks=False, ai=None,is_player = False):
         GameObject.__init__(self, x, y,name,char,color,blocks=True)
         self.hp, self.defense, self.power = stats
@@ -93,7 +93,7 @@ class Fighter(GameObject):
         if self.ai:  
             self.ai.owner = self
         
-        glob.actors.append(self)
+        gv.actors.append(self)
 
     def take_damage(self, damage):
         '''apply damage if possible'''
@@ -144,13 +144,13 @@ class Player(Fighter):
 
         running = running
 
-        if glob.game_map.walkable[self.x+dx,self.y+dy]:
+        if gv.game_map.walkable[self.x+dx,self.y+dy]:
             check = True
-            for obj in glob.gameobjects:
+            for obj in gv.gameobjects:
                 target = None
                 if [obj.x,obj.y] == [self.x+dx,self.y+dy] and obj.blocks:  # check if there is something in the way
                     check = False
-                    if obj in glob.actors and not obj.is_player:                         # if it's another actor, target it
+                    if obj in gv.actors and not obj.is_player:                         # if it's another actor, target it
                         target = obj
                     break
             if check and target == None:
@@ -183,9 +183,9 @@ class Player(Fighter):
     def death(self):
         message('You died!')
 
-        #for added effect, transform the glob.player into a corpse!
-        glob.player.char = '%'
-        glob.player.color = colors.dark_red
+        #for added effect, transform the gv.player into a corpse!
+        gv.player.char = '%'
+        gv.player.color = colors.dark_red
 
         self.is_dead = True
 
@@ -197,12 +197,12 @@ class Item(GameObject):
         self.param1 = param1
         self.param2 = param2
     def pick_up(self):
-        '''add to the glob.player's glob.inventory and remove from the map'''
-        if len(glob.inventory) >= 26:
-            message('Your glob.inventory is full, cannot pick up ' + self.name + '.', colors.red)
+        '''add to the gv.player's gv.inventory and remove from the map'''
+        if len(gv.inventory) >= 26:
+            message('Your gv.inventory is full, cannot pick up ' + self.name + '.', colors.red)
         else:
-            glob.inventory.append(self)
-            glob.gameobjects.remove(self)
+            gv.inventory.append(self)
+            gv.gameobjects.remove(self)
             message('You picked up a ' + self.name + '!', colors.green)
     def use(self):
         '''just call the "use_function" if it is defined'''
@@ -210,12 +210,12 @@ class Item(GameObject):
             message('The ' + self.name + ' cannot be used.')
         else:
             if self.use_function(p1=self.param1,p2=self.param2) != 'cancelled': #the use_function is called and unless it isn't cancelled, True is returned
-                glob.inventory.remove(self)  #destroy after use, unless it was cancelled for some reason
+                gv.inventory.remove(self)  #destroy after use, unless it was cancelled for some reason
 
     def drop(self):
-        '''add to the map and remove from the glob.player's glob.inventory. also, place it at the glob.player's coordinates'''
-        glob.gameobjects.append(self)
-        glob.inventory.remove(self)
-        self.x = glob.player.x
-        self.y = glob.player.y
+        '''add to the map and remove from the gv.player's gv.inventory. also, place it at the gv.player's coordinates'''
+        gv.gameobjects.append(self)
+        gv.inventory.remove(self)
+        self.x = gv.player.x
+        self.y = gv.player.y
         message('You dropped a ' + self.name + '.', colors.yellow)

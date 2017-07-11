@@ -1,6 +1,6 @@
 import settings
 import colors
-import global_vars as glob
+import global_vars as gv
 import math
 from random import randint
 import random
@@ -16,16 +16,16 @@ def ran_room_pos(room):
         while check:
             x = randint(room.x1+1, room.x2-1)
             y = randint(room.y1+1, room.y2-1)
-            if glob.game_map.walkable[x,y]:
+            if gv.game_map.walkable[x,y]:
                 #count = lambda obj,x,y : [obj.x,obj.y] == [x,y]
-                if sum([obj.x,obj.y] == [x,y] for obj in glob.actors) <= 0:
+                if sum([obj.x,obj.y] == [x,y] for obj in gv.actors) <= 0:
                     check = False
                     break
     return [x,y]
 
 def place_objects():
     ''' place objects in room '''
-    for room in glob.game_map.rooms:
+    for room in gv.game_map.rooms:
         num_monsters = randint(0, settings.MAX_ROOM_MONSTERS)
         for i in range(num_monsters):
             #choose random spot for this monster

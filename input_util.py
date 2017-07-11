@@ -1,7 +1,7 @@
-''' key input for the game '''
+''' key handling & input processing '''
 
 import colors
-import global_vars as glob
+import global_vars as gv
 from gui_util import message, inventory_menu
 
 def handle_keys(user_input):
@@ -75,49 +75,49 @@ def process_input(action):
     ''' process key input into game actions '''
     if 'move' in action:
         x,y = action['move']
-        if glob.cursor.is_active:
-            glob.cursor.move(x,y)
-            glob.player.is_active = False
-        elif glob.player.is_active:
-            glob.player.move(x,y,glob.player.is_running)          
+        if gv.cursor.is_active:
+            gv.cursor.move(x,y)
+            gv.player.is_active = False
+        elif gv.player.is_active:
+            gv.player.move(x,y,gv.player.is_running)          
     
     elif 'run' in action:
-        if (glob.player.is_running):
-            message('You stop running.')
-            glob.player.is_running = False
+        if (gv.player.is_running):
+            message('You stop runningv.')
+            gv.player.is_running = False
         else:
             message('You start to run.')
-            glob.player.is_running = True
-        glob.player.is_active = False
+            gv.player.is_running = True
+        gv.player.is_active = False
 
     elif 'look' in action:
-        if glob.player.is_looking:
+        if gv.player.is_looking:
             message('You stop looking around.')
-            glob.player.is_active = False
-            glob.player.is_looking = False
-            glob.cursor.deactivate()
+            gv.player.is_active = False
+            gv.player.is_looking = False
+            gv.cursor.deactivate()
         else:
             message('You start looking around.')
-            glob.player.is_active = False
-            glob.player.is_looking = True
-            glob.cursor.activate('.',colors.white)
+            gv.player.is_active = False
+            gv.player.is_looking = True
+            gv.cursor.activate('.',colors.white)
     
     elif 'target' in action:
-        if glob.player.is_targeting:
-            message('You stop targeting.')
-            glob.player.is_active = False
-            glob.player.is_targeting = False
-            glob.cursor.deactivate()
+        if gv.player.is_targeting:
+            message('You stop targetingv.')
+            gv.player.is_active = False
+            gv.player.is_targeting = False
+            gv.cursor.deactivate()
         else:
-            message('You begin targeting.')
-            glob.player.is_active = False
-            glob.player.is_targeting = True
-            glob.cursor.activate('X',colors.red)
+            message('You begin targetingv.')
+            gv.player.is_active = False
+            gv.player.is_targeting = True
+            gv.cursor.activate('X',colors.red)
 
     elif 'get' in action:
         found_something = False
-        for obj in glob.gameobjects:  #look for an item in the player's tile
-            if obj.x == glob.player.x and obj.y == glob.player.y and obj.is_item:
+        for obj in gv.gameobjects:  #look for an item in the player's tile
+            if obj.x == gv.player.x and obj.y == gv.player.y and obj.is_item:
                 obj.pick_up()
                 found_something = True
                 break
@@ -125,17 +125,17 @@ def process_input(action):
             message('There is nothing to pick up here!')
 
     elif 'inventory' in action:
-        #show the glob.inventory, pressing a key returns the corresponding item
+        #show the gv.inventory, pressing a key returns the corresponding item
         chosen_item = inventory_menu('Press the key next to an item to %s it, or any other to cancel.\n' % action['inventory'])
         if chosen_item is not None: #if an item was selected, call it's use or drop function
             if (action['inventory'] == 'use'):
                 chosen_item.use()
-                glob.player.is_active = True
+                gv.player.is_active = True
             elif (action['inventory'] == 'drop'):
                 chosen_item.drop()
-        glob.player.is_active = False
+        gv.player.is_active = False
     
     elif 'confirm' in action:
-        if glob.player.is_targeting:
-            glob.player.is_active = False
-            return {'target':(glob.cursor.x,glob.cursor.y)}
+        if gv.player.is_targeting:
+            gv.player.is_active = False
+            return {'target':(gv.cursor.x,gv.cursor.y)}

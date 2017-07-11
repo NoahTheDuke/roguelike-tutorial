@@ -3,24 +3,24 @@
 import tdl
 import settings
 import colors
-import global_vars as glob
+import global_vars as gv
 import textwrap
         
 def inventory_menu(header):
     '''show a menu with each item of the inventory as an option'''
-    if len(glob.inventory) == 0:
+    if len(gv.inventory) == 0:
         message('Inventory is empty.')
     else:
-        options = [item.name for item in glob.inventory]
+        options = [item.name for item in gv.inventory]
         index = menu(header, options, settings.INVENTORY_WIDTH)
         #if an item was chosen, return it
-        if index is None or len(glob.inventory) == 0:
+        if index is None or len(gv.inventory) == 0:
             return None
-        return glob.inventory[index]
+        return gv.inventory[index]
 
 def menu(header, options, width):
-    '''display a simple menu to the glob.player'''
-    root = glob.root
+    '''display a simple menu to the gv.player'''
+    root = gv.root
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
     #calculate total height for the header (after textwrap) and one line per option
     header_wrapped = textwrap.wrap(header, width)
@@ -50,7 +50,7 @@ def menu(header, options, width):
     y = settings.SCREEN_HEIGHT//2 - height//2
     root.blit(window, x, y, width, height, 0, 0)
 
-    #present the root console to the glob.player and wait for a key-press
+    #present the root console to the gv.player and wait for a key-press
     tdl.flush()
     key = tdl.event.key_wait()
     key_char = key.char
@@ -70,8 +70,8 @@ def message(new_msg, color = colors.white):
  
     for line in new_msg_lines:
         #if the buffer is full, remove the first line to make room for the new one
-        if len(glob.game_msgs) == settings.MSG_HEIGHT:
-            del glob.game_msgs[0]
+        if len(gv.game_msgs) == settings.MSG_HEIGHT:
+            del gv.game_msgs[0]
  
         #add the new line as a tuple, with the text and the color
-        glob.game_msgs.append((line, color))
+        gv.game_msgs.append((line, color))

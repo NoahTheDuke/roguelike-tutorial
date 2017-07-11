@@ -1,7 +1,7 @@
 ''' All AI-related code '''
 
 import colors
-import global_vars as glob
+import global_vars as gv
 from random import randint
 import math
 from gui_util import message
@@ -11,23 +11,23 @@ class BasicMonster:
     def take_turn(self):
         '''let the monster take a turn'''
         monster = self.owner
-        if glob.game_map.fov[monster.x, monster.y]:
+        if gv.game_map.fov[monster.x, monster.y]:
  
-            #move towards glob.player if far away
-            if monster.distance_to(glob.player) >= 2:
-                self.move_towards(glob.player)
+            #move towards gv.player if far away
+            if monster.distance_to(gv.player) >= 2:
+                self.move_towards(gv.player)
  
-            #close enough, attack! (if the glob.player is still alive.)
-            elif glob.player.hp > 0:
-                monster.attack(glob.player)
+            #close enough, attack! (if the gv.player is still alive.)
+            elif gv.player.hp > 0:
+                monster.attack(gv.player)
     
     def move(self, dx, dy):
         ''' Move the monster, after checking if the target space is legitimate '''
 
         x,y = self.owner.x, self.owner.y
-        if glob.game_map.walkable[x+dx,y+dy]:
+        if gv.game_map.walkable[x+dx,y+dy]:
             check = True
-            for obj in glob.gameobjects:
+            for obj in gv.gameobjects:
                 target = None
                 if [obj.x,obj.y] == [x+dx,y+dy] and obj.blocks:  # check if there is something in the way
                     check = False
@@ -75,13 +75,13 @@ class ConfusedMonster:
         ''' Confused monsters stumble around and attack randomly '''
         x,y = self.owner.x, self.owner.y
         dx,dy = randint(-1, 1), randint(-1, 1)
-        if glob.game_map.walkable[x+dx,y+dy]:
+        if gv.game_map.walkable[x+dx,y+dy]:
             check = True
-            for obj in glob.gameobjects:
+            for obj in gv.gameobjects:
                 target = None
                 if [obj.x,obj.y] == [x+dx,y+dy] and obj.blocks:  # check if there is something in the way
                     check = False
-                    if obj in glob.actors:
+                    if obj in gv.actors:
                         target = obj
                     break
             if check and target == None:

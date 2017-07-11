@@ -1,18 +1,18 @@
 import settings
 import colors
-import global_vars as glob
+import global_vars as gv
 
 def render_all():
     ''' draw all game objects '''
-    root = glob.root
-    con = glob.con
-    panel = glob.panel
+    root = gv.root
+    con = gv.con
+    panel = gv.panel
     for y in range(settings.MAP_HEIGHT):
         for x in range(settings.MAP_WIDTH):
-            wall = not glob.game_map.transparent[x,y]
-            if not glob.game_map.fov[x, y]:
-                #it's out of the glob.player's FOV but explored
-                if glob.game_map.explored[x][y]:
+            wall = not gv.game_map.transparent[x,y]
+            if not gv.game_map.fov[x, y]:
+                #it's out of the gv.player's FOV but explored
+                if gv.game_map.explored[x][y]:
                     if wall:
                         con.draw_char(x, y, None, fg=None, bg=settings.color_dark_wall)
                     else:
@@ -23,26 +23,26 @@ def render_all():
                     con.draw_char(x, y, None, fg=None, bg=settings.color_light_wall)
                 else:
                     con.draw_char(x, y, None, fg=None, bg=settings.color_light_ground)
-                glob.game_map.explored[x][y] = True
-    for obj in glob.gameobjects:
-        if glob.game_map.fov[obj.x,obj.y]:
+                gv.game_map.explored[x][y] = True
+    for obj in gv.gameobjects:
+        if gv.game_map.fov[obj.x,obj.y]:
             obj.draw(con)
     
     root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
     #prepare to render the GUI panel
     panel.clear(fg=colors.white, bg=colors.black)
  
-    #show the glob.player's stats
-    render_bar(1, 1, settings.BAR_WIDTH, 'HP', glob.player.hp, glob.player.max_hp,
+    #show the gv.player's stats
+    render_bar(1, 1, settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
         colors.light_red, colors.darker_red)
-    render_bar(1,2, settings.BAR_WIDTH, 'PWR', glob.player.power, glob.player.max_power,
+    render_bar(1,2, settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power,
         colors.black, colors.black)
-    render_bar(1, 3, settings.BAR_WIDTH, 'DEF', glob.player.defense, glob.player.max_defense,
+    render_bar(1, 3, settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
         colors.black, colors.black)       
     
     #print the game messages, one line at a time
     y = 1
-    for (line, color) in glob.game_msgs:
+    for (line, color) in gv.game_msgs:
         panel.draw_str(settings.MSG_X, y, line, bg=None, fg=color)
         y += 1
  
@@ -51,7 +51,7 @@ def render_all():
 
 def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
     '''render a bar (HP, experience, etc). first calculate the width of the bar'''
-    panel = glob.panel
+    panel = gv.panel
     bar_width = int(float(value) / maximum * total_width)
  
     #render the background first
@@ -67,5 +67,5 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
     panel.draw_str(x_centered, y, text, fg=colors.white, bg=None)
 
 def fov_recompute():
-    ''' Recomputes the glob.player's FOV '''
-    glob.game_map.compute_fov(glob.player.x, glob.player.y,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,light_walls=settings.FOV_LIGHT_WALLS)
+    ''' Recomputes the gv.player's FOV '''
+    gv.game_map.compute_fov(gv.player.x, gv.player.y,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,light_walls=settings.FOV_LIGHT_WALLS)

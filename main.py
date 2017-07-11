@@ -6,7 +6,7 @@ from tcod import image_load
 from random import randint
 import colors
 import settings
-import global_vars as glob
+import global_vars as gv
 from input_util import handle_keys, process_input
 from map_util import GameMap,make_map
 from render_util import render_all, fov_recompute
@@ -22,9 +22,9 @@ def initialize_window():
     tdl.set_font('resources/arial10x10.png', greyscale=True, altLayout=True)
 
     # initialize the window
-    glob.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
-    glob.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
-    glob.panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
+    gv.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
+    gv.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
+    gv.panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
 
     main_menu()
 
@@ -33,16 +33,16 @@ def main_menu():
 
     while not tdl.event.is_window_closed():
         #show the background image, at twice the regular console resolution
-        img.blit_2x(glob.root, 0, 0)
+        img.blit_2x(gv.root, 0, 0)
 
         #show the game's title, and some credits!
         title = 'THE PITS BELOW'
         center = (settings.SCREEN_WIDTH - len(title)) // 2
-        glob.root.draw_str(center, settings.SCREEN_HEIGHT//2-4, title, bg=None, fg=colors.light_yellow)
+        gv.root.draw_str(center, settings.SCREEN_HEIGHT//2-4, title, bg=None, fg=colors.light_yellow)
 
         title = 'By Wolfenswan'
         center = (settings.SCREEN_WIDTH - len(title)) // 2
-        glob.root.draw_str(center, settings.SCREEN_HEIGHT-2, title, bg=None, fg=colors.light_yellow)
+        gv.root.draw_str(center, settings.SCREEN_HEIGHT-2, title, bg=None, fg=colors.light_yellow)
  
         #show options and wait for the player's choice
         choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
@@ -55,18 +55,18 @@ def main_menu():
 def new_game():
     ''' sets up a new game '''
     # reset other global variables
-    glob.gameobjects = []
-    glob.actors = []
-    glob.game_msgs = []
-    glob.inventory = []
+    gv.gameobjects = []
+    gv.actors = []
+    gv.game_msgs = []
+    gv.inventory = []
 
     # create the player & cursor
     player_stats = (30,2,5) # hp/defense/power
-    glob.player = Player(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, stats=player_stats,blocks=True)
-    glob.cursor = Cursor(0,0)
+    gv.player = Player(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, stats=player_stats,blocks=True)
+    gv.cursor = Cursor(0,0)
 
     # create the map
-    glob.game_map = GameMap(settings.MAP_WIDTH,settings.MAP_HEIGHT)
+    gv.game_map = GameMap(settings.MAP_WIDTH,settings.MAP_HEIGHT)
     make_map()
     
     # place objects in the map
@@ -76,7 +76,7 @@ def new_game():
     fov_recompute()
     
     # clear the old console
-    glob.con.clear()
+    gv.con.clear()
     
     # a warm welcoming message!
     message('Welcome stranger! Prepare to perish in the Tombs of the Ancient Kings.', colors.red)
@@ -90,10 +90,10 @@ def main_loop():
     while not tdl.event.is_window_closed():
         render_all()
         tdl.flush()
-        for obj in glob.gameobjects:
-            obj.clear(glob.con)
+        for obj in gv.gameobjects:
+            obj.clear(gv.con)
         
-        glob.player.is_active = True # Player is considered active by default
+        gv.player.is_active = True # Player is considered active by default
         player_action = handle_keys(tdl.event.key_wait())
 
         if not player_action == None:
@@ -101,23 +101,23 @@ def main_loop():
                 break
             elif 'fullscreen' in player_action:
                 tdl.set_fullscreen(not tdl.get_fullscreen())
-                glob.player.is_active = False
+                gv.player.is_active = False
             else:              
-                if not glob.player.is_dead:
+                if not gv.player.is_dead:
                     process_input(player_action)
                 
-                if glob.cursor.is_active:
+                if gv.cursor.is_active:
                     look_at_ground()
                 
                 #TODO: Get targeting to work
                 #IDEA: suspend all input processing above, while is_targeting
-                # if glob.player.is_targeting:
+                # if gv.player.is_targeting:
                 #     target_tile()
 
                 #AI takes turn, if player is not considered inactive
-                if glob.player.is_active:
-                    for obj in glob.actors:
-                        if obj.ai and glob.game_map.fov[obj.x, obj.y]:
+                if gv.player.is_active:
+                    for obj in gv.actors:
+                        if obj.ai and gv.game_map.fov[obj.x, obj.y]:
                             obj.ai.take_turn()
 
 initialize_window()
