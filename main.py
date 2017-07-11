@@ -120,4 +120,5 @@ def main_loop():
                         if obj.ai and gv.game_map.fov[obj.x, obj.y]:
                             obj.ai.take_turn()
 
-initialize_window()
+if __name__ == '__main__':
+    initialize_window()
