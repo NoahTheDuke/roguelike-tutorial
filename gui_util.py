@@ -19,8 +19,7 @@ def inventory_menu(header):
         return gv.inventory[index]
 
 def menu(header, options, width):
-    '''display a simple menu to the gv.player'''
-    root = gv.root
+    '''display a simple menu to the player'''
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
     #calculate total height for the header (after textwrap) and one line per option
     header_wrapped = textwrap.wrap(header, width)
@@ -48,7 +47,7 @@ def menu(header, options, width):
     #blit the contents of "window" to the root console
     x = settings.SCREEN_WIDTH//2 - width//2
     y = settings.SCREEN_HEIGHT//2 - height//2
-    root.blit(window, x, y, width, height, 0, 0)
+    gv.root.blit(window, x, y, width, height, 0, 0)
 
     #present the root console to the gv.player and wait for a key-press
     tdl.flush()

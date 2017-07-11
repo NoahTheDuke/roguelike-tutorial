@@ -104,12 +104,12 @@ def process_input(action):
     
     elif 'target' in action:
         if gv.player.is_targeting:
-            message('You stop targetingv.')
+            message('You stop targeting.')
             gv.player.is_active = False
             gv.player.is_targeting = False
             gv.cursor.deactivate()
         else:
-            message('You begin targetingv.')
+            message('You begin targeting.')
             gv.player.is_active = False
             gv.player.is_targeting = True
             gv.cursor.activate('X',colors.red)

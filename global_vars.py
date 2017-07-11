@@ -1,4 +1,5 @@
 # Global variables
+# TODO: noramlize variable names (game_objects,game_actors)
 gameobjects = []
 actors = []
 game_msgs = []

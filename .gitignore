@@ -1,3 +1,4 @@
 __pycache__/
 restructure/
-.gitignore
+.pylintrc
+Notes.txt
