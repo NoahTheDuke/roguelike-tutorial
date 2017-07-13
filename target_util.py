@@ -33,7 +33,7 @@ def target_tile():
             elif 'confirm' in player_action:
                 gv.player.is_targeting = False
                 gv.cursor.deactivate()
-                return (gv.cursor.x,gv.cursor.y)
+                return (gv.cursor.x,gv.cursor.y) #Return the cursor's current coordinates to the calling function
             else:
                 gv.player.is_targeting = False
                 gv.cursor.deactivate()

@@ -49,8 +49,8 @@ def handle_keys(user_input):
     # looking and targeting
     elif user_input.text == 'l':
         return 'look'
-    elif user_input.text == 't':
-        return 'target'
+    # elif user_input.text == 't':
+    #     return 'target'
 
     # item handling
     elif user_input.text == 'g':
@@ -99,16 +99,16 @@ def process_input(action):
             gv.cursor.activate('*',colors.white)
         gv.player.is_active = False
     
-    elif 'target' in action:
-        if gv.player.is_targeting:
-            message('You stop targeting.')
-            gv.player.is_targeting = False
-            gv.cursor.deactivate()
-        else:
-            message('You begin targeting.')
-            gv.player.is_targeting = True
-            gv.cursor.activate('X',colors.red)
-        gv.player.is_active = False
+    # elif 'target' in action:
+    #     if gv.player.is_targeting:
+    #         message('You stop targeting.')
+    #         gv.player.is_targeting = False
+    #         gv.cursor.deactivate()
+    #     else:
+    #         message('You begin targeting.')
+    #         gv.player.is_targeting = True
+    #         gv.cursor.activate('X',colors.red)
+    #     gv.player.is_active = False
 
     elif 'get' in action:
         found_something = False
@@ -131,3 +131,8 @@ def process_input(action):
             elif (action['inventory'] == 'drop'):
                 chosen_item.drop()
         gv.player.is_active = False
+    
+    # elif 'confirm' in action:
+    #     if gv.player.is_targeting:
+    #         return {'target':(gv.cursor.x,gv.cursor.y)}
+    #     gv.player.is_active = False
