@@ -6,6 +6,7 @@ from random import randint
 from tdl.map import Map
 
 class GameMap(Map):
+    ''' the basic game map '''
     def __init__(self, width, height,rooms=[]):
         super().__init__(width, height)
         self.rooms = rooms

@@ -72,22 +72,18 @@ def cast_confusion(p1=5,p2=10,**kwargs):
 
 def cast_fireball(p1=10,p2=10):
     '''ask the player for a target tile to throw a fireball at'''
-    
-    #gv.player.is_targeting = True
-    target_tile()
-
-    # dmg = p1
-    # radius = p2
-    # x, y = target_tile()
-    # if x is None:
-    #     message('Cancelled')
-    #     return 'cancelled'
-    # message('The fireball explodes, burning everything within ' + str(radius) + ' tiles!', colors.orange)
- 
-    # for obj in gv.gameobjects:  #damage every fighter in range, including the player
-    #     if obj.distance(x, y) <= FIREBALL_RADIUS and obj.fighter:
-    #         message('The ' + obj.name + ' gets burned for ' + str(dmg) + ' hit points.', colors.orange)
-    #         obj.take_damage(dmg)
+    dmg = p1
+    radius = p2
+    target = target_tile()
+    if target is None:
+        message('Your spell fizzles.')
+    else:
+        message('The fireball explodes, burning everything within ' + str(radius) + ' tiles!', colors.orange)
+        x,y = target
+        for obj in gv.actors:  #damage every actor in range, including the player
+            if obj.distance_to_coord(x, y) <= radius:
+                message('The ' + obj.name + ' gets burned for ' + str(dmg) + ' hit points.', colors.orange)
+                obj.take_damage(dmg)
 
 def eat_corpse(p1='',**kwargs):
     message('You eat the corpse of a ' + p1 + '. It is disgusting!')

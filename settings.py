@@ -1,5 +1,5 @@
 #! python3
-''' Settings for the tutorial roguelike '''
+''' Constant variables for the tutorial roguelike '''
 
 import colors
 
@@ -30,7 +30,7 @@ MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
 MSG_HEIGHT = PANEL_HEIGHT - 1
 
 # Dungeon colors
-color_dark_wall = colors.darkest_sepia
-color_light_wall = colors.dark_sepia
-color_dark_ground = colors.darkest_amber
-color_light_ground = colors.dark_amber
+COLOR_DARK_WALL = colors.darkest_sepia
+COLOR_LIGHT_WALL = colors.dark_sepia
+COLOR_DARK_GROUND = colors.darkest_amber
+COLOR_LIGHT_GROUND = colors.dark_amber

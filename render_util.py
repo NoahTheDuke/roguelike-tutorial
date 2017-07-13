@@ -14,15 +14,15 @@ def render_all():
                 #it's out of the gv.player's FOV but explored
                 if gv.game_map.explored[x][y]:
                     if wall:
-                        con.draw_char(x, y, None, fg=None, bg=settings.color_dark_wall)
+                        con.draw_char(x, y,'#', fg=colors.grey, bg=colors.darkest_gray)
                     else:
-                        con.draw_char(x, y, None, fg=None, bg=settings.color_dark_ground)
+                        con.draw_char(x, y,'.', fg=colors.grey, bg=colors.darkest_grey)
             else:
                 #it's visible
                 if wall:
-                    con.draw_char(x, y, None, fg=None, bg=settings.color_light_wall)
+                    con.draw_char(x, y,'#', fg=colors.white, bg=colors.black)
                 else:
-                    con.draw_char(x, y, None, fg=None, bg=settings.color_light_ground)
+                    con.draw_char(x, y,'.', fg=colors.white, bg=colors.black)
                 gv.game_map.explored[x][y] = True
     for obj in gv.gameobjects:
         if gv.game_map.fov[obj.x,obj.y]:

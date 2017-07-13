@@ -14,9 +14,7 @@ def handle_keys(user_input):
         return {'fullscreen':None}
     elif user_input.key == 'ESCAPE':
         return {'exit':None}  #exit game
-    elif user_input.key == 'F5':
-        return {'restart'}
-
+    
     # movement keys
     if user_input.key in ['UP','KP8']:
         return {'move':(0,-1)}
@@ -93,36 +91,35 @@ def process_input(action):
     elif 'look' in action:
         if gv.player.is_looking:
             message('You stop looking around.')
-            gv.player.is_active = False
             gv.player.is_looking = False
             gv.cursor.deactivate()
         else:
             message('You start looking around.')
-            gv.player.is_active = False
             gv.player.is_looking = True
-            gv.cursor.activate('.',colors.white)
+            gv.cursor.activate('*',colors.white)
+        gv.player.is_active = False
     
     elif 'target' in action:
         if gv.player.is_targeting:
             message('You stop targeting.')
-            gv.player.is_active = False
             gv.player.is_targeting = False
             gv.cursor.deactivate()
         else:
             message('You begin targeting.')
-            gv.player.is_active = False
             gv.player.is_targeting = True
             gv.cursor.activate('X',colors.red)
+        gv.player.is_active = False
 
     elif 'get' in action:
         found_something = False
         for obj in gv.gameobjects:  #look for an item in the player's tile
-            if obj.x == gv.player.x and obj.y == gv.player.y and obj.is_item:
+            if [obj.x,obj.y] == [gv.player.x, gv.player.y] and obj.is_item:
                 obj.pick_up()
                 found_something = True
                 break
         if not found_something:
             message('There is nothing to pick up here!')
+            gv.player.is_active = False
 
     elif 'inventory' in action:
         #show the gv.inventory, pressing a key returns the corresponding item
@@ -134,8 +131,3 @@ def process_input(action):
             elif (action['inventory'] == 'drop'):
                 chosen_item.drop()
         gv.player.is_active = False
-    
-    elif 'confirm' in action:
-        if gv.player.is_targeting:
-            gv.player.is_active = False
-            return {'target':(gv.cursor.x,gv.cursor.y)}

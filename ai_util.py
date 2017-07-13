@@ -13,11 +13,11 @@ class BasicMonster:
         monster = self.owner
         if gv.game_map.fov[monster.x, monster.y]:
  
-            #move towards gv.player if far away
+            #move towards player if far away
             if monster.distance_to(gv.player) >= 2:
                 self.move_towards(gv.player)
  
-            #close enough, attack! (if the gv.player is still alive.)
+            #close enough, attack! (if the player is still alive.)
             elif gv.player.hp > 0:
                 monster.attack(gv.player)
     

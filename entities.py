@@ -33,7 +33,10 @@ class GameObject:
         '''return the distance to another object'''
         dx = other.x - self.x
         dy = other.y - self.y
-        return math.sqrt(dx ** 2 + dy ** 2) 
+        return math.sqrt(dx ** 2 + dy ** 2)
+    def distance_to_coord(self, x, y):
+        ''' return the distance to some coordinates '''
+        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2) 
     def send_to_back(self):
         '''make this object be drawn first, so all others appear above it if they're in the same tile.'''
         gv.gameobjects.remove(self)
