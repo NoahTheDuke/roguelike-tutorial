@@ -10,7 +10,8 @@ class GameMap(Map):
     def __init__(self, width, height,rooms=[]):
         super().__init__(width, height)
         self.rooms = rooms
-        self.explored = [[False for y in range(height)] for x in range(width)]
+        self.explored = [[False for y in range(height)] for x in range(width)] # This loops through a list of range (width), for every step looping through a list of range (height), filling every index with a False value. Eg: [[False,False],[False,False]]
+        self.gibbed = [[False for y in range(height)] for x in range(width)]
 
 class Rect:
     ''' a rectangle on the map. used to characterize a room. '''
@@ -51,6 +52,12 @@ def create_v_tunnel(y1, y2, x):
     for y in range(min(y1, y2), max(y1, y2) + 1):
         gv.game_map.walkable[x,y] = True
         gv.game_map.transparent[x,y] = True
+
+def ran_room_pos(room):
+    '''returns a random position within a room for an object'''
+    x = randint(room.x1+1, room.x2-1)
+    y = randint(room.y1+1, room.y2-1)
+    return (x,y)
 
 def make_map():
     ''' Sets up the game's map '''

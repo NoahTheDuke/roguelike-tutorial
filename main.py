@@ -12,7 +12,8 @@ from map_util import GameMap,make_map
 from render_util import render_all, fov_recompute
 from gui_util import message, menu
 from entities import Player, Cursor
-from generators import place_objects
+from generators.gen_monsters import gen_monsters,gen_Player
+from generators.gen_items import gen_items, gen_inventory
 from target_util import look_at_ground
 
 def initialize_window():
@@ -62,15 +63,20 @@ def new_game():
 
     # create the player & cursor
     player_stats = (30,2,5) # hp/defense/power
-    gv.player = Player(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, stats=player_stats,blocks=True)
+    gv.player = gen_Player(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH))
+    #Player(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, stats=player_stats,blocks=True)
     gv.cursor = Cursor(0,0)
+
+    # setup an initial inventory
+    gen_inventory()
 
     # create the map
     gv.game_map = GameMap(settings.MAP_WIDTH,settings.MAP_HEIGHT)
     make_map()
     
-    # place objects in the map
-    place_objects()
+    # fill the map with content
+    gen_monsters()
+    gen_items()
 
     # initialize FOV
     fov_recompute()
@@ -104,16 +110,8 @@ def main_loop():
                 gv.player.is_active = False
             else:              
                 if not gv.player.is_dead:
-                    process_input(player_action)
+                    process_input(player_action) 
                 
-                if gv.cursor.is_active:
-                    look_at_ground()
-                
-                #TODO: Get targeting to work
-                #IDEA: suspend all input processing above, while is_targeting
-                # if gv.player.is_targeting:
-                #     target_tile()
-
                 #AI takes turn, if player is not considered inactive
                 if gv.player.is_active:
                     for obj in gv.actors:

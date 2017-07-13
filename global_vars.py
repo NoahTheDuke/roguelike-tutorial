@@ -3,7 +3,7 @@
 gameobjects = []
 actors = []
 game_msgs = []
-inventory = []
+inventory = []  # TODO: Make this a class variable of the Fighter class
 player = None
 game_map = None
 cursor = None

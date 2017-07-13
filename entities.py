@@ -1,13 +1,16 @@
 ''' Code related to entitity creation '''
 # TODO: split item-related code into own module
 
+import math
+from random import randint
+
 import settings
 import colors
 import global_vars as gv
-import math
 import item_use as iu
 from gui_util import message
 from render_util import fov_recompute
+from target_util import look_at_ground
 
 class GameObject:
     ''' Main class of game objects'''
@@ -62,6 +65,7 @@ class Cursor(GameObject):
         if gv.game_map.fov[self.x + dx,self.y + dy]:
             self.x += dx
             self.y += dy
+            look_at_ground(self.x,self.y)
     
     def draw(self,con):
         ''' Draw the object '''
@@ -84,12 +88,12 @@ class Cursor(GameObject):
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
-    def __init__(self, x, y,name,char,color,stats=(0,0,0),blocks=False, ai=None,is_player = False):
+    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False, ai=None,is_player = False):
         GameObject.__init__(self, x, y,name,char,color,blocks=True)
-        self.hp, self.defense, self.power = stats
-        self.max_hp = self.hp
-        self.max_defense = self.defense
-        self.max_power = self.power
+        self.hp, self.power, self.defense = hp, pwr, df
+        self.max_hp = hp
+        self.max_power = pwr
+        self.max_defense = df
         self.is_player = is_player
     
         self.ai = ai #let the AI component know who owns it
@@ -130,12 +134,19 @@ class Fighter(GameObject):
         message('The ' + self.name.capitalize() + ' is dead!',colors.green)
         item = Item(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,iu.eat_corpse,self.name)
         item.send_to_back()
+        for i in range(1,randint(1,5)):
+            x,y = (randint(self.x-2, self.x+2),randint(self.y-2, self.y+2))
+            if randint(0,100) < 40:
+                item = Item(x,y,(self.name + ' bits'), '~', colors.darker_red,iu.eat_corpse,self.name)
+                item.send_to_back()
+            else:
+                gv.game_map.gibbed[x][y] = True
         self.delete()
 
 class Player(Fighter):
     ''' Class for the player object '''
-    def __init__(self, x, y,name,char, color,stats=(30,2,5), blocks=True):
-        Fighter.__init__(self, x, y,name,char,color,stats,blocks,is_player=True)
+    def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2):
+        Fighter.__init__(self, x, y,name,char,color,hp=hp,pwr=pwr,df=df,is_player=True)
         self.is_running = False
         self.is_looking = False
         self.is_targeting = False
@@ -161,6 +172,7 @@ class Player(Fighter):
                 self.y += dy
                 if not self.ai: #if player has moved, recalculate FOV | NOTE: This should be eventually moved elsewhere
                     fov_recompute()
+                    look_at_ground(self.x,self.y)
                 
                 # if entity is running, re-call the move function once
                 if (running):
@@ -189,16 +201,22 @@ class Player(Fighter):
         #for added effect, transform the gv.player into a corpse!
         gv.player.char = '%'
         gv.player.color = colors.dark_red
+        for i in range(1,randint(1,5)):
+            x,y = (randint(self.x-2, self.x+2),randint(self.y-2, self.y+2))
+            if randint(0,100) < 40:
+                item = Item(x,y,(self.name + ' bits'), '~', colors.darker_red,iu.eat_corpse,self.name)
+                item.send_to_back()
+            else:
+                gv.game_map.gibbed[x][y] = True
 
         self.is_dead = True
 
 class Item(GameObject):
     '''an item that can be picked up and used.'''
-    def __init__(self, x, y,name,char, color, use_function=None,param1=None,param2=None):
+    def __init__(self, x, y,name,char, color, use_function=None,params=None):
         GameObject.__init__(self, x, y,name,char, color,blocks=False,item=True)
         self.use_function = use_function
-        self.param1 = param1
-        self.param2 = param2
+        self.params = params
     def pick_up(self):
         '''add to the gv.player's gv.inventory and remove from the map'''
         if len(gv.inventory) >= 26:
@@ -212,7 +230,7 @@ class Item(GameObject):
         if self.use_function is None:
             message('The ' + self.name + ' cannot be used.')
         else:
-            if self.use_function(p1=self.param1,p2=self.param2) != 'cancelled': #the use_function is called and unless it isn't cancelled, True is returned
+            if self.use_function(params = self.params) != 'cancelled': #the use_function is called and unless it isn't cancelled, True is returned
                 gv.inventory.remove(self)  #destroy after use, unless it was cancelled for some reason
 
     def drop(self):

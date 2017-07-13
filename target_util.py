@@ -9,9 +9,9 @@ from gui_util import message
 from input_util import handle_keys,process_input
 from render_util import render_all
 
-def look_at_ground():
+def look_at_ground(x,y):
     # check if there's an object at the current position, excluding the cursor
-    spotted = [obj.name for obj in gv.gameobjects if ([obj.x,obj.y] == [gv.cursor.x,gv.cursor.y] and not obj == gv.cursor)]
+    spotted = [obj.name for obj in gv.gameobjects if ([obj.x,obj.y] == [x,y] and not obj == gv.cursor and not obj == gv.player)]
     if len(spotted) > 0:    # if more than one object is present, output the names as a message
          message('You see: ' + (', '.join(spotted)))
 

@@ -19,10 +19,15 @@ def render_all():
                         con.draw_char(x, y,'.', fg=colors.grey, bg=colors.darkest_grey)
             else:
                 #it's visible
-                if wall:
-                    con.draw_char(x, y,'#', fg=colors.white, bg=colors.black)
+                if gv.game_map.gibbed[x][y]:
+                    fgcolor = colors.red
                 else:
-                    con.draw_char(x, y,'.', fg=colors.white, bg=colors.black)
+                    fgcolor = colors.white
+                
+                if wall:
+                    con.draw_char(x, y,'#', fg=fgcolor, bg=colors.black)
+                else:
+                    con.draw_char(x, y,'.', fg=fgcolor, bg=colors.black)
                 gv.game_map.explored[x][y] = True
     for obj in gv.gameobjects:
         if gv.game_map.fov[obj.x,obj.y]:

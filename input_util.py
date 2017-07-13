@@ -134,5 +134,5 @@ def process_input(action):
     
     # elif 'confirm' in action:
     #     if gv.player.is_targeting:
-    #         return {'target':(gv.cursor.x,gv.cursor.y)}
+    #         gv.player.fire_weapon(gv.cursor.x,gv.cursor.y)
     #     gv.player.is_active = False

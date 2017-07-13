@@ -8,21 +8,19 @@ from gui_util import message
 from target_util import target_tile
 from ai_util import ConfusedMonster
 
-def cast_heal(p1=0,p2=None,**kwargs):
+def cast_heal(params=0):
     '''heal the player'''
-    hp = p1
-    range = p2
-    if range == None:
-        if gv.player.hp == gv.player.max_hp:
-            message('You are already at full health.', colors.red)
-            return 'cancelled'
+    hp = params
+    if gv.player.hp == gv.player.max_hp:
+        message('You are already at full health.', colors.red)
+        return 'cancelled'
 
-        message('Your wounds start to feel better!', colors.light_violet)
-        gv.player.heal(hp)
+    message('Your wounds start to feel better!', colors.light_violet)
+    gv.player.heal(hp)
 
-def cast_powerup(p1=0,**kwargs):
+def cast_powerup(params=0):
     '''modify characters power'''
-    pwr = p1
+    pwr = params
     if (pwr > 0):
         message('Your power has been increased!', colors.light_violet)
     else:
@@ -30,10 +28,9 @@ def cast_powerup(p1=0,**kwargs):
 
     gv.player.modpwr(pwr)
 
-def cast_lightning(p1=0,p2=0):
+def cast_lightning(params=(0,0)):
     '''zap something'''
-    pwr = p1
-    range = p2
+    pwr,range = params
     #find closest enemy (inside a maximum range) and damage it
     if range == 0:
         monster = gv.player
@@ -50,10 +47,9 @@ def cast_lightning(p1=0,p2=0):
         + str(pwr) + ' hit points.', colors.light_blue)
     monster.take_damage(pwr)
 
-def cast_confusion(p1=5,p2=10,**kwargs):
+def cast_confusion(params = (5,10)):
     '''find closest enemy in-range and confuse it''' #TODO: Make confused monster attack random monsters
-    range = p1
-    dur = p2
+    range,dur = params
     monster = None
     if (range > 0):
         monster = closest_monster(range)
@@ -70,10 +66,9 @@ def cast_confusion(p1=5,p2=10,**kwargs):
         monster.ai.owner = monster  #tell the new component who owns it
         message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!', colors.light_green)
 
-def cast_fireball(p1=10,p2=10):
+def cast_fireball(params = (10,10)):
     '''ask the player for a target tile to throw a fireball at'''
-    dmg = p1
-    radius = p2
+    dmg,radius = params
     target = target_tile()
     if target is None:
         message('Your spell fizzles.')
@@ -85,8 +80,8 @@ def cast_fireball(p1=10,p2=10):
                 message('The ' + obj.name + ' gets burned for ' + str(dmg) + ' hit points.', colors.orange)
                 obj.take_damage(dmg)
 
-def eat_corpse(p1='',**kwargs):
-    message('You eat the corpse of a ' + p1 + '. It is disgusting!')
+def eat_corpse(params = ''):
+    message('You eat the corpse of a ' + params + '. It is disgusting!')
 
 def closest_monster(max_range):
     '''find closest enemy, up to a maximum range, and in the gv.player's FOV'''
