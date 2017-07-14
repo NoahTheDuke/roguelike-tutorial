@@ -66,6 +66,9 @@ def handle_keys(user_input):
     elif user_input.text == 'd':
         return {'inventory':'drop'}
 
+    elif user_input.text == 'e':
+        return {'inventory':'equip'}
+
     elif user_input.text == 'x':
         return {'inventory':'examine'}
 
@@ -134,7 +137,8 @@ def process_input(action):
         if chosen_item is not None: #if an item was selected, call it's use or drop function
             if (action['inventory'] == 'use'):
                 chosen_item.use()
-                gv.player.is_active = True
+            elif (action['inventory'] == 'equip'):
+                chosen_item.equip()
             elif (action['inventory'] == 'drop'):
                 chosen_item.drop()
             elif (action['inventory'] == 'examine'):

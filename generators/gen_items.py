@@ -9,7 +9,7 @@ import colors
 import global_vars as gv
 
 import item_use as iu
-from classes.items import Item
+from classes.items import Useable,Equipment
 
 def gen_items():
     '''creates a new item at the given position'''
@@ -53,7 +53,7 @@ def gen_P_Heal(x,y):
     pwr = randint(6,10)
     on_use = iu.cast_heal
 
-    i = Item(x,y, name, symbol, color,use_function=on_use,params=pwr)
+    i = Useable(x,y, name, symbol, color,use_function=on_use,params=pwr)
     i.send_to_back()
     return i
 
@@ -69,7 +69,7 @@ def gen_P_Power(x,y):
         pwr = -1
     on_use = iu.cast_powerup
 
-    i = Item(x,y, name, symbol, color,use_function=on_use,params=pwr)
+    i = Useable(x,y, name, symbol, color,use_function=on_use,params=pwr)
     i.send_to_back()
     return i
 

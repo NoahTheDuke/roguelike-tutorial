@@ -13,7 +13,7 @@ from gui_util import message
 from render_util import fov_recompute
 
 from classes.objects import GameObject
-from classes.items import Item
+from classes.items import Useable
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
@@ -67,12 +67,12 @@ class Monster(Fighter):
     def death(self):
         ''' death for monster characters '''
         message('The ' + self.name.capitalize() + ' is dead!',colors.green)
-        item = Item(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,iu.eat_corpse,self.name)
+        item = Useable(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,use_function=iu.eat_corpse,params=self.name)
         item.send_to_back()
         for i in range(1,randint(1,5)):
             x,y = (randint(self.x-2, self.x+2),randint(self.y-2, self.y+2))
             if randint(0,100) < 40:
-                item = Item(x,y,(self.name + ' bits'), '~', colors.darker_red,iu.eat_corpse,self.name)
+                item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,use_function=iu.eat_corpse,params=self.name)
                 item.send_to_back()
             else:
                 gv.game_map.gibbed[x][y] = True
@@ -137,7 +137,7 @@ class Player(Fighter):
         for i in range(1,randint(1,5)):
             x,y = (randint(self.x-2, self.x+2),randint(self.y-2, self.y+2))
             if randint(0,100) < 40:
-                item = Item(x,y,(self.name + ' bits'), '~', colors.darker_red,iu.eat_corpse,self.name)
+                item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,iu.eat_corpse,self.name)
                 item.send_to_back()
             else:
                 gv.game_map.gibbed[x][y] = True

@@ -74,6 +74,9 @@ def gen_map(width,height):
                     gv.game_map.create_v_tunnel(prev_y, new_y, prev_x)
                     gv.game_map.create_h_tunnel(prev_x, new_x, new_y)
 
+                    # create a diagonal tunnel
+                    # gv.game_map.create_d_tunnel((prev_x,prev_y),(new_x,new_y))
+
             #append the new room to the list
             rooms.append(new_room)
             num_rooms += 1
@@ -81,6 +84,7 @@ def gen_map(width,height):
     gv.game_map.rooms = rooms
 
 def gen_map_content():
+    ''' fills the map with content '''
     
     rooms = gv.game_map.rooms
     
