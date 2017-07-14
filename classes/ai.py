@@ -23,29 +23,19 @@ class BasicMonster:
             #close enough, attack! (if the player is still alive.)
             elif gv.player.hp > 0:
                 monster.attack(gv.player)
+            
+            # 25% chance to produce a sound
+            if randint(0,100) > 75:
+                self.blurb()
     
     def move(self, dx, dy):
         ''' Move the monster, after checking if the target space is legitimate '''
 
         x,y = self.owner.x, self.owner.y
         if gv.game_map.walkable[x+dx,y+dy]:
-            check = True
-            for obj in gv.gameobjects:
-                target = None
-                if [obj.x,obj.y] == [x+dx,y+dy] and obj.blocks:  # check if there is something in the way
-                    check = False
-                    if obj.is_player:                         # if it's the player, target him
-                        target = obj
-                    break
-            if check and target == None:
+            if sum([obj.x,obj.y] == [x+dx,y+dy] for obj in gv.actors)==0:
                 self.owner.x += dx
                 self.owner.y += dy
-
-            # if blocking object is an enemy target
-            elif not check and target:
-                self.attack(target)
-        
-        self.blurb()
 
     def move_towards(self, target):
         ''' Move Gameobject towards intended target '''
@@ -58,13 +48,13 @@ class BasicMonster:
         #convert to integer so the movement is restricted to the map grid
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
+        
         self.move(dx, dy)
     
     def blurb(self):
         ''' make some sounds '''
         if not self.owner.blurbs == None:
-            if randint(0,100) > 75:
-                message(random.choice(self.owner.blurbs),colors.lightest_grey)
+            message(random.choice(self.owner.blurbs),colors.lightest_grey)
 
 class ConfusedMonster:
     '''AI for a confused monster'''

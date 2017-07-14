@@ -5,26 +5,22 @@
 import tdl
 from tcod import image_load
 from random import randint
-
 # Constants and global varialbes
 import colors
-import settings
 import global_vars as gv
-
-# Game-related modules
-from input_util import handle_keys, process_input
-from map_util import GameMap,make_map
-from render_util import render_all, fov_recompute
-from gui_util import message, menu
-from target_util import look_at_ground
-
+import settings
+from classes.actors import Player
 # Classes
 from classes.objects import Cursor
-from classes.actors import Player
-
 # Generators
-from generators.gen_actors import gen_monsters,gen_Player
-from generators.gen_items import gen_items, gen_inventory
+from generators.gen_actors import gen_monsters, gen_Player
+from generators.gen_items import gen_inventory, gen_items
+from gui_util import menu, message
+# Game-related modules
+from input_util import handle_keys, process_input
+from map_util import GameMap, make_map
+from render_util import fov_recompute, render_all
+from target_util import look_at_ground
 
 def initialize_window():
     ''' initializes & launches the game '''
