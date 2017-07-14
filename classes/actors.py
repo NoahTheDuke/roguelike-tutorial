@@ -19,7 +19,7 @@ from classes.items import Item
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
     def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False,is_player = False):
-        GameObject.__init__(self, x, y,name,char,color,blocks=True)
+        super().__init__(x, y,name,char,color,blocks=True)
         self.hp, self.power, self.defense = hp, pwr, df
         self.max_hp = hp
         self.max_power = pwr
@@ -59,7 +59,7 @@ class Fighter(GameObject):
 class Monster(Fighter):
     ''' base-class for all hostile mobs '''
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2,ai=None,blurbs=None):
-        Fighter.__init__(self, x, y,name,char,color,hp=hp,pwr=pwr,df=df,is_player=False)
+        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df,is_player=False)
 
         self.blurbs = blurbs
         self.ai = ai
@@ -83,7 +83,7 @@ class Monster(Fighter):
 class Player(Fighter):
     ''' Class for the player object '''
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2):
-        Fighter.__init__(self, x, y,name,char,color,hp=hp,pwr=pwr,df=df,is_player=True)
+        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df,is_player=True)
         self.is_running = False
         self.is_looking = False
         self.is_targeting = False

@@ -56,7 +56,7 @@ class GameObject:
 class Cursor(GameObject):
     '''cursor object '''
     def __init__(self, x, y):
-        GameObject.__init__(self, x, y,'cursor',None,None)
+        super().__init__(x, y,'cursor',None,None)
         self.is_active = False
 
     def move (self,dx,dy):

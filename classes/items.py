@@ -15,7 +15,7 @@ from gui_util import message
 class Item(GameObject):
     '''an item that can be picked up and used.'''
     def __init__(self, x, y,name,char, color, use_function=None,params=None):
-        GameObject.__init__(self, x, y,name,char, color,blocks=False,item=True)
+        super().__init__(x, y,name,char, color,blocks=False,item=True)
         self.use_function = use_function
         self.params = params
     def pick_up(self):
