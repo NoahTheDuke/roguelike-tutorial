@@ -93,7 +93,7 @@ def main_loop():
                     look_at_ground(gv.player.x,gv.player.y) # check ground for stuff
                     #AI takes turn, if player is not considered inactive
                     for obj in gv.actors:
-                        if not obj.is_player and gv.game_map.fov[obj.x, obj.y]:
+                        if gv.game_map.fov[obj.x, obj.y] and (not obj == gv.player):
                             obj.ai.take_turn()
 
 if __name__ == '__main__':

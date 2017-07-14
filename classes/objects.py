@@ -34,21 +34,30 @@ class GameObject:
         ''' Returns the x,y coordinates of the object '''
         return (self.x,self.y)
 
+    def is_player(self):
+        ''' returns true if the object is the player '''
+        return (self == gv.player)
+
     def distance_to(self, other):
         '''return the distance to another object'''
         dx = other.x - self.x
         dy = other.y - self.y
         return math.sqrt(dx ** 2 + dy ** 2)
+
     def distance_to_coord(self, x, y):
         ''' return the distance to some coordinates '''
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2) 
+    
     def send_to_back(self):
         '''make this object be drawn first, so all others appear above it if they're in the same tile.'''
         gv.gameobjects.remove(self)
         gv.gameobjects.insert(0, self)
+    
     def send_to_front(self):
+        '''make this object be drawn last, so it appears above all others'''
         gv.gameobjects.remove(self)
         gv.gameobjects.insert(len(gv.gameobjects), self)
+    
     def delete(self):
         '''remove the object from the game'''
         if self in gv.gameobjects:

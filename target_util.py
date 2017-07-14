@@ -19,12 +19,11 @@ def look_at_ground(x,y):
 def target_tile():
     '''Display a targeting cursor'''
     message('Select a target by moving your cursor. Enter to confirm the target, any other key to cancel.')
-    if not gv.player.is_targeting:
-        #message('You begin targeting.')
+    if not gv.player.is_targeting:  # If the player-state is not yet targeting, enable it and create the cursor
         gv.player.is_active = False
         gv.player.is_targeting = True
         gv.cursor.activate('X',colors.red)
-    while gv.player.is_targeting:
+    while gv.player.is_targeting: # While the player is considered targeting, suspend game-play to control the cursor and get a target
         render_all()
         tdl.flush()
         player_action = handle_keys(tdl.event.key_wait())

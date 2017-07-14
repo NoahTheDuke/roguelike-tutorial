@@ -4,11 +4,6 @@ import colors
 import global_vars as gv
 
 from gui_util import message, inventory_menu
-#from map_util import make_map
-# Generators
-#from generators.gen_game import gen_map
-#from generators.gen_actors import gen_monsters, gen_Player
-#from generators.gen_items import gen_inventory, gen_items
 
 def handle_keys(user_input):
     ''' Handles all key input made by the player '''

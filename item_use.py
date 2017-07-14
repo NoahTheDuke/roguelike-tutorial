@@ -91,7 +91,7 @@ def closest_monster(max_range):
     closest_dist = max_range + 1  #start with (slightly more than) maximum range
  
     for obj in gv.actors:
-        if not obj.is_player and gv.game_map.fov[obj.x, obj.y]:
+        if gv.game_map.fov[obj.x, obj.y] and (not obj == gv.player):
             #calculate distance between this object and the gv.player
             dist = gv.player.distance_to(obj)
             if dist < closest_dist:  #it's closer, so remember it

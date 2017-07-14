@@ -88,13 +88,12 @@ class Cursor(GameObject):
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
-    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False, ai=None,is_player = False):
+    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False, ai=None):
         GameObject.__init__(self, x, y,name,char,color,blocks=True)
         self.hp, self.power, self.defense = hp, pwr, df
         self.max_hp = hp
         self.max_power = pwr
         self.max_defense = df
-        self.is_player = is_player
     
         self.ai = ai #let the AI component know who owns it
         if self.ai:  
@@ -146,7 +145,7 @@ class Fighter(GameObject):
 class Player(Fighter):
     ''' Class for the player object '''
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2):
-        Fighter.__init__(self, x, y,name,char,color,hp=hp,pwr=pwr,df=df,is_player=True)
+        Fighter.__init__(self, x, y,name,char,color,hp=hp,pwr=pwr,df=df)
         self.is_running = False
         self.is_looking = False
         self.is_targeting = False
@@ -164,7 +163,7 @@ class Player(Fighter):
                 target = None
                 if [obj.x,obj.y] == [self.x+dx,self.y+dy] and obj.blocks:  # check if there is something in the way
                     check = False
-                    if obj in gv.actors and not obj.is_player:                         # if it's another actor, target it
+                    if obj in gv.actors  and (not obj == gv.player):                         # if it's another actor, target it
                         target = obj
                     break
             if check and target == None:

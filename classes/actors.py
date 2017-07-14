@@ -17,13 +17,12 @@ from classes.items import Item
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
-    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False,is_player = False):
+    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False):
         super().__init__(x, y,name,char,color,blocks=True)
         self.hp, self.power, self.defense = hp, pwr, df
         self.max_hp = hp
         self.max_power = pwr
         self.max_defense = df
-        self.is_player = is_player
     
         gv.actors.append(self)
 
@@ -58,7 +57,7 @@ class Fighter(GameObject):
 class Monster(Fighter):
     ''' base-class for all hostile mobs '''
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2,ai=None,blurbs=None):
-        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df,is_player=False)
+        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
 
         self.blurbs = blurbs
         self.ai = ai
@@ -82,7 +81,7 @@ class Monster(Fighter):
 class Player(Fighter):
     ''' Class for the player object '''
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2):
-        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df,is_player=True)
+        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
         self.is_running = False
         self.is_looking = False
         self.is_targeting = False
@@ -100,7 +99,7 @@ class Player(Fighter):
                 target = None
                 if [obj.x,obj.y] == [self.x+dx,self.y+dy] and obj.blocks:  # check if there is something in the way
                     check = False
-                    if obj in gv.actors and not obj.is_player:                         # if it's another actor, target it
+                    if obj in gv.actors  and (not obj == gv.player):                         # if it's another actor, target it
                         target = obj
                     break
             if check and target == None:
