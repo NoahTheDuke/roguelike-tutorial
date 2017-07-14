@@ -62,6 +62,9 @@ def handle_keys(user_input):
     elif user_input.text == 'd':
         return {'inventory':'drop'}
 
+    elif user_input.text == 'x':
+        return {'inventory':'examine'}
+
     # other
     elif user_input.key in ['ENTER','KPENTER']:
         return 'confirm'

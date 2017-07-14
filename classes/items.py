@@ -41,3 +41,8 @@ class Item(GameObject):
         self.x = gv.player.x
         self.y = gv.player.y
         message('You dropped a ' + self.name + '.', colors.yellow)
+
+    def examine(self):
+        '''examines the given'''
+        # TODO: Pass description from generator; possibly open small menu instead of message to display longer texts
+        message('This is a ' + self.name + '.')
