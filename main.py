@@ -23,7 +23,7 @@ from classes.objects import Cursor
 from classes.actors import Player
 
 # Generators
-from generators.gen_monsters import gen_monsters,gen_Player
+from generators.gen_actors import gen_monsters,gen_Player
 from generators.gen_items import gen_items, gen_inventory
 
 def initialize_window():
@@ -125,7 +125,7 @@ def main_loop():
                 #AI takes turn, if player is not considered inactive
                 if gv.player.is_active:
                     for obj in gv.actors:
-                        if obj.ai and gv.game_map.fov[obj.x, obj.y]:
+                        if not obj.is_player and gv.game_map.fov[obj.x, obj.y]:
                             obj.ai.take_turn()
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 ''' All AI-related classes '''
 
 import math
+import random
 from random import randint
 
 import colors
@@ -9,6 +10,7 @@ from gui_util import message
 
 class BasicMonster:
     '''AI for a basic monster.'''
+
     def take_turn(self):
         '''let the monster take a turn'''
         monster = self.owner
@@ -42,6 +44,8 @@ class BasicMonster:
             # if blocking object is an enemy target
             elif not check and target:
                 self.attack(target)
+        
+        self.blurb()
 
     def move_towards(self, target):
         ''' Move Gameobject towards intended target '''
@@ -55,6 +59,12 @@ class BasicMonster:
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
         self.move(dx, dy)
+    
+    def blurb(self):
+        ''' make some sounds '''
+        if not self.owner.blurbs == None:
+            if randint(0,100) > 75:
+                message(random.choice(self.owner.blurbs),colors.lightest_grey)
 
 class ConfusedMonster:
     '''AI for a confused monster'''

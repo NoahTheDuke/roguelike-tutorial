@@ -9,15 +9,16 @@ import colors
 import global_vars as gv
 
 import item_use as iu
-from classes.objects import GameObject
-from classes.items import Item
 from gui_util import message
 from render_util import fov_recompute
 from target_util import look_at_ground
 
+from classes.objects import GameObject
+from classes.items import Item
+
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
-    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False, ai=None,is_player = False):
+    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False,is_player = False):
         GameObject.__init__(self, x, y,name,char,color,blocks=True)
         self.hp, self.power, self.defense = hp, pwr, df
         self.max_hp = hp
@@ -25,10 +26,6 @@ class Fighter(GameObject):
         self.max_defense = df
         self.is_player = is_player
     
-        self.ai = ai #let the AI component know who owns it
-        if self.ai:  
-            self.ai.owner = self
-        
         gv.actors.append(self)
 
     def take_damage(self, damage):
@@ -58,8 +55,19 @@ class Fighter(GameObject):
         self.power += amount
         if self.power == 1:
             self.power = 1
-    
+
+class Monster(Fighter):
+    ''' base-class for all hostile mobs '''
+    def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2,ai=None,blurbs=None):
+        Fighter.__init__(self, x, y,name,char,color,hp=hp,pwr=pwr,df=df,is_player=False)
+
+        self.blurbs = blurbs
+        self.ai = ai
+        if self.ai: #let the AI component know who owns it
+            self.ai.owner = self
+
     def death(self):
+        ''' death for monster characters '''
         message('The ' + self.name.capitalize() + ' is dead!',colors.green)
         item = Item(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,iu.eat_corpse,self.name)
         item.send_to_back()
@@ -99,9 +107,8 @@ class Player(Fighter):
             if check and target == None:
                 self.x += dx
                 self.y += dy
-                if not self.ai: #if player has moved, recalculate FOV | NOTE: This should be eventually moved elsewhere
-                    fov_recompute()
-                    look_at_ground(self.x,self.y)
+                fov_recompute()
+                look_at_ground(self.x,self.y)
                 
                 # if entity is running, re-call the move function once
                 if (running):
