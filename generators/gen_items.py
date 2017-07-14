@@ -10,7 +10,7 @@ import global_vars as gv
 
 import item_use as iu
 from classes.items import Item
-from common import ran_room_pos
+from map_util import ran_room_pos
 
 def gen_items():
     '''creates a new item at the given position'''

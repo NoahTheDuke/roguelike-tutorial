@@ -5,20 +5,18 @@
 import tdl
 from tcod import image_load
 from random import randint
+
 # Constants and global varialbes
 import colors
 import global_vars as gv
 import settings
-from classes.actors import Player
-# Classes
-from classes.objects import Cursor
-from gui_util import menu, message
+
 # Generators
-from generators.gen_actors import gen_monsters, gen_Player
-from generators.gen_items import gen_inventory, gen_items
+from generators.gen_game import gen_game
+
 # Game-related modules
+from gui_util import menu, message
 from input_util import handle_keys, process_input
-from map_util import GameMap, make_map
 from render_util import fov_recompute, render_all
 from target_util import look_at_ground
 
@@ -32,6 +30,9 @@ def initialize_window():
     gv.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
     gv.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
     gv.panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
+
+    # begin the main game loop
+    tdl.setFPS(settings.LIMIT_FPS)
 
     main_menu()
 
@@ -55,50 +56,17 @@ def main_menu():
         choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
  
         if choice == 0:  #new game
-            new_game()
+            gen_game()
+            main_loop()
         elif choice == 2:  #quit
             break
-
-def new_game():
-    ''' sets up a new game '''
-    # reset other global variables
-    gv.gameobjects = []
-    gv.actors = []
-    gv.game_msgs = []
-    gv.inventory = []
-    gv.cursor = Cursor(0,0)
-
-    # create the player & cursor
-    gv.player = gen_Player(0,0)
-    gv.cursor = Cursor(0,0)
-
-    # create the map
-    gv.game_map = GameMap(settings.MAP_WIDTH,settings.MAP_HEIGHT)
-    make_map()
-
-    # fill the map with content
-    gen_monsters()
-    gen_items()
-
-    # setup an initial inventory
-    gen_inventory()
-
-    # initialize FOV
-    fov_recompute()
-    
-    # clear the old console
-    gv.con.clear()
-    
-    # a warm welcoming message!
-    message('Welcome stranger! Prepare to perish in the Tombs of the Ancient Kings.', colors.red)
-    
-    # begin the main game loop
-    tdl.setFPS(settings.LIMIT_FPS)
-    main_loop()
 
 def main_loop():
     ''' begin main game loop '''
     while not tdl.event.is_window_closed():
+        if gv.stairs_down.descended:
+            gen_game(newgame=False)
+
         render_all()
         tdl.flush()
         for obj in gv.gameobjects:
@@ -123,7 +91,6 @@ def main_loop():
                 # If player has done an active turn
                 if gv.player.is_active:
                     look_at_ground(gv.player.x,gv.player.y) # check ground for stuff
-
                     #AI takes turn, if player is not considered inactive
                     for obj in gv.actors:
                         if not obj.is_player and gv.game_map.fov[obj.x, obj.y]:

@@ -1,9 +1,11 @@
 ''' look and targeting related functions '''
 
 import tdl
+
 import settings
 import colors
 import global_vars as gv
+
 from gui_util import message
 from input_util import handle_keys,process_input
 from render_util import render_all

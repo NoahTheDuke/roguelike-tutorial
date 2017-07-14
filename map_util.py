@@ -9,17 +9,6 @@ from tdl.map import Map
 import global_vars as gv
 import settings
 
-# Other game-modules
-from common import ran_room_pos
-
-# Classes
-from classes.objects import Stairs
-
-# Generators
-# from generators.gen_actors import gen_monsters, gen_Player
-# from generators.gen_items import gen_inventory, gen_items
-
-
 class GameMap(Map):
     ''' the basic game map '''
     def __init__(self, width, height,rooms=[]):
@@ -68,68 +57,11 @@ def create_v_tunnel(y1, y2, x):
         gv.game_map.walkable[x,y] = True
         gv.game_map.transparent[x,y] = True
 
-def make_map():
-    ''' Sets up the game's map '''
-
-    rooms = []
-    num_rooms = 0
- 
-    for r in range(settings.MAX_ROOMS):
-        #random width and height
-        w = randint(settings.ROOM_MIN_SIZE, settings.ROOM_MAX_SIZE)
-        h = randint(settings.ROOM_MIN_SIZE, settings.ROOM_MAX_SIZE)
-        #random position without going out of the boundaries of the map
-        x = randint(0, settings.MAP_WIDTH-w-1)
-        y = randint(0, settings.MAP_HEIGHT-h-1)
-
-        #"Rect" class makes rectangles easier to work with
-        new_room = Rect(x, y, w, h)
- 
-        #run through the other rooms and see if they intersect with this one
-        failed = False
-        for other_room in rooms:
-            if new_room.intersect(other_room):
-                failed = True
-                break
-        if not failed:
-            #this means there are no intersections, so this room is valid
-
-            #"paint" it to the map's tiles
-            create_room(new_room)
-
-            #center coordinates of new room, will be useful later
-            (new_x, new_y) = new_room.center()
-
-            if num_rooms == 0:
-                #this is the first room, where the player starts at
-                gv.player.x,gv.player.y = new_x,new_y
-
-                gv.stairs_up = Stairs(new_x,new_y,False)
-            else:
-                #all rooms after the first:
-                #connect it to the previous room with a tunnel
-
-                #center coordinates of previous room
-                (prev_x, prev_y) = rooms[num_rooms-1].center()
-
-                #toss a coin (random number that is either 0 or 1)
-                if randint(0, 1):
-                    #first move horizontally, then vertically
-                    create_h_tunnel(prev_x, new_x, prev_y)
-                    create_v_tunnel(prev_y, new_y, new_x)
-                else:
-                    #first move vertically, then horizontally
-                    create_v_tunnel(prev_y, new_y, prev_x)
-                    create_h_tunnel(prev_x, new_x, new_y)
-
-            #append the new room to the list
-            rooms.append(new_room)
-            num_rooms += 1
-    
-    # Create downward stairs in a random room
-    x,y = ran_room_pos(ranchoice(rooms))
-    while ((x,y) == gv.stairs_up.pos()):
-        x,y = ran_room_pos(ranchoice(rooms))
-    gv.stairs_down = Stairs(x,y)
-
-    gv.game_map.rooms = rooms
+def ran_room_pos(room):
+    '''returns a random, walkable position within a room for an object'''
+    x = randint(room.x1+1, room.x2-1)
+    y = randint(room.y1+1, room.y2-1)
+    while not gv.game_map.walkable[x,y]:
+        x = randint(room.x1+1, room.x2-1)
+        y = randint(room.y1+1, room.y2-1)
+    return (x,y)

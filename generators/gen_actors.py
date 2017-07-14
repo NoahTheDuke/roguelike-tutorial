@@ -10,7 +10,7 @@ import global_vars as gv
 
 from classes.actors import Monster,Player
 from classes.ai import BasicMonster
-from common import ran_room_pos
+from map_util import ran_room_pos
 
 def gen_monsters():
     '''creates a new monster at the given position'''

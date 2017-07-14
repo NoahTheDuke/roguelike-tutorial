@@ -94,6 +94,7 @@ class Stairs(GameObject):
         if down:
             name = 'downward stairs'
             char = '<'
+            self.descended = False
         else:
             name = 'upward stairs'
             char = '>'

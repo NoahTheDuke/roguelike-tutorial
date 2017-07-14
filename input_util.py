@@ -4,8 +4,9 @@ import colors
 import global_vars as gv
 
 from gui_util import message, inventory_menu
-from map_util import make_map
+#from map_util import make_map
 # Generators
+#from generators.gen_game import gen_map
 #from generators.gen_actors import gen_monsters, gen_Player
 #from generators.gen_items import gen_inventory, gen_items
 
@@ -148,6 +149,7 @@ def process_input(action):
     elif 'stairs' in action:
         if (action['stairs'] == '<' and gv.player.pos() == gv.stairs_down.pos()):
             message('You descend further into the dark abyss.')
+            gv.stairs_down.descended = True
         elif (action['stairs'] == '>' and gv.player.pos() == gv.stairs_up.pos()):
             message('A heavy trap door has fallen shut on the stairs. You can only go further down.')
         else:
