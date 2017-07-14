@@ -20,6 +20,8 @@ class Item(GameObject):
         self.description = description
         if description == None:
             print(str(self) + ' lacks a description!')
+        
+        self.send_to_back()
     
     def pick_up(self):
         '''add to the gv.player's gv.inventory and remove from the map'''
@@ -64,11 +66,11 @@ class Useable(Item):
 
 class Equipment(Item):
     '''an equipable item (e.g. armor, weapon)'''
-    def __init__(self, x, y,name,char, color,description=None,equips_to=None,stats=None):
+    def __init__(self, x, y,name,char, color,description=None,equips_to=None,params=None):
         super().__init__(x, y,name,char, color,description=description)
         
         self.equips_to = equips_to
-        self.stats = stats
+        self.params = params
 
     def equip(self):
         if not self.equips_to is None:

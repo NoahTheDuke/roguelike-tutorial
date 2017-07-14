@@ -17,8 +17,9 @@ def gen_items():
     generators = {
         'p_heal':(70,gen_P_Heal),
         'p_pwr':(50,gen_P_Power),
-        'scr_frb':(30,gen_Scr_Frb)
-        # 'scr_lightning':(30,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,20,5),
+        'scr_frb':(30,gen_Scr_Frb),
+        'scr_ltng':(30,gen_Scr_Ltng),
+        'scr_conf':(30,gen_Scr_Conf)
         # 'scr_lightning_cur':(10,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,8,0),  #cursed
         # 'scr_conf':(30,'scroll of confusion','#',colors.light_yellow,iu.cast_confusion,10,8),
         # 'scr_conf_cur':(10,'scroll of confusion','#',colors.light_yellow,iu.cast_confusion,0,3),
@@ -39,8 +40,8 @@ def gen_items():
 
 def gen_inventory():
     ''' creates an initial inventory (PLACEHOLDER) '''
-    i = gen_P_Heal(0,0)
-    i.pick_up()
+    gen_P_Heal(0,0).pick_up()
+    gen_Scr_Mami(0,0).pick_up()
 
 # Potions
 
@@ -54,7 +55,6 @@ def gen_P_Heal(x,y):
     on_use = iu.cast_heal
 
     i = Useable(x,y, name, symbol, color,use_function=on_use,params=pwr)
-    i.send_to_back()
     return i
 
 def gen_P_Power(x,y):
@@ -70,10 +70,69 @@ def gen_P_Power(x,y):
     on_use = iu.cast_powerup
 
     i = Useable(x,y, name, symbol, color,use_function=on_use,params=pwr)
-    i.send_to_back()
     return i
 
 # Scrolls
 
+def gen_Scr_Ltng(x,y):
+    name = 'scroll of lightning bolt'
+    pwr = randint(8,10)
+    range = 3
+    i = Useable(
+        x,y,
+        name,
+        '=',
+        colors.yellow,
+        description = 'A scroll of lightning bolt. It will strike one of the nearest enemies.',
+        use_function=iu.cast_lightning,
+        params=(pwr,range) # power/radius
+    )
+    return i
+
 def gen_Scr_Frb(x,y):
-    return None
+    name = 'scroll of fireball'
+    pwr = 12
+    range = 3
+    i = Useable(
+        x,y,
+        name,
+        '=',
+        colors.yellow,
+        description = 'A scroll of fireball. It will burn anything in a small radius.',
+        use_function=iu.cast_fireball,
+        params=(pwr,range) # power/radius
+    )
+    return i
+
+def gen_Scr_Conf(x,y):
+    name = 'scroll of confusion'
+    pwr = randint(4,6)
+    if randint(0,100) > 85: # 15% chance to be cursed
+        range = -1
+    else:
+        range = 3
+    i = Useable(
+        x,y,
+        name,
+        '=',
+        colors.yellow,
+        description = 'A scroll of confusion. It will turn a foes brain into mush temporarily.',
+        use_function=iu.cast_confusion,
+        params=(pwr,range) # power/radius
+    )
+    return i
+
+def gen_Scr_Mami(x,y):
+    name = 'scroll of magic missile'
+    pwr = randint(4,8)
+    range = 6
+    i = Useable(
+        x,y,
+        name,
+        '=',
+        colors.yellow,
+        description = 'A scroll of magic missile. Inflicts direct damage on a single enemy.',
+        use_function=iu.cast_magicmissile,
+        params=(pwr,range) # power/radius
+    )
+    return i

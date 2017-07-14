@@ -1,6 +1,7 @@
 ''' code related to item usage'''
 
-#from main import message
+from random import randint
+
 import settings
 import colors
 import global_vars as gv
@@ -48,26 +49,27 @@ def cast_lightning(params=(0,0)):
         + str(pwr) + ' hit points.', colors.light_blue)
     monster.take_damage(pwr)
 
-def cast_confusion(params = (5,10)):
+def cast_confusion(params = (6,3)):
     '''find closest enemy in-range and confuse it''' #TODO: Make confused monster attack random monsters
-    range,dur = params
+    dur,range = params
     monster = None
     if (range > 0):
         monster = closest_monster(range)
+
+        if monster is None:  #no enemy found within maximum range
+            message('No enemy is close enough to confuse.', colors.red)
+            return 'cancelled'
+        else:
+            old_ai = monster.ai
+            monster.ai = ConfusedMonster(old_ai,num_turns=dur)
+            monster.ai.owner = monster  #tell the new component who owns it
+            message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!', colors.light_green)
     else:
         message('The scroll of confusion was cursed!')
-        monster = gv.player
+        gv.player.confused = True # Placeholder    
     
-    if monster is None:  #no enemy found within maximum range
-        message('No enemy is close enough to confuse.', colors.red)
-        return 'cancelled'
-    else:
-        old_ai = monster.ai
-        monster.ai = ConfusedMonster(old_ai,num_turns=dur)
-        monster.ai.owner = monster  #tell the new component who owns it
-        message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!', colors.light_green)
 
-def cast_fireball(params = (10,10)):
+def cast_fireball(params = (10,3)):
     '''ask the player for a target tile to throw a fireball at'''
     pwr,radius = params
     target = target_tile()
@@ -81,6 +83,17 @@ def cast_fireball(params = (10,10)):
                 dmg = randint(pwr/2,pwr)
                 message('The ' + obj.name + ' gets burned for ' + str(dmg) + ' hit points.', colors.orange)
                 obj.take_damage(dmg)
+
+def cast_magicmissile(params = (10,3)):
+    '''ask the player for a target tile to throw a magic missile at it'''
+    pwr,radius = params
+    target = target_tile()
+    monster = [obj for obj in gv.actors if (obj.x,obj.y) == target]
+    if len(monster) == 0: # if no actor is at the selected location, the spell fails
+        message('There is no target at the position and your spell fizzles.')
+    else: 
+        message('Your magical projectile hits the ' + monster[0].name + ' for ' + str(pwr) + ' damage!', colors.turquoise)
+        monster[0].take_damage(pwr)
 
 def eat_corpse(params = ''):
     message('You eat the corpse of a ' + params + '. It is disgusting!')
