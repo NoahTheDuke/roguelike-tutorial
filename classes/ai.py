@@ -1,9 +1,10 @@
-''' All AI-related code '''
+''' All AI-related classes '''
+
+import math
+from random import randint
 
 import colors
 import global_vars as gv
-from random import randint
-import math
 from gui_util import message
 
 class BasicMonster:

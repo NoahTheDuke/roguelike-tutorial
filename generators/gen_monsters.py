@@ -8,8 +8,8 @@ import settings
 import colors
 import global_vars as gv
 
-from entities import GameObject,Fighter,Player
-from ai_util import BasicMonster
+from classes.actors import Fighter,Player
+from classes.ai import BasicMonster
 from map_util import ran_room_pos
 
 def gen_monsters():

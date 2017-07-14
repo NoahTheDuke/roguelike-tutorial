@@ -9,7 +9,7 @@ import colors
 import global_vars as gv
 
 import item_use as iu
-from entities import Item
+from classes.items import Item
 from map_util import ran_room_pos
 
 def gen_items():
@@ -82,4 +82,4 @@ def gen_P_Power(x,y):
 # Scrolls
 
 def gen_Scr_Frb(x,y):
-    break
+    return None

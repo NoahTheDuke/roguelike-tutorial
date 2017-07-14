@@ -130,6 +130,8 @@ def process_input(action):
                 gv.player.is_active = True
             elif (action['inventory'] == 'drop'):
                 chosen_item.drop()
+            elif (action['inventory'] == 'examine'):
+                chosen_item.examine()
         gv.player.is_active = False
     
     # elif 'confirm' in action:

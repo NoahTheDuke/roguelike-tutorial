@@ -11,7 +11,8 @@ from input_util import handle_keys, process_input
 from map_util import GameMap,make_map
 from render_util import render_all, fov_recompute
 from gui_util import message, menu
-from entities import Player, Cursor
+from classes.objects import Cursor
+from classes.actors import Player
 from generators.gen_monsters import gen_monsters,gen_Player
 from generators.gen_items import gen_items, gen_inventory
 from target_util import look_at_ground

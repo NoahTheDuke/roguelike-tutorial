@@ -4,9 +4,10 @@
 import settings
 import colors
 import global_vars as gv
+
 from gui_util import message
 from target_util import target_tile
-from ai_util import ConfusedMonster
+from classes.ai import ConfusedMonster
 
 def cast_heal(params=0):
     '''heal the player'''
@@ -68,7 +69,7 @@ def cast_confusion(params = (5,10)):
 
 def cast_fireball(params = (10,10)):
     '''ask the player for a target tile to throw a fireball at'''
-    dmg,radius = params
+    pwr,radius = params
     target = target_tile()
     if target is None:
         message('Your spell fizzles.')
@@ -77,6 +78,7 @@ def cast_fireball(params = (10,10)):
         x,y = target
         for obj in gv.actors:  #damage every actor in range, including the player
             if obj.distance_to_coord(x, y) <= radius:
+                dmg = randint(pwr/2,pwr)
                 message('The ' + obj.name + ' gets burned for ' + str(dmg) + ' hit points.', colors.orange)
                 obj.take_damage(dmg)
 
