@@ -10,7 +10,7 @@ import global_vars as gv
 
 from classes.actors import Monster,Player
 from classes.ai import BasicMonster
-from map_util import ran_room_pos
+from common import ran_room_pos
 
 def gen_monsters():
     '''creates a new monster at the given position'''
@@ -29,7 +29,7 @@ def gen_monsters():
         # Get a good position for the monster
         x,y = ran_room_pos(room)
         i = 0
-        while not gv.game_map.walkable[x,y] or sum([obj.x,obj.y] == [x,y] for obj in gv.actors) > 0:
+        while sum([obj.x,obj.y] == [x,y] for obj in gv.actors) > 0:
             x,y = ran_room_pos(room)
             i += 1
             if i == 0:

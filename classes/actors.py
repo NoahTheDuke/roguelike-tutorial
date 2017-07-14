@@ -11,7 +11,6 @@ import global_vars as gv
 import item_use as iu
 from gui_util import message
 from render_util import fov_recompute
-from target_util import look_at_ground
 
 from classes.objects import GameObject
 from classes.items import Item
@@ -108,7 +107,6 @@ class Player(Fighter):
                 self.x += dx
                 self.y += dy
                 fov_recompute()
-                look_at_ground(self.x,self.y)
                 
                 # if entity is running, re-call the move function once
                 if (running):

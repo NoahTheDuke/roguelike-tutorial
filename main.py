@@ -12,10 +12,10 @@ import settings
 from classes.actors import Player
 # Classes
 from classes.objects import Cursor
+from gui_util import menu, message
 # Generators
 from generators.gen_actors import gen_monsters, gen_Player
 from generators.gen_items import gen_inventory, gen_items
-from gui_util import menu, message
 # Game-related modules
 from input_util import handle_keys, process_input
 from map_util import GameMap, make_map
@@ -66,23 +66,22 @@ def new_game():
     gv.actors = []
     gv.game_msgs = []
     gv.inventory = []
-
-    # create the player & cursor
-    player_stats = (30,2,5) # hp/defense/power
-    gv.player = gen_Player(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH))
-    #Player(randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),randint(settings.MAP_HEIGHT,settings.MAP_WIDTH),'player', '@', colors.white, stats=player_stats,blocks=True)
     gv.cursor = Cursor(0,0)
 
-    # setup an initial inventory
-    gen_inventory()
+    # create the player & cursor
+    gv.player = gen_Player(0,0)
+    gv.cursor = Cursor(0,0)
 
     # create the map
     gv.game_map = GameMap(settings.MAP_WIDTH,settings.MAP_HEIGHT)
     make_map()
-    
+
     # fill the map with content
     gen_monsters()
     gen_items()
+
+    # setup an initial inventory
+    gen_inventory()
 
     # initialize FOV
     fov_recompute()
@@ -116,10 +115,16 @@ def main_loop():
                 gv.player.is_active = False
             else:              
                 if not gv.player.is_dead:
-                    process_input(player_action) 
+                    process_input(player_action)
+
+                if gv.cursor.is_active:
+                    look_at_ground(gv.cursor.x,gv.cursor.y)
                 
-                #AI takes turn, if player is not considered inactive
+                # If player has done an active turn
                 if gv.player.is_active:
+                    look_at_ground(gv.player.x,gv.player.y) # check ground for stuff
+
+                    #AI takes turn, if player is not considered inactive
                     for obj in gv.actors:
                         if not obj.is_player and gv.game_map.fov[obj.x, obj.y]:
                             obj.ai.take_turn()

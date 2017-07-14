@@ -8,7 +8,6 @@ import colors
 import global_vars as gv
 
 from render_util import fov_recompute
-from target_util import look_at_ground
 
 class GameObject:
     ''' Main class of game objects'''
@@ -29,7 +28,12 @@ class GameObject:
 
     def clear(self,con):
         ''' Clear the object '''
-        con.draw_char(self.x, self.y, ' ', self.color, bg=None)  
+        con.draw_char(self.x, self.y, ' ', self.color, bg=None)
+
+    def pos(self):
+        ''' Returns the x,y coordinates of the object '''
+        return (self.x,self.y)
+
     def distance_to(self, other):
         '''return the distance to another object'''
         dx = other.x - self.x
@@ -63,7 +67,7 @@ class Cursor(GameObject):
         if gv.game_map.fov[self.x + dx,self.y + dy]:
             self.x += dx
             self.y += dy
-            look_at_ground(self.x,self.y)
+            #look_at_ground(self.x,self.y)
     
     def draw(self,con):
         ''' Draw the object '''
@@ -82,4 +86,18 @@ class Cursor(GameObject):
         self.color = None
         self.char = None
         self.is_active = False
+        self.send_to_back()
+
+class Stairs(GameObject):
+    '''stair object '''
+    def __init__(self, x, y,down=True):
+        if down:
+            name = 'downward stairs'
+            char = '<'
+        else:
+            name = 'upward stairs'
+            char = '>'
+
+        super().__init__(x, y,name,char,colors.white)
+        self.down = down
         self.send_to_back()

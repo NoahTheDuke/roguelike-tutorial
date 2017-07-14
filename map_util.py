@@ -1,9 +1,24 @@
 '''map-creation related code for the roguelike tutorial'''
 
-import settings
-import global_vars as gv
+# Third-party modules
+from random import choice as ranchoice
 from random import randint
 from tdl.map import Map
+
+# Constants and global variables
+import global_vars as gv
+import settings
+
+# Other game-modules
+from common import ran_room_pos
+
+# Classes
+from classes.objects import Stairs
+
+# Generators
+# from generators.gen_actors import gen_monsters, gen_Player
+# from generators.gen_items import gen_inventory, gen_items
+
 
 class GameMap(Map):
     ''' the basic game map '''
@@ -53,12 +68,6 @@ def create_v_tunnel(y1, y2, x):
         gv.game_map.walkable[x,y] = True
         gv.game_map.transparent[x,y] = True
 
-def ran_room_pos(room):
-    '''returns a random position within a room for an object'''
-    x = randint(room.x1+1, room.x2-1)
-    y = randint(room.y1+1, room.y2-1)
-    return (x,y)
-
 def make_map():
     ''' Sets up the game's map '''
 
@@ -93,8 +102,9 @@ def make_map():
 
             if num_rooms == 0:
                 #this is the first room, where the player starts at
-                gv.player.x = new_x
-                gv.player.y = new_y
+                gv.player.x,gv.player.y = new_x,new_y
+
+                gv.stairs_up = Stairs(new_x,new_y,False)
             else:
                 #all rooms after the first:
                 #connect it to the previous room with a tunnel
@@ -116,4 +126,10 @@ def make_map():
             rooms.append(new_room)
             num_rooms += 1
     
+    # Create downward stairs in a random room
+    x,y = ran_room_pos(ranchoice(rooms))
+    while ((x,y) == gv.stairs_up.pos()):
+        x,y = ran_room_pos(ranchoice(rooms))
+    gv.stairs_down = Stairs(x,y)
+
     gv.game_map.rooms = rooms

@@ -2,12 +2,17 @@
 
 import colors
 import global_vars as gv
+
 from gui_util import message, inventory_menu
+from map_util import make_map
+# Generators
+#from generators.gen_actors import gen_monsters, gen_Player
+#from generators.gen_items import gen_inventory, gen_items
 
 def handle_keys(user_input):
     ''' Handles all key input made by the player '''
     
-    #print(user_input)
+    print(user_input)
 
     if user_input.key == 'ENTER' and user_input.alt:
         #Alt+Enter: toggle fullscreen
@@ -46,14 +51,17 @@ def handle_keys(user_input):
     elif user_input.text == 'r':
         return 'run'
 
+    elif user_input.text in ['<','>']:
+        return {'stairs':user_input.text}
+
     # looking and targeting
-    elif user_input.text == 'l':
+    if user_input.text == 'l':
         return 'look'
     # elif user_input.text == 't':
     #     return 'target'
 
     # item handling
-    elif user_input.text == 'g':
+    if user_input.text == 'g':
         return 'get'
 
     elif user_input.text == 'i':
@@ -135,6 +143,15 @@ def process_input(action):
                 chosen_item.drop()
             elif (action['inventory'] == 'examine'):
                 chosen_item.examine()
+        gv.player.is_active = False
+    
+    elif 'stairs' in action:
+        if (action['stairs'] == '<' and gv.player.pos() == gv.stairs_down.pos()):
+            message('You descend further into the dark abyss.')
+        elif (action['stairs'] == '>' and gv.player.pos() == gv.stairs_up.pos()):
+            message('A heavy trap door has fallen shut on the stairs. You can only go further down.')
+        else:
+            message('There a no stairs here.')
         gv.player.is_active = False
     
     # elif 'confirm' in action:

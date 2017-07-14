@@ -1,10 +1,10 @@
 ''' all GUI-related code '''
 
 import tdl
+import textwrap
 import settings
 import colors
 import global_vars as gv
-import textwrap
         
 def inventory_menu(header):
     '''show a menu with each item of the inventory as an option'''

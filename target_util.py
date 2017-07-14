@@ -1,6 +1,5 @@
 ''' look and targeting related functions '''
 
-from time import sleep
 import tdl
 import settings
 import colors

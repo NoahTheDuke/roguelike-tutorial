@@ -10,7 +10,7 @@ import global_vars as gv
 
 import item_use as iu
 from classes.items import Item
-from map_util import ran_room_pos
+from common import ran_room_pos
 
 def gen_items():
     '''creates a new item at the given position'''
@@ -34,12 +34,7 @@ def gen_items():
     
         # Get a good position for the item
         x,y = ran_room_pos(room)
-        i = 0
-        while not gv.game_map.walkable[x,y]:
-            x,y = ran_room_pos(room)
-            i += 1
-            if i == 0:
-                break
+
         # Place it  
         i = generators[gen][1](x,y)
 
