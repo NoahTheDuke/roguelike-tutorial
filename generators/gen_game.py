@@ -83,18 +83,16 @@ def gen_map(width,height):
 def gen_map_content():
     
     rooms = gv.game_map.rooms
-    x,y = ran_room_pos(ranchoice(gv.game_map.rooms))
-    gv.player.x,gv.player.y = x,y
-    # Place player and upwards stairs in random room
+    
+    # Place player on upwards stairs in random room
     x,y = ran_room_pos(ranchoice(rooms))
     gv.player.x,gv.player.y = x,y
-    #gv.stairs_up = Stairs(x,y,False)
-    gv.stairs_down = Stairs(x,y)
+    gv.stairs_up = Stairs(x,y,False)
 
     # Create downward stairs in a random room
-    # x,y = ran_room_pos(ranchoice(rooms))
-    # while ((x,y) == gv.stairs_up.pos()):
-    #     x,y = ran_room_pos(ranchoice(rooms))
+    x,y = ran_room_pos(ranchoice(rooms))
+    while ((x,y) == gv.stairs_up.pos()):
+        x,y = ran_room_pos(ranchoice(rooms))
     gv.stairs_down = Stairs(x,y)
 
     # fill the map with content
@@ -104,6 +102,8 @@ def gen_map_content():
 
 def gen_game(newgame=True):
     ''' sets up a new game '''
+
+    gv.dungeon_level += 1 # Increase the dungeon leavel by one
 
     if newgame:
         # reset other global variables
@@ -121,8 +121,9 @@ def gen_game(newgame=True):
         gen_inventory()
 
         # a warm welcoming message!
-        message('Welcome stranger! Prepare to perish in the Tombs of the Ancient Kings.', colors.red)
+        message('Welcome stranger! Prepare to perish in the %s.' % settings.DUNGEONNAME, colors.red)
     else:
+        message('You are now on level %s of the %s' % (gv.dungeon_level, settings.DUNGEONNAME), colors.red)
         for obj in gv.gameobjects:
             if not obj == gv.player:
                 obj.delete()
