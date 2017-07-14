@@ -12,13 +12,13 @@ import colors
 
 # Classes
 from classes.objects import Cursor, Stairs
+from classes.map import GameMap,Rect
 
 # Generators
 from generators.gen_actors import gen_monsters, gen_Player
 from generators.gen_items import gen_inventory, gen_items
 
 # Other game-related functions
-from map_util import GameMap,Rect,create_room, create_h_tunnel,create_v_tunnel,ran_room_pos
 from gui_util import message
 from render_util import fov_recompute
 
@@ -52,7 +52,7 @@ def gen_map(width,height):
             #this means there are no intersections, so this room is valid
 
             #"paint" it to the map's tiles
-            create_room(new_room)
+            gv.game_map.create_room(new_room)
 
             #center coordinates of new room, will be useful later
             (new_x, new_y) = new_room.center()
@@ -67,12 +67,12 @@ def gen_map(width,height):
                 #toss a coin (random number that is either 0 or 1)
                 if randint(0, 1):
                     #first move horizontally, then vertically
-                    create_h_tunnel(prev_x, new_x, prev_y)
-                    create_v_tunnel(prev_y, new_y, new_x)
+                    gv.game_map.create_h_tunnel(prev_x, new_x, prev_y)
+                    gv.game_map.create_v_tunnel(prev_y, new_y, new_x)
                 else:
                     #first move vertically, then horizontally
-                    create_v_tunnel(prev_y, new_y, prev_x)
-                    create_h_tunnel(prev_x, new_x, new_y)
+                    gv.game_map.create_v_tunnel(prev_y, new_y, prev_x)
+                    gv.game_map.create_h_tunnel(prev_x, new_x, new_y)
 
             #append the new room to the list
             rooms.append(new_room)
@@ -85,14 +85,14 @@ def gen_map_content():
     rooms = gv.game_map.rooms
     
     # Place player on upwards stairs in random room
-    x,y = ran_room_pos(ranchoice(rooms))
+    x,y = ranchoice(rooms).ranpos()
     gv.player.x,gv.player.y = x,y
     gv.stairs_up = Stairs(x,y,False)
 
     # Create downward stairs in a random room
-    x,y = ran_room_pos(ranchoice(rooms))
+    x,y = ranchoice(rooms).ranpos()
     while ((x,y) == gv.stairs_up.pos()):
-        x,y = ran_room_pos(ranchoice(rooms))
+        x,y = ranchoice(rooms).ranpos()
     gv.stairs_down = Stairs(x,y)
 
     # fill the map with content
