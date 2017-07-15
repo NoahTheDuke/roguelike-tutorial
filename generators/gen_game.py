@@ -2,6 +2,7 @@
 
 # Third-party modules
 import tdl
+import shelve
 from random import choice as ranchoice
 from random import randint
 
@@ -19,7 +20,7 @@ from generators.gen_actors import gen_monsters, gen_Player
 from generators.gen_items import gen_inventory, gen_items
 
 # Other game-related functions
-from gui_util import message
+from gui_util import message, msgbox
 from render_util import fov_recompute
 
 def gen_map(width,height):
@@ -104,17 +105,16 @@ def gen_map_content():
     gen_items()
 
 
-def gen_game(newgame=True):
+def gen_game(newgame):
     ''' sets up a new game '''
 
-    gv.dungeon_level += 1 # Increase the dungeon leavel by one
-
-    if newgame:
+    if newgame: # new game
         # reset other global variables
         gv.gameobjects = []
         gv.actors = []
         gv.game_msgs = []
         gv.inventory = []
+        gv.dungeon_level = 1
         #gv.cursor = Cursor(0,0)
 
         # create the player & cursor
@@ -125,11 +125,13 @@ def gen_game(newgame=True):
         gen_inventory()
 
         # a warm welcoming message!
-        message('Welcome stranger! Prepare to perish in the %s.' % settings.DUNGEONNAME, colors.red)
-    else:
+        message('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME, colors.red)
+
+    else: # new dungeon level
+        gv.dungeon_level += 1 # Increase the dungeon leavel by one
         message('You are now on level %s of the %s' % (gv.dungeon_level, settings.DUNGEONNAME), colors.red)
         for obj in gv.gameobjects:
-            if not obj == gv.player:
+            if not obj in [gv.player,gv.cursor]:
                 obj.delete()
 
     # Generate a new map

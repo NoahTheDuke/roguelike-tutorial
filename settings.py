@@ -4,7 +4,7 @@
 import colors
 
 # Game
-DUNGEONNAME = 'Fiendish Abyss'
+DUNGEONNAME = 'The Fiendish Abyss'
 
 # Console
 SCREEN_WIDTH = 80
@@ -33,7 +33,9 @@ FOV_LIGHT_WALLS = True
 TORCH_RADIUS = 10
 
 # Dungeon colors
-COLOR_DARK_WALL = colors.darkest_sepia
-COLOR_LIGHT_WALL = colors.dark_sepia
-COLOR_DARK_GROUND = colors.darkest_amber
-COLOR_LIGHT_GROUND = colors.dark_amber
+COLOR_DARK_WALL = colors.darkest_gray
+COLOR_DARK_WALL_fg = colors.dark_grey
+COLOR_DARK_GROUND = colors.darkest_gray
+COLOR_DARK_GROUND_fg = colors.dark_grey
+COLOR_LIGHT_WALL = colors.lighter_grey
+COLOR_LIGHT_GROUND = colors.lighter_grey

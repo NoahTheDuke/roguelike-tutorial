@@ -14,7 +14,7 @@ class BasicMonster:
     def take_turn(self):
         '''let the monster take a turn'''
         monster = self.owner
-        if gv.game_map.fov[monster.x, monster.y]:
+        if gv.game_map.visible[monster.x][monster.y]:
  
             #move towards player if far away
             if monster.distance_to(gv.player) >= 2:
@@ -32,7 +32,7 @@ class BasicMonster:
         ''' Move the monster, after checking if the target space is legitimate '''
 
         x,y = self.owner.x, self.owner.y
-        if gv.game_map.walkable[x+dx,y+dy]:
+        if gv.game_map.walkable[x+dx][y+dy]:
             if sum([obj.x,obj.y] == [x+dx,y+dy] for obj in gv.actors)==0:
                 self.owner.x += dx
                 self.owner.y += dy
@@ -76,7 +76,7 @@ class ConfusedMonster:
         ''' Confused monsters stumble around and attack randomly '''
         x,y = self.owner.x, self.owner.y
         dx,dy = randint(-1, 1), randint(-1, 1)
-        if gv.game_map.walkable[x+dx,y+dy]:
+        if gv.game_map.walkable[x+dx][y+dy]:
             check = True
             for obj in gv.gameobjects:
                 target = None

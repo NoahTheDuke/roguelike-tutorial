@@ -68,14 +68,15 @@ class Monster(Fighter):
         ''' death for monster characters '''
         message('The ' + self.name.capitalize() + ' is dead!',colors.green)
         item = Useable(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,use_function=iu.eat_corpse,params=self.name)
-        item.send_to_back()
-        for i in range(1,randint(1,5)):
+        gv.game_map.gibbed[self.x][self.y] = True
+        for i in range(1,randint(3,5)):
+            x,y = (randint(self.x-1, self.x+1),randint(self.y-1, self.y+1))
+            gv.game_map.gibbed[x][y] = True
+        for i in range(1,randint(1,3)):
             x,y = (randint(self.x-2, self.x+2),randint(self.y-2, self.y+2))
             if randint(0,100) < 40:
                 item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,use_function=iu.eat_corpse,params=self.name)
                 item.send_to_back()
-            else:
-                gv.game_map.gibbed[x][y] = True
         self.delete()
 
 class Player(Fighter):
@@ -93,7 +94,7 @@ class Player(Fighter):
 
         running = running
 
-        if gv.game_map.walkable[self.x+dx,self.y+dy]:
+        if gv.game_map.walkable[self.x+dx][self.y+dy]:
             check = True
             for obj in gv.gameobjects:
                 target = None

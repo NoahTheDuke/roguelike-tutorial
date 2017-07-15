@@ -1,3 +1,5 @@
+import tdl
+
 import settings
 import colors
 import global_vars as gv
@@ -7,30 +9,39 @@ def render_all():
     root = gv.root
     con = gv.con
     panel = gv.panel
+    px,py = gv.player.x, gv.player.y
+    visible_tiles = (tdl.map.quick_fov(px, py,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS))
     for y in range(settings.MAP_HEIGHT):
         for x in range(settings.MAP_WIDTH):
-            wall = not gv.game_map.transparent[x,y]
-            if not gv.game_map.fov[x, y]:
-                #it's out of the gv.player's FOV but explored
+            wall = not gv.game_map.transparent[x][y]
+            #if not gv.game_map.fov[x, y]:
+            visible = (x, y) in visible_tiles
+            
+            #tdl.map.quick_fov(px, py,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS)
+            if not visible:
+                #it's out of the gv.player's.visible[self.x + dx][self.y+dy]but explored
                 if gv.game_map.explored[x][y]:
                     if wall:
-                        con.draw_char(x, y,'#', fg=colors.grey, bg=colors.darkest_gray)
+                        con.draw_char(x, y,'#', fg=settings.COLOR_DARK_GROUND_fg, bg=settings.COLOR_DARK_GROUND)
                     else:
-                        con.draw_char(x, y,'.', fg=colors.grey, bg=colors.darkest_grey)
+                        con.draw_char(x, y,'.', fg=settings.COLOR_DARK_WALL_fg, bg=settings.COLOR_DARK_WALL)
+                gv.game_map.visible[x][y] = False
             else:
                 #it's visible
                 if gv.game_map.gibbed[x][y]:
                     fgcolor = colors.red
                 else:
-                    fgcolor = colors.white
+                    fgcolor = settings.COLOR_LIGHT_GROUND
                 
                 if wall:
                     con.draw_char(x, y,'#', fg=fgcolor, bg=colors.black)
                 else:
                     con.draw_char(x, y,'.', fg=fgcolor, bg=colors.black)
                 gv.game_map.explored[x][y] = True
+                gv.game_map.visible[x][y] = True
+    
     for obj in gv.gameobjects:
-        if gv.game_map.fov[obj.x,obj.y]:
+        if gv.game_map.visible[obj.x][obj.y]:
             obj.draw(con)
     
     root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
@@ -71,6 +82,19 @@ def render_bar(x, y, total_width, name, value, maximum, bar_color, back_color):
     x_centered = x + (total_width-len(text))//2
     panel.draw_str(x_centered, y, text, fg=colors.white, bg=None)
 
+def is_visible_tile(x, y):
+    if x >= settings.MAP_WIDTH or x < 0:
+        return False
+    elif y >= settings.MAP_HEIGHT or y < 0:
+        return False
+    elif gv.game_map.transparent[x][y] == True:
+        return True
+    else:
+        return False
+
 def fov_recompute():
-    ''' Recomputes the gv.player's FOV '''
-    gv.game_map.compute_fov(gv.player.x, gv.player.y,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,light_walls=settings.FOV_LIGHT_WALLS)
+    ''' Recomputes the gv.player's.visible[self.x + dx][self.y+dy]'''
+    x,y = gv.player.x, gv.player.y
+    return True
+    #tdl.map.quick_fov(x, y,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS)
+    #gv.game_map.compute_fov(gv.player.x, gv.player.y,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,light_walls=settings.FOV_LIGHT_WALLS)

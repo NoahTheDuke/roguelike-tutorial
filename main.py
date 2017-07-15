@@ -3,6 +3,7 @@
 
 # Other libraries
 import tdl
+import shelve
 from tcod import image_load
 from random import randint
 
@@ -15,7 +16,7 @@ import settings
 from generators.gen_game import gen_game
 
 # Game-related modules
-from gui_util import menu, message
+from gui_util import menu, message, msgbox
 from input_util import handle_keys, process_input
 from render_util import fov_recompute, render_all
 from target_util import look_at_ground
@@ -54,12 +55,47 @@ def main_menu():
  
         #show options and wait for the player's choice
         choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
- 
-        if choice == 0:  #new game
-            gen_game()
-            main_loop()
-        elif choice == 2:  #quit
+
+        if choice == 0: # new game:
+            gen_game(True)
+        elif choice == 1:
+            try:
+                load_game()
+            except:
+                msgbox('\n No saved game to load.\n', 24)
+        else: #quit
             break
+
+        main_loop()
+
+def save_game():
+    ''' open a new empty shelve (possibly overwriting an old one) to write the game data '''
+    with shelve.open('savegame', 'n') as savefile:
+        savefile['map'] = gv.game_map
+        savefile['objects'] = gv.gameobjects
+        savefile['p_index'] = gv.gameobjects.index(gv.player)
+        savefile['c_index'] = gv.gameobjects.index(gv.cursor)
+        savefile['sd_index'] = gv.gameobjects.index(gv.stairs_down)
+        savefile['su_index'] = gv.gameobjects.index(gv.stairs_up)
+        savefile['inventory'] = gv.inventory
+        savefile['messages']=gv.game_msgs
+        #savefile['dungeonlevel'] = gv.dungeon_level
+        
+        savefile.close()
+
+def load_game():
+    with shelve.open('savegame', 'r') as savefile:
+        gv.game_map = savefile['map']
+        gv.gameobjects = savefile['objects']
+        gv.player = gv.gameobjects[savefile['p_index']]  #get index of player in objects list and access it
+        gv.cursor = gv.gameobjects[savefile['c_index']]
+        gv.stairs_down = gv.gameobjects[savefile['sd_index']]
+        gv.stairs_up = gv.gameobjects[savefile['su_index']]
+        gv.inventory = savefile['inventory']
+        gv.game_msgs = savefile['messages']
+
+        message('Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME,gv.dungeon_level), colors.red)
+        #gv.dungeon_level = 
 
 def main_loop():
     ''' begin main game loop '''
@@ -77,6 +113,7 @@ def main_loop():
 
         if not player_action == None:
             if 'exit' in player_action:
+                save_game()
                 break
             elif 'fullscreen' in player_action:
                 tdl.set_fullscreen(not tdl.get_fullscreen())
@@ -91,9 +128,9 @@ def main_loop():
                 # If player has done an active turn
                 if gv.player.is_active:
                     look_at_ground(gv.player.x,gv.player.y) # check ground for stuff
-                    #AI takes turn, if player is not considered inactive
+                    #AI takes turn, if player is not considered inactive and is roughly in FOV
                     for obj in gv.actors:
-                        if gv.game_map.fov[obj.x, obj.y] and (not obj == gv.player):
+                        if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and (not obj == gv.player):
                             obj.ai.take_turn()
 
 if __name__ == '__main__':

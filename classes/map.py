@@ -1,40 +1,44 @@
 ''' map-related classes '''
 
 # Third-party modules
-from tdl.map import Map
 from random import randint
 
 # Constants and global variables
 import global_vars as gv
 import settings
 
-class GameMap(Map):
+class GameMap:
     ''' the basic game map '''
     def __init__(self, width, height,rooms=[]):
-        super().__init__(width, height)
+        self.width = width
+        self.height = height
+        #super().__init__(width, height)
         self.rooms = rooms
         self.explored = [[False for y in range(height)] for x in range(width)] # This loops through a list of range (width), for every step looping through a list of range (height), filling every index with a False value. Eg: [[False,False],[False,False]]
         self.gibbed = [[False for y in range(height)] for x in range(width)]
+        self.transparent = [[False for y in range(height)] for x in range(width)]
+        self.walkable = [[False for y in range(height)] for x in range(width)]
+        self.visible = [[False for y in range(height)] for x in range(width)]
 
     def create_room(self,room):
         ''' Create a room in the dungeon '''
         #go through the tiles in the rectangle and make them passable
         for x in range(room.x1, room.x2 + 1):
             for y in range(room.y1, room.y2 + 1):
-                self.walkable[x,y] = True
-                self.transparent[x,y] = True    # transparent is an attribute inherited from parent class 'Map'
+                self.walkable[x][y] = True
+                self.transparent[x][y] = True    # transparent is an attribute inherited from parent class 'Map'
  
     def create_h_tunnel(self,x1, x2, y):
         ''' create a horizontal tunnel between x1 & x2 '''
         for x in range(min(x1, x2), max(x1, x2) + 1):
-            self.walkable[x,y] = True
-            self.transparent[x,y] = True
+            self.walkable[x][y] = True
+            self.transparent[x][y] = True
     
     def create_v_tunnel(self,y1, y2, x):
         ''' create a vertical tunnel between y1 & y2 '''
         for y in range(min(y1, y2), max(y1, y2) + 1):
-            self.walkable[x,y] = True
-            self.transparent[x,y] = True
+            self.walkable[x][y] = True
+            self.transparent[x][y] = True
 
     # def create_d_tunnel(self,(x1,y1),(x2,y2)):
     #     ''' create a diagonal tunnel between (x1,y1) & (x2,y2) '''
@@ -65,7 +69,7 @@ class Rect:
         '''returns a random, walkable position within the room'''
         x = randint(self.x1+1, self.x2-1)
         y = randint(self.y1+1, self.y2-1)
-        while not gv.game_map.walkable[x,y]:
+        while not gv.game_map.walkable[x][y]:
             x = randint(self.x1+1, self.x2-1)
             y = randint(self.y1+1, self.y2-1)
         return (x,y)

@@ -18,6 +18,9 @@ def inventory_menu(header):
             return None
         return gv.inventory[index]
 
+def msgbox(text, width=50):
+    menu(text, [], width)  #use menu() as a sort of "message box"
+
 def menu(header, options, width):
     '''display a simple menu to the player'''
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
