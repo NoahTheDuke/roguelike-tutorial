@@ -3,7 +3,7 @@
 import colors
 import global_vars as gv
 
-from gui_util import message, inventory_menu
+from gui_util import message, menu, inventory_menu
 
 def handle_keys(user_input):
     ''' Handles all key input made by the player '''
@@ -121,15 +121,18 @@ def process_input(action):
     #     gv.player.is_active = False
 
     elif 'get' in action:
-        found_something = False
-        for obj in gv.gameobjects:  #look for an item in the player's tile
-            if [obj.x,obj.y] == [gv.player.x, gv.player.y] and obj.is_item:
-                obj.pick_up()
-                found_something = True
-                break
-        if not found_something:
+        item = None
+        # get all items at the player's feet
+        items = [obj for obj in gv.gameobjects if [obj.x,obj.y] == [gv.player.x, gv.player.y] and obj.is_item]
+        if len(items) == 0:
             message('There is nothing to pick up here!')
             gv.player.is_active = False
+        elif len(items) == 1:
+            item = 0
+        else:
+            item = menu('What do you want to pick up?',[item.name for item in items],24)
+        if not item == None:
+            items[item].pick_up()
 
     elif 'inventory' in action:
         #show the gv.inventory, pressing a key returns the corresponding item
