@@ -42,6 +42,7 @@ def gen_inventory():
     ''' creates an initial inventory (PLACEHOLDER) '''
     gen_P_Heal(0,0).pick_up()
     gen_Scr_Mami(0,0).pick_up()
+    gen_Scr_Frb(0,0).pick_up()
 
 # Potions
 

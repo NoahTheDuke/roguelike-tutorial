@@ -6,7 +6,7 @@ import settings
 import colors
 import global_vars as gv
 
-from gui_util import message
+from gui_util import message, menu
 from target_util import target_tile
 from classes.ai import ConfusedMonster
 
@@ -76,13 +76,19 @@ def cast_fireball(params = (10,3)):
     if target is None:
         message('Your spell fizzles.')
     else:
-        message('The fireball explodes, burning everything within ' + str(radius) + ' tiles!', colors.orange)
         x,y = target
-        for obj in gv.actors:  #damage every actor in range, including the player
-            if obj.distance_to_coord(x, y) <= radius:
-                dmg = randint(pwr/2,pwr)
-                message('The ' + obj.name + ' gets burned for ' + str(dmg) + ' hit points.', colors.orange)
-                obj.take_damage(dmg)
+        check = True # Choice is True by default, but can be set to False if the player decided not to hit him-/herself
+        if gv.player.distance_to_coord(x,y) <= radius:
+            check = menu('The spell would hit you as well. Proceed?',['No','Yes'],24)
+        if check:
+            message('The fireball explodes, burning everything within ' + str(radius) + ' tiles!', colors.orange)
+            for obj in gv.actors:  #damage every actor in range, including the player
+                if obj.distance_to_coord(x, y) <= radius:
+                    dmg = randint(pwr/2,pwr)
+                    message('The ' + obj.name + ' gets burned for ' + str(dmg) + ' hit points.', colors.orange)
+                    obj.take_damage(dmg)
+        else:
+            message('Your spell fizzles.')
 
 def cast_magicmissile(params = (10,3)):
     '''ask the player for a target tile to throw a magic missile at it'''
