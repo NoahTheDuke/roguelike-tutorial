@@ -7,8 +7,6 @@ import settings
 import colors
 import global_vars as gv
 
-from render_util import fov_recompute
-
 class GameObject:
     ''' Main class of game objects'''
     def __init__(self, x, y,name,char,color,blocks=False, item=False):

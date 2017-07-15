@@ -18,7 +18,7 @@ from generators.gen_game import gen_game
 # Game-related modules
 from gui_util import menu, message, msgbox
 from input_util import handle_keys, process_input
-from render_util import fov_recompute, render_all
+from render_util import render_all
 from target_util import look_at_ground
 
 def initialize_window():

@@ -10,7 +10,7 @@ import global_vars as gv
 
 import item_use as iu
 from gui_util import message
-from render_util import fov_recompute
+from render_util import 
 
 from classes.objects import GameObject
 from classes.items import Useable
@@ -106,7 +106,6 @@ class Player(Fighter):
             if check and target == None:
                 self.x += dx
                 self.y += dy
-                fov_recompute()
                 
                 # if entity is running, re-call the move function once
                 if (running):

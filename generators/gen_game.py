@@ -21,7 +21,6 @@ from generators.gen_items import gen_inventory, gen_items
 
 # Other game-related functions
 from gui_util import message, msgbox
-from render_util import fov_recompute
 
 def gen_map(width,height):
     ''' Sets up the game's map '''
@@ -141,7 +140,7 @@ def gen_game(newgame):
     gen_map_content()
 
     # initialize FOV
-    fov_recompute()
+    #fov_recompute()
     
     # clear the old console
     gv.con.clear()

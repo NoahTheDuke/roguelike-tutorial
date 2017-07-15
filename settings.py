@@ -30,7 +30,7 @@ INVENTORY_WIDTH = 50
 # FOV
 FOV_ALGO = 'SHADOW'
 FOV_LIGHT_WALLS = True
-TORCH_RADIUS = 10
+TORCH_RADIUS = 6
 
 # Dungeon colors
 COLOR_DARK_WALL = colors.darkest_gray
