@@ -91,10 +91,3 @@ def is_visible_tile(x, y):
         return True
     else:
         return False
-
-def fov_recompute():
-    ''' Recomputes the gv.player's.visible[self.x + dx][self.y+dy]'''
-    x,y = gv.player.x, gv.player.y
-    return True
-    #tdl.map.quick_fov(x, y,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS)
-    #gv.game_map.compute_fov(gv.player.x, gv.player.y,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,light_walls=settings.FOV_LIGHT_WALLS)

@@ -10,7 +10,6 @@ import global_vars as gv
 
 import item_use as iu
 from gui_util import message
-from render_util import 
 
 from classes.objects import GameObject
 from classes.items import Useable
