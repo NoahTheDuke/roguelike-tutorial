@@ -70,7 +70,7 @@ def main_menu():
 
 def save_game():
     ''' open a new empty shelve (possibly overwriting an old one) to write the game data '''
-    with shelve.open('savegame', 'n') as savefile:
+    with shelve.open('savegames/savegame', 'n') as savefile:
         savefile['map'] = gv.game_map
         savefile['objects'] = gv.gameobjects
         savefile['p_index'] = gv.gameobjects.index(gv.player)
@@ -79,12 +79,12 @@ def save_game():
         savefile['su_index'] = gv.gameobjects.index(gv.stairs_up)
         savefile['inventory'] = gv.inventory
         savefile['messages']=gv.game_msgs
-        #savefile['dungeonlevel'] = gv.dungeon_level
         
         savefile.close()
 
 def load_game():
-    with shelve.open('savegame', 'r') as savefile:
+    ''' load an existing savegame '''
+    with shelve.open('savegames/savegame', 'r') as savefile:
         gv.game_map = savefile['map']
         gv.gameobjects = savefile['objects']
         gv.player = gv.gameobjects[savefile['p_index']]  #get index of player in objects list and access it
@@ -95,7 +95,6 @@ def load_game():
         gv.game_msgs = savefile['messages']
 
         message('Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME,gv.dungeon_level), colors.red)
-        #gv.dungeon_level = 
 
 def main_loop():
     ''' begin main game loop '''
@@ -113,11 +112,16 @@ def main_loop():
 
         if not player_action == None:
             if 'exit' in player_action:
-                save_game()
-                break
+                choice = menu('Save & Quit the %s' % settings.DUNGEONNAME + ' ?',['Yes','No'],24)
+                if choice == 0:
+                    save_game()
+                    break
             elif 'fullscreen' in player_action:
                 tdl.set_fullscreen(not tdl.get_fullscreen())
                 gv.player.is_active = False
+            # elif 'manual' in player_action:
+            #     man = open('manual.txt','r')
+            #     msgbox(man.read(),60)
             else:              
                 if not gv.player.is_dead:
                     process_input(player_action)

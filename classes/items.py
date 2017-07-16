@@ -19,7 +19,7 @@ class Item(GameObject):
         
         self.description = description
         if description == None:
-            print(str(self) + ' lacks a description!')
+            print(str(self.name) + ' lacks a description!')
         
         self.send_to_back()
     

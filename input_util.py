@@ -15,6 +15,8 @@ def handle_keys(user_input):
         return {'fullscreen':None}
     elif user_input.key == 'ESCAPE':
         return {'exit':None}  #exit game
+    elif user_input.key == 'F1':
+        return 'manual'
     
     # movement keys
     if user_input.key in ['UP','KP8']:
