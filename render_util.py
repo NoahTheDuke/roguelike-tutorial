@@ -43,6 +43,8 @@ def render_all():
     for obj in gv.gameobjects:
         if gv.game_map.visible[obj.x][obj.y]:
             obj.draw(con)
+        elif not gv.game_map.visible[obj.x][obj.y] and obj.always_visible: # if obj is not in FOV but should always be visible
+            obj.draw(con,fgcolor=settings.COLOR_DARK_WALL_fg,bgcolor=settings.COLOR_DARK_GROUND)
     
     root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
     #prepare to render the GUI panel

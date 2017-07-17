@@ -9,7 +9,7 @@ import global_vars as gv
 
 class GameObject:
     ''' Main class of game objects'''
-    def __init__(self, x, y,name,char,color,blocks=False, item=False):
+    def __init__(self, x, y,name,char,color,blocks=False, item=False,always_visible=False):
         self.x = x
         self.y = y
         self.char = char
@@ -17,12 +17,15 @@ class GameObject:
         self.blocks = blocks
         self.name = name
         self.is_item = item
+        self.always_visible = always_visible
         
         gv.gameobjects.append(self)
 
-    def draw(self,con):
+    def draw(self,con,fgcolor=None,bgcolor = colors.black):
         ''' Draw the object '''
-        con.draw_char(self.x, self.y, self.char, self.color)
+        if fgcolor == None:
+            fgcolor = self.color
+        con.draw_char(self.x, self.y, self.char, fgcolor,bgcolor)
 
     def clear(self,con):
         ''' Clear the object '''
@@ -106,6 +109,6 @@ class Stairs(GameObject):
             name = 'upward stairs'
             char = '>'
 
-        super().__init__(x, y,name,char,colors.white)
+        super().__init__(x, y,name,char,colors.white,always_visible=True)
         self.down = down
         self.send_to_back()
