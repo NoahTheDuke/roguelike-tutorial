@@ -11,6 +11,12 @@ import global_vars as gv
 import item_use as iu
 from classes.items import Useable,Equipment
 
+# Constants for item generation
+CHAR_POTION = '!'
+CHAR_SCROLL = '='
+
+COLOR_SCROLL = colors.light_yellow
+
 def gen_items():
     '''creates a new item at the given position'''
     
@@ -19,11 +25,8 @@ def gen_items():
         'p_pwr':(50,gen_P_Power),
         'scr_frb':(30,gen_Scr_Frb),
         'scr_ltng':(30,gen_Scr_Ltng),
-        'scr_conf':(30,gen_Scr_Conf)
-        # 'scr_lightning_cur':(10,'scroll of lightning bolt','#',colors.light_yellow,iu.cast_lightning,8,0),  #cursed
-        # 'scr_conf':(30,'scroll of confusion','#',colors.light_yellow,iu.cast_confusion,10,8),
-        # 'scr_conf_cur':(10,'scroll of confusion','#',colors.light_yellow,iu.cast_confusion,0,3),
-        # 'scr_frb':(100,'scroll of fireball','#',colors.light_yellow,iu.cast_fireball,10,10)
+        'scr_conf':(30,gen_Scr_Conf),
+        'scr_mm': (30,gen_Scr_Mami)
     }
 
     # Randomly pick an item from the list
@@ -44,37 +47,53 @@ def gen_inventory():
     gen_Scr_Mami(0,0).pick_up()
     gen_Scr_Frb(0,0).pick_up()
 
-# Potions
-
+#    ____       _   _                 
+#  |  _ \ ___ | |_(_) ___  _ __  ___ 
+#  | |_) / _ \| __| |/ _ \| '_ \/ __|
+#  |  __/ (_) | |_| | (_) | | | \__ \
+#  |_|   \___/ \__|_|\___/|_| |_|___/
+                                    
 def gen_P_Heal(x,y):
     ''' basic healing potion '''
 
     name = 'healing potion'
-    symbol = '!'
-    color = colors.violet
     pwr = randint(6,10)
-    on_use = iu.cast_heal
 
-    i = Useable(x,y, name, symbol, color,use_function=on_use,params=pwr)
+    i = Useable(
+        x,y,
+        name,
+        CHAR_POTION,
+        colors.violet,
+        use_function=iu.cast_heal,
+        params= pwr
+    )
     return i
 
 def gen_P_Power(x,y):
     ''' basic power potion - can be cursed '''
 
     name = 'potion of power'
-    symbol = '!'
-    color = colors.red
     if randint(0,100) > 20: 
         pwr = 1
     else:   # 20% chance of being cursed
         pwr = -1
-    on_use = iu.cast_powerup
 
-    i = Useable(x,y, name, symbol, color,use_function=on_use,params=pwr)
+    i = Useable(
+        x,y,
+        name,
+        CHAR_POTION,
+        colors.red,
+        use_function=iu.cast_powerup,
+        params=pwr
+    )
     return i
 
-# Scrolls
-
+#   ____                 _ _     
+#  / ___|  ___ _ __ ___ | | |___ 
+#  \___ \ / __| '__/ _ \| | / __|
+#   ___) | (__| | | (_) | | \__ \
+#  |____/ \___|_|  \___/|_|_|___/
+                               
 def gen_Scr_Ltng(x,y):
     name = 'scroll of lightning bolt'
     pwr = randint(8,10)
@@ -82,8 +101,8 @@ def gen_Scr_Ltng(x,y):
     i = Useable(
         x,y,
         name,
-        '=',
-        colors.yellow,
+        CHAR_SCROLL,
+        COLOR_SCROLL,
         description = 'A scroll of lightning bolt. It will strike one of the nearest enemies.',
         use_function=iu.cast_lightning,
         params=(pwr,range) # power/radius
@@ -97,8 +116,8 @@ def gen_Scr_Frb(x,y):
     i = Useable(
         x,y,
         name,
-        '=',
-        colors.yellow,
+        CHAR_SCROLL,
+        COLOR_SCROLL,
         description = 'A scroll of fireball. It will burn anything in a small radius.',
         use_function=iu.cast_fireball,
         params=(pwr,range) # power/radius
@@ -115,8 +134,8 @@ def gen_Scr_Conf(x,y):
     i = Useable(
         x,y,
         name,
-        '=',
-        colors.yellow,
+        CHAR_SCROLL,
+        COLOR_SCROLL,
         description = 'A scroll of confusion. It will turn a foes brain into mush temporarily.',
         use_function=iu.cast_confusion,
         params=(pwr,range) # power/radius
@@ -130,8 +149,8 @@ def gen_Scr_Mami(x,y):
     i = Useable(
         x,y,
         name,
-        '=',
-        colors.yellow,
+        CHAR_SCROLL,
+        COLOR_SCROLL,
         description = 'A scroll of magic missile. Inflicts direct damage on a single enemy.',
         use_function=iu.cast_magicmissile,
         params=(pwr,range) # power/radius
