@@ -73,12 +73,15 @@ def save_game():
     with shelve.open('savegames/savegame', 'n') as savefile:
         savefile['map'] = gv.game_map
         savefile['objects'] = gv.gameobjects
+        savefile['actors'] = gv.actors
+        savefile['inventory'] = gv.inventory
+        savefile['messages']=gv.game_msgs
+
+        # Store the index of special objects, so they can be later restored from the gv.gameobjects array
         savefile['p_index'] = gv.gameobjects.index(gv.player)
         savefile['c_index'] = gv.gameobjects.index(gv.cursor)
         savefile['sd_index'] = gv.gameobjects.index(gv.stairs_down)
         savefile['su_index'] = gv.gameobjects.index(gv.stairs_up)
-        savefile['inventory'] = gv.inventory
-        savefile['messages']=gv.game_msgs
         
         savefile.close()
 
@@ -87,12 +90,15 @@ def load_game():
     with shelve.open('savegames/savegame', 'r') as savefile:
         gv.game_map = savefile['map']
         gv.gameobjects = savefile['objects']
-        gv.player = gv.gameobjects[savefile['p_index']]  #get index of player in objects list and access it
+        gv.actors = savefile['actors']
+        gv.inventory = savefile['inventory']
+        gv.game_msgs = savefile['messages']
+
+        # Restore special objects
+        gv.player = gv.gameobjects[savefile['p_index']]
         gv.cursor = gv.gameobjects[savefile['c_index']]
         gv.stairs_down = gv.gameobjects[savefile['sd_index']]
         gv.stairs_up = gv.gameobjects[savefile['su_index']]
-        gv.inventory = savefile['inventory']
-        gv.game_msgs = savefile['messages']
 
         message('Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME,gv.dungeon_level), colors.red)
 

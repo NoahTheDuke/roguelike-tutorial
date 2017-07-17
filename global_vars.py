@@ -9,7 +9,7 @@ game_map = None
 cursor = None
 stairs_up = None
 stairs_down = None
-dungeon_level = 0
+dungeon_level = 1
 
 root = None
 con = None

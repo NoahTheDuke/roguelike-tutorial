@@ -155,7 +155,7 @@ def process_input(action):
             message('You descend further into the dark abyss.')
             gv.stairs_down.descended = True
         elif (action['stairs'] == '>' and gv.player.pos() == gv.stairs_up.pos()):
-            message('A heavy trap door has fallen shut on the stairs. You can only go further down.')
+            message('A heavy trap door has fallen shut on the staircase. You can only go further down.')
         else:
             message('There a no stairs here.')
         gv.player.is_active = False

@@ -71,7 +71,7 @@ class Cursor(GameObject):
         self.is_active = False
 
     def move (self,dx,dy):
-        if gv.game_map.fov[self.x + dx,self.y + dy]:
+        if gv.game_map.visible[self.x + dx][self.y + dy]:
             self.x += dx
             self.y += dy
             #look_at_ground(self.x,self.y)
