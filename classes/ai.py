@@ -78,7 +78,6 @@ class BasicMonster:
         else:
             #Keep the old move function as a backup so that if there are no paths (for example another monster blocks a corridor)
             #it will still try to move towards the player (closer to the corridor opening)
-            print('default pathin')
             self.move_towards(target)  
  
         #Delete the path to free memory
