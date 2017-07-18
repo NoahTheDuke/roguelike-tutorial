@@ -1,10 +1,12 @@
 ''' All AI-related classes '''
 
+import tcod as libtcod
 import math
 import random
 from random import randint
 
 import colors
+import settings
 import global_vars as gv
 from gui_util import message
 
@@ -18,7 +20,7 @@ class BasicMonster:
  
             #move towards player if far away
             if monster.distance_to(gv.player) >= 2:
-                self.move_towards(gv.player)
+                self.move_astar(gv.player)
  
             #close enough, attack! (if the player is still alive.)
             elif gv.player.hp > 0:
@@ -36,6 +38,52 @@ class BasicMonster:
             if sum([obj.x,obj.y] == [x+dx,y+dy] for obj in gv.actors)==0:
                 self.owner.x += dx
                 self.owner.y += dy
+
+    def move_astar(self,target):
+        '''A* pathfinding'''
+
+        #Create a FOV map that has the dimensions of the map
+        fov = libtcod.map_new(settings.MAP_WIDTH, settings.MAP_HEIGHT)
+ 
+        #Scan the current map each turn and set all the walls as unwalkable
+        for y1 in range(settings.MAP_HEIGHT):
+            for x1 in range(settings.MAP_WIDTH):
+                libtcod.map_set_properties(fov, x1, y1, gv.game_map.transparent[x1][y1], gv.game_map.walkable[x1][y1])
+ 
+        #Scan all the objects to see if there are objects that must be navigated around
+        #Check also that the object isn't self or the target (so that the start and the end points are free)
+        #The AI class handles the situation if self is next to the target so it will not use this A* function anyway   
+        for obj in gv.gameobjects:
+            if obj.blocks and obj != self and obj != target:
+                #Set the tile as a wall so it must be navigated around
+                libtcod.map_set_properties(fov, obj.x, obj.y, True, False)
+ 
+        #Allocate a A* path
+        #The 1.41 is the normal diagonal cost of moving, it can be set as 0.0 if diagonal moves are prohibited
+        my_path = libtcod.path_new_using_map(fov, 1.41)
+ 
+        #Compute the path between self's coordinates and the target's coordinates
+        libtcod.path_compute(my_path, self.owner.x, self.owner.y, target.x, target.y)
+ 
+        #Check if the path exists, and in this case, also the path is shorter than 25 tiles
+        #The path size matters if you want the monster to use alternative longer paths (for example through other rooms) if for example the player is in a corridor
+        #It makes sense to keep path size relatively low to keep the monsters from running around the map if there's an alternative path really far away        
+        if not libtcod.path_is_empty(my_path) and libtcod.path_size(my_path) < 25:
+            #Find the next coordinates in the computed full path
+            x, y = libtcod.path_walk(my_path, True)
+            if x or y:
+                #Set self's coordinates to the next path tile
+                self.owner.x = x
+                self.owner.y = y
+        else:
+            #Keep the old move function as a backup so that if there are no paths (for example another monster blocks a corridor)
+            #it will still try to move towards the player (closer to the corridor opening)
+            print('default pathin')
+            self.move_towards(target)  
+ 
+        #Delete the path to free memory
+        libtcod.path_delete(my_path)
+
 
     def move_towards(self, target):
         ''' Move Gameobject towards intended target '''
