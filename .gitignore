@@ -1,6 +1,4 @@
 __pycache__/
-restructure/
 .pylintrc
+misc/
 savegames/savegame.*
-Notes.txt
-manual.txt

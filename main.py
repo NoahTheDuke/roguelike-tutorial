@@ -20,6 +20,7 @@ from gui_util import menu, message, msgbox
 from input_util import handle_keys, process_input
 from render_util import render_all
 from target_util import look_at_ground
+from gui_util import display_manual
 
 def initialize_window():
     ''' initializes & launches the game '''
@@ -28,7 +29,7 @@ def initialize_window():
     tdl.set_font('resources/arial10x10.png', greyscale=True, altLayout=True)
 
     # initialize the window
-    gv.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
+    gv.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title=settings.DUNGEONNAME, fullscreen=False)
     gv.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
     gv.panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
 
@@ -38,7 +39,7 @@ def initialize_window():
     main_menu()
 
 def main_menu():
-    img = image_load('resources\menu_background2.png')
+    img = image_load('resources\menu_background3.png')
 
     while not tdl.event.is_window_closed():
         #show the background image, at twice the regular console resolution
@@ -58,6 +59,7 @@ def main_menu():
 
         if choice == 0: # new game:
             gen_game(True)
+            #message('Press ? to open the manual.')
         elif choice == 1:
             try:
                 load_game()
@@ -106,6 +108,7 @@ def main_loop():
     ''' begin main game loop '''
     while not tdl.event.is_window_closed():
         if gv.stairs_down.descended:
+            msgbox('You descend further downwards the %s' % settings.DUNGEONNAME)
             gen_game(newgame=False)
 
         render_all()
@@ -126,9 +129,9 @@ def main_loop():
             elif 'fullscreen' in player_action:
                 tdl.set_fullscreen(not tdl.get_fullscreen())
                 gv.player.is_active = False
-            # elif 'manual' in player_action:
-            #     man = open('manual.txt','r')
-            #     msgbox(man.read(),60)
+            elif 'manual' in player_action:
+                display_manual()
+  
             else:              
                 if not gv.player.is_dead:
                     process_input(player_action)

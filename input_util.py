@@ -15,7 +15,7 @@ def handle_keys(user_input):
         return {'fullscreen':None}
     elif user_input.key == 'ESCAPE':
         return {'exit':None}  #exit game
-    elif user_input.key == 'F1':
+    elif user_input.text == '?':
         return 'manual'
     
     # movement keys
@@ -138,18 +138,20 @@ def process_input(action):
             item = menu('What do you want to pick up?',[item.name for item in items],24)
         if not item == None:
             items[item].pick_up()
+            message('You picked up a ' + items[item].name + '!', colors.green)
 
     elif 'inventory' in action:
         #show the gv.inventory, pressing a key returns the corresponding item
-        if chosen_item is not None:
-            if (action['inventory'] == 'interact'):
-                chosen_item = inventory_menu('Select the item to interact with:')
+        #if chosen_item is not None:
+        if (action['inventory'] == 'interact'):
+            chosen_item = inventory_menu('Select the item to interact with:')
+            if chosen_item is not None:
                 item_menu(chosen_item)
-            elif (action['inventory'] == 'use'):
-                chosen_item = inventory_menu('Select the item to use:')
-                item_menu(chosen_item)
+        elif (action['inventory'] == 'use'):
+            chosen_item = inventory_menu('Select the item to use:',filter='Useable')
+            if chosen_item is not None:
                 chosen_item.use()
-                
+
         gv.player.is_active = False
     
     elif 'stairs' in action:

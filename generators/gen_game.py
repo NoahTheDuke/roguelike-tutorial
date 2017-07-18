@@ -125,6 +125,7 @@ def gen_game(newgame):
 
         # a warm welcoming message!
         message('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME, colors.red)
+        message('Press ? to open the manual.', colors.green)
 
     else: # new dungeon level
         gv.dungeon_level += 1 # Increase the dungeon leavel by one

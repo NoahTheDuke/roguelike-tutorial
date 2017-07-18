@@ -18,7 +18,7 @@ def look_at_ground(x,y):
 
 def target_tile():
     '''Display a targeting cursor'''
-    message('Select a target by moving your cursor. Enter to confirm the target, any other key to cancel.')
+    message('Select a target by moving your cursor. Enter to confirm the target, press ESC to cancel.')
     if not gv.player.is_targeting:  # If the player-state is not yet targeting, enable it and create the cursor
         gv.player.is_active = False
         gv.player.is_targeting = True
@@ -28,13 +28,13 @@ def target_tile():
         tdl.flush()
         player_action = handle_keys(tdl.event.key_wait())
         if not player_action == None:
-            if 'move' in player_action:
+            if 'move' in player_action: # if key is a movement key process input as normal (will move the cursor)
                 process_input(player_action)
-            elif 'confirm' in player_action:
+            elif 'confirm' in player_action: # if enter was pressed, return the coordinates of the cursor
                 gv.player.is_targeting = False
                 gv.cursor.deactivate()
                 return (gv.cursor.x,gv.cursor.y) #Return the cursor's current coordinates to the calling function
-            else:
-                gv.player.is_targeting = False
+            elif 'exit' in player_action:
+                gv.player.is_targeting = False 
                 gv.cursor.deactivate()
                 break

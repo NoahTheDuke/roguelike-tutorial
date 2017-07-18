@@ -8,17 +8,20 @@ import global_vars as gv
 
 from render_util import render_all
 
-def inventory_menu(header):
+def inventory_menu(header,filter=None):
     '''show a menu with each item of the inventory as an option'''
-    if len(gv.inventory) == 0:
-        message('Inventory is empty.')
+    if filter is not None:  # if filter is set, only display items of a certain class
+        inventory = [item for item in gv.inventory if type(item).__name__ == filter]
     else:
-        options = [item.name for item in gv.inventory]
-        index = menu(header, options, settings.INVENTORY_WIDTH)
-        #if an item was chosen, return it
-        if index is None or len(gv.inventory) == 0:
-            return None
-        return gv.inventory[index]
+        inventory = gv.inventory
+    if len(inventory) == 0:
+        message('Your Inventory is empty.')
+    options = [item.name for item in inventory]
+    index = menu(header, options, settings.INVENTORY_WIDTH)
+    #if an item was chosen, return it
+    if index is None or len(gv.inventory) == 0:
+        return None
+    return gv.inventory[index]
 
 def item_menu(item):
     '''displays an item's descriptions and related options '''
@@ -36,7 +39,14 @@ def item_menu(item):
     elif key.char == 'e':
         item.equip()
     elif key.char == 'd':
-        item.drop()    
+        item.drop()
+
+def display_manual():
+    '''displays the game's manual'''
+    man = open('resources/manual.txt','r')
+    man = man.read().split('\n')
+    print(man)
+    menu(man,[],40,wrap_header=False,options_sorted=False)
 
 def msgbox(text, width=50):
     '''display a simple message box'''
@@ -50,13 +60,12 @@ def menu(header, options, width,wrap_header=True,options_sorted=True):
         header_wrapped = textwrap.wrap(header, width)
     else:
         header_wrapped = header
-    print(header_wrapped)
     
     #calculate total height for the header (after textwrap) and one line per option
     header_height = len(header_wrapped)
     if header == '':
         header_height = 0
-    height = len(options) + header_height+1
+    height = len(options) + header_height + 3
 
     #create an off-screen console that represents the menu's window
     window = tdl.Console(width, height)
@@ -79,6 +88,7 @@ def menu(header, options, width,wrap_header=True,options_sorted=True):
         for option_text in options:
             window.draw_str(0, y, option_text, bg=None)
             y += 1
+    window.draw_str(0,y+1,' ')
 
     #blit the contents of "window" to the root console
     x = settings.SCREEN_WIDTH//2 - width//2

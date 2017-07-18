@@ -30,7 +30,6 @@ class Item(GameObject):
         else:
             gv.inventory.append(self)
             gv.gameobjects.remove(self)
-            message('You picked up a ' + self.name + '!', colors.green)
     
     def drop(self):
         '''add to the map and remove from the gv.player's gv.inventory. also, place it at the gv.player's coordinates'''
