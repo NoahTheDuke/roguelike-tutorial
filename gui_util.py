@@ -5,7 +5,9 @@ import textwrap
 import settings
 import colors
 import global_vars as gv
-        
+
+from render_util import render_all
+
 def inventory_menu(header):
     '''show a menu with each item of the inventory as an option'''
     if len(gv.inventory) == 0:
@@ -18,18 +20,43 @@ def inventory_menu(header):
             return None
         return gv.inventory[index]
 
+def item_menu(item):
+    '''displays an item's descriptions and related options '''
+    render_all()    # Re-render the screen so the menus wont overlap
+
+    header = [(item.name).title(),' ']+(textwrap.wrap(item.description,30)) # Construct a header out of the item's name and description
+    menu(header,['(u)se','(e)quip','(d)rop',' ','Any other key to cancel.'],30,wrap_header=False,options_sorted=False)
+    key = tdl.event.key_wait()
+
+    if key.key == 'ENTER' and key.alt:  #(special case) Alt+Enter: toggle fullscreen
+        tdl.set_fullscreen(not tdl.get_fullscreen())
+
+    if key.char == 'u':
+        item.use()
+    elif key.char == 'e':
+        item.equip()
+    elif key.char == 'd':
+        item.drop()    
+
 def msgbox(text, width=50):
+    '''display a simple message box'''
     menu(text, [], width)  #use menu() as a sort of "message box"
 
-def menu(header, options, width):
+def menu(header, options, width,wrap_header=True,options_sorted=True):
     '''display a simple menu to the player'''
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
+    
+    if wrap_header:
+        header_wrapped = textwrap.wrap(header, width)
+    else:
+        header_wrapped = header
+    print(header_wrapped)
+    
     #calculate total height for the header (after textwrap) and one line per option
-    header_wrapped = textwrap.wrap(header, width)
     header_height = len(header_wrapped)
     if header == '':
         header_height = 0
-    height = len(options) + header_height
+    height = len(options) + header_height+1
 
     #create an off-screen console that represents the menu's window
     window = tdl.Console(width, height)
@@ -38,14 +65,20 @@ def menu(header, options, width):
     window.draw_rect(0, 0, width, height, None, fg=colors.white, bg=None)
     for i, line in enumerate(header_wrapped):
         window.draw_str(0, 0+i, header_wrapped[i])
+    window.draw_str(0,header_height,' ')
 
-    y = header_height
-    letter_index = ord('a') #ord returns the ascii code for a string-letter
-    for option_text in options:
-        text = '(' + chr(letter_index) + ') ' + option_text
-        window.draw_str(0, y, text, bg=None)
-        y += 1
-        letter_index += 1 #by incrementing the ascii code for the letter, we go through the alphabet
+    y = header_height+1
+    if options_sorted:
+        letter_index = ord('a') #ord returns the ascii code for a string-letter
+        for option_text in options:
+            text = '(' + chr(letter_index) + ') ' + option_text
+            window.draw_str(0, y, text, bg=None)
+            y += 1
+            letter_index += 1 #by incrementing the ascii code for the letter, we go through the alphabet
+    else:
+        for option_text in options:
+            window.draw_str(0, y, option_text, bg=None)
+            y += 1
 
     #blit the contents of "window" to the root console
     x = settings.SCREEN_WIDTH//2 - width//2
@@ -60,7 +93,7 @@ def menu(header, options, width):
         key_char = ' ' # placeholder
     if key.key == 'ENTER' and key.alt:  #(special case) Alt+Enter: toggle fullscreen
         tdl.set_fullscreen(not tdl.get_fullscreen())
-    
+
     index = ord(key_char) - ord('a')
     if index >= 0 and index < len(options):
         return index

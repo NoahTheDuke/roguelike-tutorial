@@ -115,6 +115,7 @@ def main_loop():
         
         gv.player.is_active = True # Player is considered active by default
         player_action = handle_keys(tdl.event.key_wait())
+        print(player_action)
 
         if not player_action == None:
             if 'exit' in player_action:

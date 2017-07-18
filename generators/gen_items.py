@@ -58,12 +58,14 @@ def gen_P_Heal(x,y):
 
     name = 'healing potion'
     pwr = randint(6,10)
+    descr = 'This potion will heal you for a small amount.'
 
     i = Useable(
         x,y,
         name,
         CHAR_POTION,
         colors.violet,
+        description = descr,
         use_function=iu.cast_heal,
         params= pwr
     )
@@ -73,6 +75,8 @@ def gen_P_Power(x,y):
     ''' basic power potion - can be cursed '''
 
     name = 'potion of power'
+    descr = 'A potion of power will heighten your strength.'
+
     if randint(0,100) > 20: 
         pwr = 1
     else:   # 20% chance of being cursed
@@ -83,6 +87,7 @@ def gen_P_Power(x,y):
         name,
         CHAR_POTION,
         colors.red,
+        description = descr,
         use_function=iu.cast_powerup,
         params=pwr
     )
@@ -96,6 +101,7 @@ def gen_P_Power(x,y):
                                
 def gen_Scr_Ltng(x,y):
     name = 'scroll of lightning bolt'
+    descr = 'A scroll of lightning bolt. It will strike one of the nearest enemies.'
     pwr = randint(8,10)
     range = 3
     i = Useable(
@@ -103,7 +109,7 @@ def gen_Scr_Ltng(x,y):
         name,
         CHAR_SCROLL,
         COLOR_SCROLL,
-        description = 'A scroll of lightning bolt. It will strike one of the nearest enemies.',
+        description = descr,
         use_function=iu.cast_lightning,
         params=(pwr,range) # power/radius
     )

@@ -3,7 +3,7 @@
 import colors
 import global_vars as gv
 
-from gui_util import message, menu, inventory_menu
+from gui_util import message, menu, inventory_menu, item_menu
 
 def handle_keys(user_input):
     ''' Handles all key input made by the player '''
@@ -63,16 +63,19 @@ def handle_keys(user_input):
         return 'get'
 
     elif user_input.text == 'i':
+        return {'inventory':'interact'}
+
+    elif user_input.text == 'u':
         return {'inventory':'use'}
 
-    elif user_input.text == 'd':
-        return {'inventory':'drop'}
+    # elif user_input.text == 'd':
+    #     return {'inventory':'drop'}
 
-    elif user_input.text == 'e':
-        return {'inventory':'equip'}
+    # elif user_input.text == 'e':
+    #     return {'inventory':'equip'}
 
-    elif user_input.text == 'x':
-        return {'inventory':'examine'}
+    # elif user_input.text == 'x':
+    #     return {'inventory':'examine'}
 
     # other
     elif user_input.key in ['ENTER','KPENTER']:
@@ -138,16 +141,15 @@ def process_input(action):
 
     elif 'inventory' in action:
         #show the gv.inventory, pressing a key returns the corresponding item
-        chosen_item = inventory_menu('Press the key next to an item to %s it, or any other to cancel.\n' % action['inventory'])
-        if chosen_item is not None: #if an item was selected, call it's use or drop function
-            if (action['inventory'] == 'use'):
+        if chosen_item is not None:
+            if (action['inventory'] == 'interact'):
+                chosen_item = inventory_menu('Select the item to interact with:')
+                item_menu(chosen_item)
+            elif (action['inventory'] == 'use'):
+                chosen_item = inventory_menu('Select the item to use:')
+                item_menu(chosen_item)
                 chosen_item.use()
-            elif (action['inventory'] == 'equip'):
-                chosen_item.equip()
-            elif (action['inventory'] == 'drop'):
-                chosen_item.drop()
-            elif (action['inventory'] == 'examine'):
-                chosen_item.examine()
+                
         gv.player.is_active = False
     
     elif 'stairs' in action:
@@ -157,7 +159,7 @@ def process_input(action):
         elif (action['stairs'] == '>' and gv.player.pos() == gv.stairs_up.pos()):
             message('A heavy trap door has fallen shut on the staircase. You can only go further down.')
         else:
-            message('There a no stairs here.')
+            message('There are no stairs here.')
         gv.player.is_active = False
     
     # elif 'confirm' in action:
