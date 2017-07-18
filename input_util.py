@@ -43,7 +43,7 @@ def handle_keys(user_input):
     elif user_input.key in ['KP3']:
         return {'move':(1,1)}          
 
-    elif user_input.key in ['KP5']:
+    elif user_input.key in ['KP5','.']:
         return {'move':(0,0)}
 
     elif user_input.text == 'r':

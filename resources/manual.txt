@@ -5,19 +5,25 @@
 \____/\___/|_| |_|\__|_|  \___/|_|___/
                                       
 
-Movement:
-  7    8    9
-   \   |   /
-4 - Numpad - 6
-   /   |   \
-  1    2    3
+MOVEMENT:
+Numpad:
+   7    8    9
+    \   |   /
+4 - Direction - 6
+    /   |   \
+   1    2    3
 
-Num 5 - Wait a turn.
+Arrow Keys:
+     Up
+Left    Right
+    Down
+
+Num 5 or . - Wait a turn.
 r - toggle (r)unning
     - you can't fight while running
 < - descend a flight of stairs
 
-Actions:
+ACTIONS:
 l - (l)ook around
     - use movement keys to control the cursor
     - press the key again to stop (l)ooking
@@ -27,6 +33,6 @@ i - open the (i)nventory
 g - (g)et an item from the ground
 u - show all (u)seable items
 
-Other:
+OTHER:
 ESC - quit & save the game
 Alt+Enter - toggle Fullscreen

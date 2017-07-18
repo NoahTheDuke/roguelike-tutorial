@@ -45,8 +45,7 @@ def display_manual():
     '''displays the game's manual'''
     man = open('resources/manual.txt','r')
     man = man.read().split('\n')
-    print(man)
-    menu(man,[],40,wrap_header=False,options_sorted=False)
+    menu(man,[],(settings.SCREEN_WIDTH//2),wrap_header=False,options_sorted=False)
 
 def msgbox(text, width=50):
     '''display a simple message box'''
