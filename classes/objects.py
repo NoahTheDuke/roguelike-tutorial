@@ -71,7 +71,6 @@ class Cursor(GameObject):
     '''cursor object '''
     def __init__(self, x, y):
         super().__init__(x, y,'cursor',None,None)
-        self.is_active = False
 
     def move (self,dx,dy):
         if gv.game_map.visible[self.x + dx][self.y + dy]:
@@ -87,7 +86,6 @@ class Cursor(GameObject):
     def activate(self,char,color):
         self.char = char
         self.color = color
-        self.is_active = True
         self.x = gv.player.x
         self.y = gv.player.y
         self.send_to_front()
@@ -95,7 +93,6 @@ class Cursor(GameObject):
     def deactivate(self):
         self.color = None
         self.char = None
-        self.is_active = False
         self.send_to_back()
 
 class Stairs(GameObject):
