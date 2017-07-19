@@ -57,29 +57,28 @@ def draw_side_panel(panel,root):
     ''' draws the right (GUI) panel '''
 
     # prepare to render the GUI panel
-    panel.clear(fg=colors.red, bg=colors.red)
+    panel.clear(fg=colors.white, bg=colors.black)
 
     # draw the panel's border
     for y in range(settings.SCREEN_HEIGHT):
-        print(y)
-        panel.draw_char(1,y,None,bg=colors.grey)
+        panel.draw_char(0,y,None,bg=colors.darker_grey)
         
-    # # Show the player's name and stats
-    # panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,1,gv.player.name, bg=None, fg=colors.gold)
-    # panel.draw_str(2,2,' ')
-    # render_bar(2,3,panel,settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
-    #     colors.light_red, colors.darker_red)
-    # panel.draw_str(2,4,' ')
-    # render_bar(2,5,panel,settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power,
-    #     colors.black, colors.black)
-    # panel.draw_str(2,6,' ')
-    # render_bar(2,7,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
-    #     colors.black, colors.black)
-    # panel.draw_str(2,8,' ')
+    # Show the player's name and stats
+    panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,1,gv.player.name, bg=None, fg=colors.gold)
+    panel.draw_str(2,2,' ')
+    render_bar(2,3,panel,settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
+        colors.light_red, colors.darker_red)
+    panel.draw_str(2,4,' ')
+    render_bar(2,5,panel,settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power,
+        colors.black, colors.black)
+    panel.draw_str(2,6,' ')
+    render_bar(2,7,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
+        colors.black, colors.black)
+    panel.draw_str(2,8,' ')
 
     # # Blit the content to root
     # blit(source, x=0, y=0, width=None, height=None, srcX=0, srcY=0, fg_alpha=1.0, bg_alpha=1.0)
-    root.blit(panel, settings.SIDE_PANEL_X,0, settings.SIDE_PANEL_WIDTH, 120)
+    root.blit(panel, settings.SIDE_PANEL_X,0, settings.SIDE_PANEL_WIDTH, settings.SCREEN_HEIGHT)
 
 def draw_bottom_panel(panel,root):
     ''' draws the bottom (message) panel '''
