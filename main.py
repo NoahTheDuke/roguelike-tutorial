@@ -55,16 +55,17 @@ def main_menu():
         gv.root.draw_str(center, settings.SCREEN_HEIGHT-2, title, bg=None, fg=colors.light_yellow)
  
         #show options and wait for the player's choice
-        choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
+        #choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
+        choice = menu('', ['Play a new game', 'Quit'], 24)
 
         if choice == 0: # new game:
             gen_game(True)
             #message('Press ? to open the manual.')
-        elif choice == 1:
-            try:
-                load_game()
-            except:
-                msgbox('\n No saved game to load.\n', 24)
+        # elif choice == 1:
+        #     try:
+        #         load_game()
+        #     except:
+        #         msgbox('\n No saved game to load.\n', 24)
         else: #quit
             break
 
@@ -93,11 +94,13 @@ def load_game():
         gv.game_map = savefile['map']
         gv.gameobjects = savefile['objects']
         gv.actors = savefile['actors']
+        #gv.actors = [obj for obj in gameobjects if ]
         gv.inventory = savefile['inventory']
         gv.game_msgs = savefile['messages']
 
         # Restore special objects
         gv.player = gv.gameobjects[savefile['p_index']]
+        print('{0} is new gv.player'.format(gv.player.name))
         gv.cursor = gv.gameobjects[savefile['c_index']]
         gv.stairs_down = gv.gameobjects[savefile['sd_index']]
         gv.stairs_up = gv.gameobjects[savefile['su_index']]
@@ -144,7 +147,7 @@ def main_loop():
                     look_at_ground(gv.player.x,gv.player.y) # check ground for stuff
                     #AI takes turn, if player is not considered inactive and is roughly in FOV
                     for obj in gv.actors:
-                        if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and (not obj == gv.player):
+                        if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj.ai is not None:
                             obj.ai.take_turn()
 
 if __name__ == '__main__':

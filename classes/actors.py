@@ -16,12 +16,16 @@ from classes.items import Useable
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
-    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False):
+    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False,ai=None):
         super().__init__(x, y,name,char,color,blocks=True)
         self.hp, self.power, self.defense = hp, pwr, df
         self.max_hp = hp
         self.max_power = pwr
         self.max_defense = df
+
+        self.ai = ai
+        if self.ai: #let the AI component know who owns it
+            self.ai.owner = self
     
         gv.actors.append(self)
 
@@ -56,12 +60,9 @@ class Fighter(GameObject):
 class Monster(Fighter):
     ''' base-class for all hostile mobs '''
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2,ai=None,blurbs=None):
-        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
+        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df,ai=ai)
 
         self.blurbs = blurbs
-        self.ai = ai
-        if self.ai: #let the AI component know who owns it
-            self.ai.owner = self
 
     def death(self):
         ''' death for monster characters '''
@@ -81,7 +82,7 @@ class Monster(Fighter):
 class Player(Fighter):
     ''' Class for the player object '''
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2):
-        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
+        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df,ai=None)
         self.is_running = False
         self.is_looking = False
         self.is_targeting = False
