@@ -6,6 +6,7 @@ import settings
 import colors
 import global_vars as gv
 
+from game_states import GameStates
 from render_util import render_all
 
 def inventory_menu(header,filter=None):
@@ -29,17 +30,23 @@ def item_menu(item):
 
     header = [(item.name).title(),' ']+(textwrap.wrap(item.description,30)) # Construct a header out of the item's name and description
     menu(header,['(u)se','(e)quip','(d)rop',' ','Any other key to cancel.'],30,wrap_header=False,options_sorted=False)
+
+    # Wait for the player make a selection
     key = tdl.event.key_wait()
 
-    if key.key == 'ENTER' and key.alt:  #(special case) Alt+Enter: toggle fullscreen
-        tdl.set_fullscreen(not tdl.get_fullscreen())
-
+    # After the player has made his choice (or canceled), game play resumes
     if key.char == 'u':
+        gv.gamestate = GameStates.ENEMY_TURN
         item.use()
     elif key.char == 'e':
+        gv.gamestate = GameStates.PLAYERS_TURN
         item.equip()
     elif key.char == 'd':
+        gv.gamestate = GameStates.PLAYERS_TURN
         item.drop()
+    else:
+        gv.gamestate = GameStates.PLAYERS_TURN
+        pass
 
 def display_manual():
     '''displays the game's manual'''

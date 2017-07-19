@@ -87,6 +87,9 @@ def handle_keys(user_input):
 
 def process_input(action):
     ''' process key input into game actions '''
+
+    print('Processing {0}'.format(action))
+
     if 'move' in action:
         x,y = action['move']
         if gv.gamestate == GameStates.CURSOR_ACTIVE:
@@ -139,16 +142,18 @@ def process_input(action):
             message('You picked up a ' + items[item].name + '!', colors.green)
 
     elif 'inventory' in action:
-        #show the gv.inventory, pressing a key returns the corresponding item
-        #if chosen_item is not None:
-        if (action['inventory'] == 'interact'):
-            chosen_item = inventory_menu('Select the item to interact with:')
-            if chosen_item is not None:
-                item_menu(chosen_item)
-        elif (action['inventory'] == 'use'):
-            chosen_item = inventory_menu('Select the item to use:',filter='Useable')
-            if chosen_item is not None:
-                chosen_item.use()
+        # Display the inventory, if it is not already active
+        if gv.gamestate is not GameStates.INVENTORY_ACTIVE:
+            if (action['inventory'] == 'interact'):
+                chosen_item = inventory_menu('Select the item to interact with:')
+                if chosen_item is not None:
+                    gv.gamestate = GameStates.INVENTORY_ACTIVE
+                    item_menu(chosen_item)    
+            elif (action['inventory'] == 'use'):
+                chosen_item = inventory_menu('Select the item to use:',filter='Useable')
+                if chosen_item is not None:
+                    chosen_item.use()
+                    gv.gamestate = GameStates.ENEMY_TURN
     
     elif 'stairs' in action:
         if (action['stairs'] == '<' and gv.player.pos() == gv.stairs_down.pos()):

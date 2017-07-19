@@ -125,36 +125,40 @@ def main_loop():
             obj.clear(gv.con)
         
         #gv.player.is_active = True # Player is considered active by default
+        print('main loop waiting again!')
         player_action = handle_keys(tdl.event.key_wait())
-
-        if not player_action == None:
-            if 'exit' in player_action:
-                choice = menu('Save & Quit the %s' % settings.DUNGEONNAME + ' ?',['Yes','No'],24)
-                if choice == 0:
-                    save_game()
-                    break
-            elif 'fullscreen' in player_action:
-                tdl.set_fullscreen(not tdl.get_fullscreen())
-            elif 'manual' in player_action:
-                display_manual()
-  
-            else:              
-                if gv.gamestate is not GameStates.PLAYER_DEAD:
-                    process_input(player_action)
-                    # If the player has moved, check the ground for items
-                    if ('move' in player_action) and gv.gamestate is GameStates.ENEMY_TURN:
-                        look_at_ground(gv.player.x,gv.player.y)
-                    # or if the cursor is active and was moved, check as well
-                    elif ('move' in player_action) and gv.gamestate is GameStates.CURSOR_ACTIVE:
-                        look_at_ground(gv.cursor.x,gv.cursor.y)
-                   
-                # If player has done an active turn
-                if gv.gamestate == GameStates.ENEMY_TURN:
-                    #AI takes turn, if player is not considered inactive and is roughly in FOV
-                    for obj in gv.actors:
-                        if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj is not gv.player:
-                            obj.ai.take_turn()
-                    gv.gamestate = GameStates.PLAYERS_TURN
+        print('Gamestate: %s' % gv.gamestate)
+        if gv.gamestate is not GameStates.INVENTORY_ACTIVE:
+            if not player_action == None:
+                if 'exit' in player_action:
+                    choice = menu('Save & Quit the %s' % settings.DUNGEONNAME + ' ?',['Yes','No'],24)
+                    if choice == 0:
+                        save_game()
+                        break
+                elif 'fullscreen' in player_action:
+                    tdl.set_fullscreen(not tdl.get_fullscreen())
+                elif 'manual' in player_action:
+                    display_manual()
+    
+                else:              
+                    if gv.gamestate is GameStates.PLAYERS_TURN or gv.gamestate is GameStates.CURSOR_ACTIVE:
+                        print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
+                        #print('processing input!')
+                        process_input(player_action)
+                        # If the player has moved, check the ground for items
+                        if ('move' in player_action) and gv.gamestate is GameStates.ENEMY_TURN:
+                            look_at_ground(gv.player.x,gv.player.y)
+                        # or if the cursor is active and was moved, check as well
+                        elif ('move' in player_action) and gv.gamestate is GameStates.CURSOR_ACTIVE:
+                            look_at_ground(gv.cursor.x,gv.cursor.y)
+                    
+                    # If player has done an active turn
+                    if gv.gamestate == GameStates.ENEMY_TURN:
+                        #AI takes turn, if player is not considered inactive and is roughly in FOV
+                        for obj in gv.actors:
+                            if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj is not gv.player:
+                                obj.ai.take_turn()
+                        gv.gamestate = GameStates.PLAYERS_TURN
 
 if __name__ == '__main__':
     initialize_window()
