@@ -162,3 +162,33 @@ def gen_Scr_Mami(x,y):
         params=(pwr,range) # power/radius
     )
     return i
+
+#    ___ _   _               
+#   /___\ |_| |__   ___ _ __ 
+#  //  // __| '_ \ / _ \ '__|
+# / \_//| |_| | | |  __/ |   
+# \___/  \__|_| |_|\___|_|   
+                           
+def gen_Corpse(x,y,origin):
+    i = Useable(
+        x,y,
+        '{0} corpse'.format(origin.name),
+        '%',
+        colors.red,
+        description = 'The brutalized corpse of a {0}'.format(origin.name),
+        use_function=iu.eat_corpse,
+        params=origin.name
+    )
+    return i
+
+def gen_Corpsebits(x,y,origin):
+    i = Useable(
+        x,y,
+        '{0} bits'.format(origin.name),
+        '~',
+        colors.red,
+        description = 'Little chunks of a {0}'.format(origin.name),
+        use_function=iu.eat_corpse,
+        params=origin.name
+    )
+    return i

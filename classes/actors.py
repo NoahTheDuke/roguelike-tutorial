@@ -9,23 +9,20 @@ import colors
 import global_vars as gv
 
 import item_use as iu
-from gui_util import message
+from gui_util import message,msgbox
 
 from classes.objects import GameObject
-from classes.items import Useable
+
+from generators.gen_items import gen_Corpse,gen_Corpsebits
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
-    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False,ai=None):
+    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False):
         super().__init__(x, y,name,char,color,blocks=True)
         self.hp, self.power, self.defense = hp, pwr, df
         self.max_hp = hp
         self.max_power = pwr
         self.max_defense = df
-
-        self.ai = ai
-        if self.ai: #let the AI component know who owns it
-            self.ai.owner = self
     
         gv.actors.append(self)
 
@@ -57,32 +54,39 @@ class Fighter(GameObject):
         if self.power == 1:
             self.power = 1
 
+    def death(self):
+        ''' Generic death for all actors '''
+        message('The ' + self.name.capitalize() + ' is dead!',colors.green)
+        x,y = (self.x,self.y)
+        item = gen_Corpse(x,y,self)
+        #item = Useable(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,use_function=iu.eat_corpse,params=self.name)
+        gv.game_map.gibbed[x][y] = True # Set the tile to 'gibbed' (will be rendered red)
+        for i in range(1,randint(3,5)):
+            x,y = (randint(x-1,x+1),randint(y-1,y+1))
+            gv.game_map.gibbed[x][y] = True
+        for i in range(1,randint(1,3)):
+            x,y = (randint(x-2,x+2),randint(y-2,y+2))
+            if randint(0,100) < 40:
+                item = gen_Corpsebits(x,y,self)
+                #item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,use_function=iu.eat_corpse,params=self.name)
+                item.send_to_back()
+        self.delete()
+
 class Monster(Fighter):
     ''' base-class for all hostile mobs '''
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2,ai=None,blurbs=None):
-        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df,ai=ai)
+        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
 
         self.blurbs = blurbs
 
-    def death(self):
-        ''' death for monster characters '''
-        message('The ' + self.name.capitalize() + ' is dead!',colors.green)
-        item = Useable(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,use_function=iu.eat_corpse,params=self.name)
-        gv.game_map.gibbed[self.x][self.y] = True
-        for i in range(1,randint(3,5)):
-            x,y = (randint(self.x-1, self.x+1),randint(self.y-1, self.y+1))
-            gv.game_map.gibbed[x][y] = True
-        for i in range(1,randint(1,3)):
-            x,y = (randint(self.x-2, self.x+2),randint(self.y-2, self.y+2))
-            if randint(0,100) < 40:
-                item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,use_function=iu.eat_corpse,params=self.name)
-                item.send_to_back()
-        self.delete()
+        self.ai = ai
+        if self.ai: #let the AI component know who owns it
+            self.ai.owner = self
 
 class Player(Fighter):
     ''' Class for the player object '''
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2):
-        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df,ai=None)
+        super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
         self.is_running = False
         self.is_looking = False
         self.is_targeting = False
@@ -129,7 +133,8 @@ class Player(Fighter):
             message('Something blocks your way.')
     
     def death(self):
-        message('You died!')
+        '''specific player death function'''
+        msgbox('You died!',text_color=colors.red)
 
         #for added effect, transform the gv.player into a corpse!
         gv.player.char = '%'
@@ -137,7 +142,8 @@ class Player(Fighter):
         for i in range(1,randint(1,5)):
             x,y = (randint(self.x-2, self.x+2),randint(self.y-2, self.y+2))
             if randint(0,100) < 40:
-                item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,iu.eat_corpse,self.name)
+                item = gen_Corpsebits(x,y,self)
+                #item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,iu.eat_corpse,self.name)
                 item.send_to_back()
             else:
                 gv.game_map.gibbed[x][y] = True

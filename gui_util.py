@@ -47,11 +47,11 @@ def display_manual():
     man = man.read().split('\n')
     menu(man,[],(settings.SCREEN_WIDTH//2),wrap_header=False,options_sorted=False)
 
-def msgbox(text, width=50):
+def msgbox(text, width=50,text_color=colors.white):
     '''display a simple message box'''
-    menu(text, [], width)  #use menu() as a sort of "message box"
+    menu(text, [], width,text_color=text_color)  #use menu() as a sort of "message box"
 
-def menu(header, options, width,wrap_header=True,options_sorted=True):
+def menu(header, options, width,wrap_header=True,options_sorted=True,text_color=colors.white):
     '''display a simple menu to the player'''
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
     
@@ -73,19 +73,19 @@ def menu(header, options, width,wrap_header=True,options_sorted=True):
     window.draw_rect(0, 0, width, height, None, fg=colors.white, bg=None)
     for i, line in enumerate(header_wrapped):
         window.draw_str(0, 0+i, header_wrapped[i])
-    window.draw_str(0,header_height,' ')
+    window.draw_str(0,header_height,' ',fg=text_color)
 
     y = header_height+1
     if options_sorted:
         letter_index = ord('a') #ord returns the ascii code for a string-letter
         for option_text in options:
             text = '(' + chr(letter_index) + ') ' + option_text
-            window.draw_str(0, y, text, bg=None)
+            window.draw_str(0, y, text,fg=text_color, bg=None)
             y += 1
             letter_index += 1 #by incrementing the ascii code for the letter, we go through the alphabet
     else:
         for option_text in options:
-            window.draw_str(0, y, option_text, bg=None)
+            window.draw_str(0, y, option_text,fg=text_color, bg=None)
             y += 1
     window.draw_str(0,y+1,' ')
 

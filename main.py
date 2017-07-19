@@ -147,7 +147,7 @@ def main_loop():
                     look_at_ground(gv.player.x,gv.player.y) # check ground for stuff
                     #AI takes turn, if player is not considered inactive and is roughly in FOV
                     for obj in gv.actors:
-                        if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj.ai is not None:
+                        if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj is not gv.player:
                             obj.ai.take_turn()
 
 if __name__ == '__main__':
