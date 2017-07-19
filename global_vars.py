@@ -1,4 +1,12 @@
 # Global variables
+
+# Console & GUI
+root = None
+con = None
+bottom_panel = None
+side_panel = None
+
+# Gameplay variables
 # TODO: noramlize variable names (game_objects,game_actors)
 gameobjects = []
 actors = []
@@ -10,7 +18,3 @@ cursor = None
 stairs_up = None
 stairs_down = None
 dungeon_level = 1
-
-root = None
-con = None
-panel = None

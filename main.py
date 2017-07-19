@@ -31,7 +31,8 @@ def initialize_window():
     # initialize the window
     gv.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title=settings.DUNGEONNAME, fullscreen=False)
     gv.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
-    gv.panel = tdl.Console(settings.SCREEN_WIDTH, settings.PANEL_HEIGHT)
+    gv.bottom_panel = tdl.Console(settings.SCREEN_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    gv.side_panel = tdl.Console(settings.SCREEN_WIDTH, settings.SIDE_PANEL_WIDTH)
 
     # begin the main game loop
     tdl.setFPS(settings.LIMIT_FPS)
