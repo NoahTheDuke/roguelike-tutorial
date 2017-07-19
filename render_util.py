@@ -1,4 +1,5 @@
 import tdl
+from textwrap import wrap
 
 import settings
 import colors
@@ -64,25 +65,35 @@ def draw_side_panel(panel,root):
         panel.draw_char(0,y,None,bg=colors.darker_grey)
         
     # Show the player's name and stats
-    panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2+2,1,gv.player.name, bg=None, fg=colors.gold)
-    panel.draw_str(2,2,' ')
-    render_bar(2,3,panel,settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
+    panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,1,gv.player.name, bg=None, fg=colors.gold)
+    panel.draw_str(1,2,' ')
+    render_bar(1,3,panel,settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
         colors.light_red, colors.darker_red)
     panel.draw_str(2,4,' ')
-    render_bar(2,5,panel,settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power,
+    render_bar(1,5,panel,settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power,
         colors.black, colors.black)
     panel.draw_str(2,6,' ')
-    render_bar(2,7,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
+    render_bar(1,7,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
         colors.black, colors.black)
-    panel.draw_str(2,8,' ')
+    panel.draw_str(1,8,' ')
     
     # Draw the inventory below the stats
     if len(gv.inventory) > 0:
-        y = 8
-        panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2+2,1,'Inventory', bg=None, fg=colors.gold)
+        y = 9
+        panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,y,'Inventory', bg=None, fg=colors.gold)
+        panel.draw_str(2,y+1,' ')
+        y += 2
         for i in range(len(gv.inventory)):
             item = gv.inventory[i]
-            panel.draw_str(2,1,'Inventory')
+            text = wrap(item.name,settings.BAR_WIDTH-4)
+            panel.draw_str(2,y,'- {0}'.format(text[0].title()))
+            y += 1
+            if len(text) > 1:
+                for line in text[1:]:
+                    panel.draw_str(2,y,line.title())
+                    y += 1
+            panel.draw_str(2,y,' ')
+            y += 1
 
     # # Blit the content to root
     # blit(source, x=0, y=0, width=None, height=None, srcX=0, srcY=0, fg_alpha=1.0, bg_alpha=1.0)
