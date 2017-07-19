@@ -27,7 +27,7 @@ def initialize_window():
     ''' initializes & launches the game '''
     
     # Set custom font
-    tdl.set_font('resources/arial10x10.png', greyscale=True, altLayout=True)
+    tdl.set_font('resources/terminal12x12_gs_ro.png', greyscale=True)
 
     # initialize the window
     gv.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title=settings.DUNGEONNAME, fullscreen=False)
