@@ -75,6 +75,14 @@ def draw_side_panel(panel,root):
     render_bar(2,7,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
         colors.black, colors.black)
     panel.draw_str(2,8,' ')
+    
+    # Draw the inventory below the stats
+    if len(gv.inventory) > 0:
+        y = 8
+        panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2+2,1,'Inventory', bg=None, fg=colors.gold)
+        for i in range(len(gv.inventory)):
+            item = gv.inventory[i]
+            panel.draw_str(2,1,'Inventory')
 
     # # Blit the content to root
     # blit(source, x=0, y=0, width=None, height=None, srcX=0, srcY=0, fg_alpha=1.0, bg_alpha=1.0)
