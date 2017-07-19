@@ -88,9 +88,6 @@ class Player(Fighter):
     def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2):
         super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
         self.is_running = False
-        self.is_looking = False
-        self.is_targeting = False
-        self.is_active = True
         self.is_dead = False
       
     def move(self, dx, dy,running=False):

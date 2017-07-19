@@ -3,6 +3,7 @@
 import colors
 import global_vars as gv
 
+from game_states import GameStates
 from gui_util import message, menu, inventory_menu, item_menu
 
 def handle_keys(user_input):
@@ -88,11 +89,11 @@ def process_input(action):
     ''' process key input into game actions '''
     if 'move' in action:
         x,y = action['move']
-        if gv.cursor.is_active:
+        if gv.gamestate == GameStates.CURSOR_ACTIVE:
             gv.cursor.move(x,y)
-            gv.player.is_active = False
-        elif gv.player.is_active:
-            gv.player.move(x,y,gv.player.is_running)          
+        elif gv.gamestate == GameStates.PLAYERS_TURN:
+            gv.player.move(x,y,gv.player.is_running)
+            gv.gamestate = GameStates.ENEMY_TURN          
     
     elif 'run' in action:
         if (gv.player.is_running):
@@ -101,18 +102,16 @@ def process_input(action):
         else:
             message('You start to run.')
             gv.player.is_running = True
-        gv.player.is_active = False
 
     elif 'look' in action:
-        if gv.player.is_looking:
+        if gv.gamestate == GameStates.CURSOR_ACTIVE:
             message('You stop looking around.')
-            gv.player.is_looking = False
             gv.cursor.deactivate()
+            gv.gamestate = GameStates.PLAYERS_TURN
         else:
             message('You start looking around.')
-            gv.player.is_looking = True
+            gv.gamestate = GameStates.CURSOR_ACTIVE
             gv.cursor.activate('*',colors.white)
-        gv.player.is_active = False
     
     # elif 'target' in action:
     #     if gv.player.is_targeting:
@@ -131,7 +130,6 @@ def process_input(action):
         items = [obj for obj in gv.gameobjects if [obj.x,obj.y] == [gv.player.x, gv.player.y] and obj.is_item]
         if len(items) == 0:
             message('There is nothing to pick up here!')
-            gv.player.is_active = False
         elif len(items) == 1:
             item = 0
         else:
@@ -151,8 +149,6 @@ def process_input(action):
             chosen_item = inventory_menu('Select the item to use:',filter='Useable')
             if chosen_item is not None:
                 chosen_item.use()
-
-        gv.player.is_active = False
     
     elif 'stairs' in action:
         if (action['stairs'] == '<' and gv.player.pos() == gv.stairs_down.pos()):
@@ -162,7 +158,6 @@ def process_input(action):
             message('A heavy trap door has fallen shut on the staircase. You can only go further down.')
         else:
             message('There are no stairs here.')
-        gv.player.is_active = False
     
     # elif 'confirm' in action:
     #     if gv.player.is_targeting:

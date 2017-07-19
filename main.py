@@ -16,6 +16,7 @@ import settings
 from generators.gen_game import gen_game
 
 # Game-related modules
+from game_states import GameStates
 from gui_util import menu, message, msgbox
 from input_util import handle_keys, process_input
 from render_util import render_all
@@ -111,6 +112,8 @@ def load_game():
 
 def main_loop():
     ''' begin main game loop '''
+    gv.gamestate = GameStates.PLAYERS_TURN
+
     while not tdl.event.is_window_closed():
         if gv.stairs_down.descended:
             #msgbox('You descend further downwards %s' % settings.DUNGEONNAME,colors.dark_red)
@@ -121,9 +124,8 @@ def main_loop():
         for obj in gv.gameobjects:
             obj.clear(gv.con)
         
-        gv.player.is_active = True # Player is considered active by default
+        #gv.player.is_active = True # Player is considered active by default
         player_action = handle_keys(tdl.event.key_wait())
-        print(player_action)
 
         if not player_action == None:
             if 'exit' in player_action:
@@ -133,7 +135,6 @@ def main_loop():
                     break
             elif 'fullscreen' in player_action:
                 tdl.set_fullscreen(not tdl.get_fullscreen())
-                gv.player.is_active = False
             elif 'manual' in player_action:
                 display_manual()
   
@@ -141,16 +142,17 @@ def main_loop():
                 if not gv.player.is_dead:
                     process_input(player_action)
 
-                if gv.cursor.is_active:
+                if gv.gamestate == GameStates.PLAYERS_TURN:
                     look_at_ground(gv.cursor.x,gv.cursor.y)
                 
                 # If player has done an active turn
-                if gv.player.is_active:
-                    look_at_ground(gv.player.x,gv.player.y) # check ground for stuff
+                if gv.gamestate == GameStates.ENEMY_TURN:
+                    #look_at_ground(gv.player.x,gv.player.y) # check ground for stuff
                     #AI takes turn, if player is not considered inactive and is roughly in FOV
                     for obj in gv.actors:
                         if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj is not gv.player:
                             obj.ai.take_turn()
+                    gv.gamestate = GameStates.PLAYERS_TURN
 
 if __name__ == '__main__':
     initialize_window()

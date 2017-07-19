@@ -17,4 +17,5 @@ game_map = None
 cursor = None
 stairs_up = None
 stairs_down = None
+gamestate = None
 dungeon_level = 1

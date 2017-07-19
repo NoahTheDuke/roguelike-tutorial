@@ -6,6 +6,7 @@ import settings
 import colors
 import global_vars as gv
 
+from game_states import GameStates
 from gui_util import message
 from input_util import handle_keys,process_input
 from render_util import render_all
@@ -19,11 +20,10 @@ def look_at_ground(x,y):
 def target_tile():
     '''Display a targeting cursor'''
     message('Select a target by moving your cursor. Enter to confirm the target, press ESC to cancel.')
-    if not gv.player.is_targeting:  # If the player-state is not yet targeting, enable it and create the cursor
-        gv.player.is_active = False
-        gv.player.is_targeting = True
+    if gv.gamestate is not GameStates.CURSOR_ACTIVE:  # If the player-state is not yet targeting, enable it and create the cursor
+        gv.gamestate = GameStates.CURSOR_ACTIVE
         gv.cursor.activate('X',colors.red)
-    while gv.player.is_targeting: # While the player is considered targeting, suspend game-play to control the cursor and get a target
+    while gv.gamestate == GameStates.CURSOR_ACTIVE: # While the player is considered targeting, suspend game-play to control the cursor and get a target
         render_all()
         tdl.flush()
         player_action = handle_keys(tdl.event.key_wait())
@@ -31,10 +31,10 @@ def target_tile():
             if 'move' in player_action: # if key is a movement key process input as normal (will move the cursor)
                 process_input(player_action)
             elif 'confirm' in player_action: # if enter was pressed, return the coordinates of the cursor
-                gv.player.is_targeting = False
+                gv.gamestate = GameStates.ENEMY_TURN
                 gv.cursor.deactivate()
                 return (gv.cursor.x,gv.cursor.y) #Return the cursor's current coordinates to the calling function
             elif 'exit' in player_action:
-                gv.player.is_targeting = False 
+                gv.gamestate =  GameStates.ENEMY_TURN
                 gv.cursor.deactivate()
                 break
