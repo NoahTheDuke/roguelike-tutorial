@@ -9,6 +9,7 @@ import colors
 import global_vars as gv
 
 import item_use as iu
+from render_util import RenderOrder
 from classes.items import Useable,Equipment
 
 # Constants for item generation
@@ -179,6 +180,7 @@ def gen_Corpse(x,y,origin):
         use_function=iu.eat_corpse,
         params=origin.name
     )
+    i.render_order = RenderOrder.CORPSE
     return i
 
 def gen_Corpsebits(x,y,origin):
@@ -191,4 +193,5 @@ def gen_Corpsebits(x,y,origin):
         use_function=iu.eat_corpse,
         params=origin.name
     )
+    i.render_order = RenderOrder.CORPSE
     return i

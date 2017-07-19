@@ -16,11 +16,12 @@ from classes.objects import GameObject
 from generators.gen_items import gen_Corpse,gen_Corpsebits
 
 from game_states import GameStates
+from render_util import RenderOrder
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
     def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False):
-        super().__init__(x, y,name,char,color,blocks=True)
+        super().__init__(x, y,name,char,color,blocks=True,render_order=RenderOrder.ACTOR)
         self.hp, self.power, self.defense = hp, pwr, df
         self.max_hp = hp
         self.max_power = pwr
@@ -71,7 +72,6 @@ class Fighter(GameObject):
             if randint(0,100) < 40:
                 item = gen_Corpsebits(x,y,self)
                 #item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,use_function=iu.eat_corpse,params=self.name)
-                item.send_to_back()
         self.delete()
 
 class Monster(Fighter):
@@ -142,8 +142,6 @@ class Player(Fighter):
             x,y = (randint(self.x-2, self.x+2),randint(self.y-2, self.y+2))
             if randint(0,100) < 40:
                 item = gen_Corpsebits(x,y,self)
-                #item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,iu.eat_corpse,self.name)
-                item.send_to_back()
             else:
                 gv.game_map.gibbed[x][y] = True
 

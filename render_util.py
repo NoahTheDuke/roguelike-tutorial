@@ -1,9 +1,17 @@
 import tdl
 from textwrap import wrap
+from enum import Enum,auto
 
 import settings
 import colors
 import global_vars as gv
+
+class RenderOrder(Enum):
+    NONE = auto()
+    CORPSE = auto()
+    ITEM = auto()
+    ACTOR = auto()
+    CURSOR = auto()
 
 def render_all():
     ''' draw all game objects '''
@@ -42,11 +50,15 @@ def render_all():
                 gv.game_map.explored[x][y] = True
                 gv.game_map.visible[x][y] = True
     
-    for obj in gv.gameobjects:
-        if gv.game_map.visible[obj.x][obj.y]:
-            obj.draw(con)
-        elif not gv.game_map.visible[obj.x][obj.y] and gv.game_map.explored[obj.x][obj.y] and obj.always_visible: # if obj is not in FOV but should always be visible
-            obj.draw(con,fgcolor=settings.COLOR_DARK_WALL_fg,bgcolor=settings.COLOR_DARK_GROUND)
+    # sort the objects according to their render order
+    sorted_objects = sorted(gv.gameobjects, key=lambda x: x.render_order.value)
+    # then render them accordingly
+    for obj in sorted_objects:
+        if obj.render_order is not RenderOrder.NONE:
+            if gv.game_map.visible[obj.x][obj.y]:
+                obj.draw(con)
+            elif not gv.game_map.visible[obj.x][obj.y] and gv.game_map.explored[obj.x][obj.y] and obj.always_visible: # if obj is not in FOV but should always be visible
+                obj.draw(con,fgcolor=settings.COLOR_DARK_WALL_fg,bgcolor=settings.COLOR_DARK_GROUND)
     
     root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
 

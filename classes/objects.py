@@ -7,9 +7,11 @@ import settings
 import colors
 import global_vars as gv
 
+from render_util import RenderOrder
+
 class GameObject:
     ''' Main class of game objects'''
-    def __init__(self, x, y,name,char,color,blocks=False, item=False,always_visible=False):
+    def __init__(self, x, y,name,char,color,blocks=False, item=False,always_visible=False,render_order=RenderOrder.CORPSE):
         self.x = x
         self.y = y
         self.char = char
@@ -18,6 +20,8 @@ class GameObject:
         self.name = name
         self.is_item = item
         self.always_visible = always_visible
+
+        self.render_order = render_order
         
         gv.gameobjects.append(self)
 
@@ -49,16 +53,6 @@ class GameObject:
         ''' return the distance to some coordinates '''
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2) 
     
-    def send_to_back(self):
-        '''make this object be drawn first, so all others appear above it if they're in the same tile.'''
-        gv.gameobjects.remove(self)
-        gv.gameobjects.insert(0, self)
-    
-    def send_to_front(self):
-        '''make this object be drawn last, so it appears above all others'''
-        gv.gameobjects.remove(self)
-        gv.gameobjects.insert(len(gv.gameobjects), self)
-    
     def delete(self):
         '''remove the object from the game'''
         if self in gv.gameobjects:
@@ -87,12 +81,10 @@ class Cursor(GameObject):
         self.color = color
         self.x = gv.player.x
         self.y = gv.player.y
-        self.send_to_front()
+        self.render_order = RenderOrder.CURSOR
     
     def deactivate(self):
-        self.color = None
-        self.char = None
-        self.send_to_back()
+        self.render_order = RenderOrder.NONE
 
 class Stairs(GameObject):
     '''stair object '''
@@ -107,4 +99,3 @@ class Stairs(GameObject):
 
         super().__init__(x, y,name,char,colors.white,always_visible=True)
         self.down = down
-        self.send_to_back()

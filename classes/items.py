@@ -11,18 +11,17 @@ import global_vars as gv
 import item_use as iu
 from classes.objects import GameObject
 from gui_util import message
+from render_util import RenderOrder
 
 class Item(GameObject):
     '''an item that can be picked up and used.'''
     def __init__(self, x, y,name,char, color,description=None):
-        super().__init__(x, y,name,char, color,blocks=False,item=True)
+        super().__init__(x, y,name,char, color,blocks=False,item=True,render_order=RenderOrder.ITEM)
         
         self.description = description
         if description == None:
             description = '{0} lacks a description!'.format[str(self.name)]
             print(str(self.name) + ' lacks a description!')
-        
-        self.send_to_back()
     
     def pick_up(self):
         '''add to the gv.player's gv.inventory and remove from the map'''
@@ -38,7 +37,6 @@ class Item(GameObject):
         gv.inventory.remove(self)
         self.x = gv.player.x
         self.y = gv.player.y
-        self.send_to_back()
         message('You dropped a ' + self.name + '.', colors.yellow)
 
     def examine(self):
