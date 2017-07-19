@@ -57,23 +57,29 @@ def draw_side_panel(panel,root):
     ''' draws the right (GUI) panel '''
 
     # prepare to render the GUI panel
-    panel.clear(fg=colors.white, bg=colors.black)
-    
-    # Show the player's name and stats
-    panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,1,gv.player.name, bg=None, fg=colors.gold)
-    panel.draw_str(0,2,' ')
-    render_bar(1,3,panel,settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
-        colors.light_red, colors.darker_red)
-    panel.draw_str(0,4,' ')
-    render_bar(1,5,panel,settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power,
-        colors.black, colors.black)
-    panel.draw_str(0,6,' ')
-    render_bar(1,7,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
-        colors.black, colors.black)
-    panel.draw_str(0,8,' ')
+    panel.clear(fg=colors.red, bg=colors.red)
 
-    # Blit the content to root
-    root.blit(panel, settings.SIDE_PANEL_X,0, settings.SIDE_PANEL_WIDTH, settings.SCREEN_HEIGHT)
+    # draw the panel's border
+    for y in range(settings.SCREEN_HEIGHT):
+        print(y)
+        panel.draw_char(1,y,None,bg=colors.grey)
+        
+    # # Show the player's name and stats
+    # panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,1,gv.player.name, bg=None, fg=colors.gold)
+    # panel.draw_str(2,2,' ')
+    # render_bar(2,3,panel,settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
+    #     colors.light_red, colors.darker_red)
+    # panel.draw_str(2,4,' ')
+    # render_bar(2,5,panel,settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power,
+    #     colors.black, colors.black)
+    # panel.draw_str(2,6,' ')
+    # render_bar(2,7,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
+    #     colors.black, colors.black)
+    # panel.draw_str(2,8,' ')
+
+    # # Blit the content to root
+    # blit(source, x=0, y=0, width=None, height=None, srcX=0, srcY=0, fg_alpha=1.0, bg_alpha=1.0)
+    root.blit(panel, settings.SIDE_PANEL_X,0, settings.SIDE_PANEL_WIDTH, 120)
 
 def draw_bottom_panel(panel,root):
     ''' draws the bottom (message) panel '''
@@ -81,17 +87,22 @@ def draw_bottom_panel(panel,root):
     # prepare to render the bottom panel
     panel.clear(fg=colors.white, bg=colors.black)       
     
+    # draw the panel's border
+    for x in range(settings.SCREEN_WIDTH):
+        panel.draw_char(x,0,None,bg=colors.darker_grey)
+
     #print the game messages, one line at a time
-    y = 1
+    y = 2
     for (line, color) in gv.game_msgs:
         panel.draw_str(settings.MSG_X, y, line, bg=None, fg=color)
         y += 1
  
     #blit the contents of "panel" to the root console
-    root.blit(panel, 0, settings.BOTTOM_PANEL_Y, settings.SCREEN_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    root.blit(panel, 0, settings.BOTTOM_PANEL_Y, settings.SCREEN_WIDTH-settings.SIDE_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
 
 def render_bar(x, y, panel,total_width, name, value, maximum, bar_color, back_color):
-    '''render a bar (HP, experience, etc). first calculate the width of the bar'''
+    '''render a bar (HP, experience, etc).'''
+    # first calculate the width of the bar
     bar_width = int(float(value) / maximum * total_width)
  
     #render the background first
