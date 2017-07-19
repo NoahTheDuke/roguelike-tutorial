@@ -76,7 +76,6 @@ class Cursor(GameObject):
         if gv.game_map.visible[self.x + dx][self.y + dy]:
             self.x += dx
             self.y += dy
-            #look_at_ground(self.x,self.y)
     
     def draw(self,con):
         ''' Draw the object '''

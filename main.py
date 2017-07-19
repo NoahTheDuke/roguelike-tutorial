@@ -139,15 +139,17 @@ def main_loop():
                 display_manual()
   
             else:              
-                if not gv.player.is_dead:
+                if gv.gamestate is not GameStates.PLAYER_DEAD:
                     process_input(player_action)
-
-                if gv.gamestate == GameStates.PLAYERS_TURN:
-                    look_at_ground(gv.cursor.x,gv.cursor.y)
-                
+                    # If the player has moved, check the ground for items
+                    if ('move' in player_action) and gv.gamestate is GameStates.ENEMY_TURN:
+                        look_at_ground(gv.player.x,gv.player.y)
+                    # or if the cursor is active and was moved, check as well
+                    elif ('move' in player_action) and gv.gamestate is GameStates.CURSOR_ACTIVE:
+                        look_at_ground(gv.cursor.x,gv.cursor.y)
+                   
                 # If player has done an active turn
                 if gv.gamestate == GameStates.ENEMY_TURN:
-                    #look_at_ground(gv.player.x,gv.player.y) # check ground for stuff
                     #AI takes turn, if player is not considered inactive and is roughly in FOV
                     for obj in gv.actors:
                         if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj is not gv.player:

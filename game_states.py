@@ -4,3 +4,4 @@ class GameStates(Enum):
     PLAYERS_TURN = auto()
     CURSOR_ACTIVE = auto()
     ENEMY_TURN = auto()
+    PLAYER_DEAD = auto()

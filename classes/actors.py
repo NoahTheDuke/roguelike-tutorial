@@ -15,6 +15,8 @@ from classes.objects import GameObject
 
 from generators.gen_items import gen_Corpse,gen_Corpsebits
 
+from game_states import GameStates
+
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
     def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False):
@@ -145,4 +147,4 @@ class Player(Fighter):
             else:
                 gv.game_map.gibbed[x][y] = True
 
-        self.is_dead = True
+        gv.gamestate = GameStates.PLAYER_DEAD
