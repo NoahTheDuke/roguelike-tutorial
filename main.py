@@ -59,7 +59,9 @@ def main_menu():
         choice = menu('', ['Play a new game', 'Quit'], 24)
 
         if choice == 0: # new game:
+            #msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=30,text_color=colors.red)
             gen_game(True)
+            
             #message('Press ? to open the manual.')
         # elif choice == 1:
         #     try:
@@ -111,7 +113,7 @@ def main_loop():
     ''' begin main game loop '''
     while not tdl.event.is_window_closed():
         if gv.stairs_down.descended:
-            msgbox('You descend further downwards the %s' % settings.DUNGEONNAME)
+            #msgbox('You descend further downwards %s' % settings.DUNGEONNAME,colors.dark_red)
             gen_game(newgame=False)
 
         render_all()

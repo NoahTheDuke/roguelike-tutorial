@@ -70,10 +70,11 @@ def menu(header, options, width,wrap_header=True,options_sorted=True,text_color=
     window = tdl.Console(width, height)
  
     #print the header, with wrapped text
-    window.draw_rect(0, 0, width, height, None, fg=colors.white, bg=None)
+    window.draw_rect(0, 0, width+1, height+1, None, fg=colors.white, bg=None)
+    window.draw_str(0,0,' ')
     for i, line in enumerate(header_wrapped):
-        window.draw_str(0, 0+i, header_wrapped[i])
-    window.draw_str(0,header_height,' ',fg=text_color)
+        window.draw_str(1,1+i, header_wrapped[i],fg=text_color)
+    window.draw_str(0,header_height,' ')
 
     y = header_height+1
     if options_sorted:

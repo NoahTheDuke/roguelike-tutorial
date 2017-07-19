@@ -134,7 +134,7 @@ class Player(Fighter):
     
     def death(self):
         '''specific player death function'''
-        msgbox('You died!',text_color=colors.red)
+        msgbox('You died!',width=10,text_color=colors.red)
 
         #for added effect, transform the gv.player into a corpse!
         gv.player.char = '%'

@@ -92,6 +92,7 @@ def gen_map_content():
     x,y = ranchoice(rooms).ranpos()
     gv.player.x,gv.player.y = x,y
     gv.stairs_up = Stairs(x,y,False)
+    #gv.stairs_down = Stairs(x+1,y+1)
 
     # Create downward stairs in a random room
     x,y = ranchoice(rooms).ranpos()
@@ -124,15 +125,21 @@ def gen_game(newgame):
         gen_inventory()
 
         # a warm welcoming message!
-        message('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME, colors.red)
+        msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=30, text_color=colors.red)
+        tdl.event.key_wait()
         message('Press ? to open the manual.', colors.green)
 
     else: # new dungeon level
         gv.dungeon_level += 1 # Increase the dungeon leavel by one
-        message('You are now on level %s of the %s' % (gv.dungeon_level, settings.DUNGEONNAME), colors.red)
-        for obj in gv.gameobjects:
+        for obj in gv.gameobjects: # Remove all old objects from the game
             if not obj in [gv.player,gv.cursor]:
                 obj.delete()
+        
+        # Reset arrays containing enemies and objects
+        gv.gameobjects = [gv.player,gv.cursor]
+        gv.actors = [gv.player]
+
+        msgbox('You are now on level %s of the %s' % (gv.dungeon_level, settings.DUNGEONNAME),width=30, text_color=colors.red)
 
     # Generate a new map
     gen_map(settings.MAP_WIDTH,settings.MAP_HEIGHT)

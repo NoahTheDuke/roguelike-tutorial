@@ -64,7 +64,7 @@ def draw_side_panel(panel,root):
         panel.draw_char(0,y,None,bg=colors.darker_grey)
         
     # Show the player's name and stats
-    panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,1,gv.player.name, bg=None, fg=colors.gold)
+    panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2+2,1,gv.player.name, bg=None, fg=colors.gold)
     panel.draw_str(2,2,' ')
     render_bar(2,3,panel,settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
         colors.light_red, colors.darker_red)
