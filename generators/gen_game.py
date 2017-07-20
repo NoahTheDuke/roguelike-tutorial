@@ -14,13 +14,14 @@ import colors
 # Classes
 from classes.objects import Cursor, Stairs
 from classes.map import GameMap,Rect
+from classes.messages import MessageLog, Message
 
 # Generators
 from generators.gen_actors import gen_monsters, gen_Player
 from generators.gen_items import gen_inventory, gen_items
 
 # Other game-related functions
-from gui_util import message, msgbox
+from gui_util import msgbox
 
 def gen_map(width,height):
     ''' Sets up the game's map '''
@@ -112,7 +113,8 @@ def gen_game(newgame):
         # reset other global variables
         gv.gameobjects = []
         gv.actors = []
-        gv.game_msgs = []
+        gv.game_log = MessageLog(settings.MSG_X,settings.MSG_WIDTH,settings.MSG_HEIGHT)
+        gv.combat_log = MessageLog(settings.MSG_X,settings.MSG_WIDTH,settings.MSG_HEIGHT)
         gv.inventory = []
         gv.dungeon_level = 1
         #gv.cursor = Cursor(0,0)
@@ -127,7 +129,8 @@ def gen_game(newgame):
         # a warm welcoming message!
         msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=30, text_color=colors.red)
         tdl.event.key_wait()
-        message('Press ? to open the manual.', colors.green)
+        Message('Press ? to open the manual.', color=colors.green)
+        #gv.game_log.add_message(Message('Press ? to open the manual.', color=colors.green))
 
     else: # new dungeon level
         gv.dungeon_level += 1 # Increase the dungeon leavel by one

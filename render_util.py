@@ -7,6 +7,8 @@ import settings
 import colors
 import global_vars as gv
 
+#from classes.messages import MessageLog
+
 class RenderOrder(Enum):
     NONE = auto()
     CORPSE = auto()
@@ -18,13 +20,8 @@ def render_all():
     ''' draw all game objects '''
     root = gv.root
     con = gv.con
-    
-    # Create panels
-    bottom_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
-    side_panel = tdl.Console(settings.SIDE_PANEL_WIDTH, settings.SCREEN_HEIGHT)
-    stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
-    inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
 
+    # render the dungeon map and it's objects
     px,py = gv.player.x, gv.player.y
     visible_tiles = (tdl.map.quick_fov(px, py,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS))
     for y in range(settings.MAP_HEIGHT):
@@ -69,12 +66,25 @@ def render_all():
     # Draw borders for console window
     draw_window_borders(con,width=settings.MAP_WIDTH,height=settings.MAP_HEIGHT)    
 
-    root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
+    root.blit(con, 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
 
+    # render the panels containing the GUI
+    render_panels(root)
+
+def render_panels(root):
+    ''' renders the GUI panels containing stats, logs etc. '''
+
+    # Create panels
+    stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
+    inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
+    gamelog_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    combat_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    
     # Draw panels
     draw_stat_panel (stat_panel,root)
     draw_inv_panel (inv_panel,root)    # TODO: Fix bottom border
-    draw_bottom_panel(bottom_panel,root)
+    draw_gamelog_panel(gamelog_panel,root)
+    draw_combat_panel(combat_panel,root)
 
 def draw_stat_panel(panel,root):
     ''' panel containing player stats & name '''
@@ -89,11 +99,11 @@ def draw_stat_panel(panel,root):
         
     # Show the player's name and stats
     panel.draw_str(1,2,'Name: %s' % gv.player.name, bg=None, fg=colors.gold)
-    render_bar(1,4,panel,settings.BAR_WIDTH-2, 'HP', gv.player.hp, gv.player.max_hp,
+    render_bar(1,4,panel,settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
         colors.light_red, colors.darker_red)
-    render_bar(1,6,panel,settings.BAR_WIDTH-2, 'PWR', gv.player.power, gv.player.max_power,
+    render_bar(1,6,panel,settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power,
         colors.black, colors.black)
-    render_bar(1,8,panel,settings.BAR_WIDTH-2, 'DEF', gv.player.defense, gv.player.max_defense,
+    render_bar(1,8,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
         colors.black, colors.black)
 
     root.blit(panel,settings.SIDE_PANEL_X,0, settings.SIDE_PANEL_WIDTH, settings.STAT_PANEL_HEIGHT)
@@ -150,7 +160,7 @@ def draw_stat_window(panel):
 
     return 9
 
-def draw_bottom_panel(panel,root):
+def draw_gamelog_panel(panel,root):
     ''' draws the bottom (message) panel '''
 
     # prepare to render the bottom panel
@@ -164,12 +174,33 @@ def draw_bottom_panel(panel,root):
 
     #print the game messages, one line at a time
     y = 2
-    for (line, color) in gv.game_msgs:
-        panel.draw_str(settings.MSG_X, y, line, bg=None, fg=color)
+    for message in gv.game_log.messages:
+        panel.draw_str(settings.MSG_X, y, message.text, bg=None, fg=message.color)
         y += 1
  
     #blit the contents of "panel" to the root console
-    root.blit(panel, 0, settings.BOTTOM_PANEL_Y,settings.SCREEN_WIDTH-settings.SIDE_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    root.blit(panel, settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_Y,settings.BOTTOM_PANEL_WIDTH,settings.BOTTOM_PANEL_HEIGHT)
+
+def draw_combat_panel(panel,root):
+    ''' draws the bottom (message) panel '''
+
+    # prepare to render the bottom panel
+    panel.clear(fg=colors.white, bg=colors.black)       
+    
+    # draw the panel's border
+    draw_window_borders(panel)
+
+    # draw the panenl's heading
+    panel.draw_str(2,0,'Combatlog')
+
+    #print the game messages, one line at a time
+    y = 2
+    for message in gv.combat_log.messages:
+        panel.draw_str(settings.MSG_X, y, message.text, bg=None, fg=message.color)
+        y += 1
+ 
+    #blit the contents of "panel" to the root console
+    root.blit(panel,0, settings.BOTTOM_PANEL_Y,settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
 
 def render_bar(x, y, panel,total_width, name, value, maximum, bar_color, back_color):
     '''render a bar (HP, experience, etc).'''

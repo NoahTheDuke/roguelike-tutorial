@@ -12,12 +12,15 @@ import colors
 import global_vars as gv
 import settings
 
+# Classes
+from classes.messages import MessageLog
+
 # Generators
 from generators.gen_game import gen_game
 
 # Game-related modules
 from game_states import GameStates
-from gui_util import menu, message, msgbox
+from gui_util import menu, msgbox
 from input_util import handle_keys, process_input
 from render_util import render_all
 from target_util import look_at_ground
@@ -61,7 +64,7 @@ def main_menu():
             #msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=30,text_color=colors.red)
             gen_game(True)
             
-            #message('Press ? to open the manual.')
+            #Message('Press ? to open the manual.')
         # elif choice == 1:
         #     try:
         #         load_game()
@@ -79,7 +82,7 @@ def save_game():
         savefile['objects'] = gv.gameobjects
         savefile['actors'] = gv.actors
         savefile['inventory'] = gv.inventory
-        savefile['messages']=gv.game_msgs
+        #savefile['messages']=gv.game_msgs
 
         # Store the index of special objects, so they can be later restored from the gv.gameobjects array
         savefile['p_index'] = gv.gameobjects.index(gv.player)
@@ -97,7 +100,7 @@ def load_game():
         gv.actors = savefile['actors']
         #gv.actors = [obj for obj in gameobjects if ]
         gv.inventory = savefile['inventory']
-        gv.game_msgs = savefile['messages']
+        #gv.game_msgs = savefile['messages']
 
         # Restore special objects
         gv.player = gv.gameobjects[savefile['p_index']]
@@ -106,7 +109,7 @@ def load_game():
         gv.stairs_down = gv.gameobjects[savefile['sd_index']]
         gv.stairs_up = gv.gameobjects[savefile['su_index']]
 
-        message('Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME,gv.dungeon_level), colors.red)
+        Message('Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME,gv.dungeon_level), color=colors.red)
 
 def main_loop():
     ''' begin main game loop '''

@@ -6,8 +6,10 @@ import settings
 import colors
 import global_vars as gv
 
+from classes.messages import Message
+
 from game_states import GameStates
-from render_util import render_all
+from render_util import render_all, draw_window_borders
 
 def inventory_menu(header,filter=None):
     '''show a menu with each item of the inventory as an option'''
@@ -16,7 +18,7 @@ def inventory_menu(header,filter=None):
     else:
         inventory = gv.inventory
     if len(inventory) == 0:
-        message('Your Inventory is empty.')
+        Message('Your Inventory is empty.')
     options = [item.name for item in inventory]
     index = menu(header, options, settings.INVENTORY_WIDTH)
     #if an item was chosen, return it
@@ -98,6 +100,9 @@ def menu(header, options, width,wrap_header=True,options_sorted=True,text_color=
             y += 1
     window.draw_str(0,y+1,' ')
 
+    # Draw the window's borders
+    draw_window_borders(window)
+
     #blit the contents of "window" to the root console
     x = settings.SCREEN_WIDTH//2 - width//2
     y = settings.SCREEN_HEIGHT//2 - height//2
@@ -117,14 +122,14 @@ def menu(header, options, width,wrap_header=True,options_sorted=True,text_color=
         return index
     return None
 
-def message(new_msg, color = colors.white):
-    '''split the message if necessary, among multiple lines'''
-    new_msg_lines = textwrap.wrap(new_msg, settings.MSG_WIDTH)
+# def Message(new_msg, color = colors.white):
+#     '''split the message if necessary, among multiple lines'''
+#     new_msg_lines = textwrap.wrap(new_msg, settings.MSG_WIDTH)
  
-    for line in new_msg_lines:
-        #if the buffer is full, remove the first line to make room for the new one
-        if len(gv.game_msgs) == settings.MSG_HEIGHT:
-            del gv.game_msgs[0]
+#     for line in new_msg_lines:
+#         #if the buffer is full, remove the first line to make room for the new one
+#         if len(gv.game_msgs) == settings.MSG_HEIGHT:
+#             del gv.game_msgs[0]
  
-        #add the new line as a tuple, with the text and the color
-        gv.game_msgs.append((line, color))
+#         #add the new line as a tuple, with the text and the color
+#         gv.game_msgs.append((line, color))

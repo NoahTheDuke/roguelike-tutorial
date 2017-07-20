@@ -8,9 +8,10 @@ import settings
 import colors
 import global_vars as gv
 
+from classes.messages import Message
+
 import item_use as iu
 from classes.objects import GameObject
-from gui_util import message
 from render_util import RenderOrder
 
 class Item(GameObject):
@@ -26,7 +27,7 @@ class Item(GameObject):
     def pick_up(self):
         '''add to the gv.player's gv.inventory and remove from the map'''
         if len(gv.inventory) >= 26:
-            message('Your gv.inventory is full, cannot pick up ' + self.name + '.', colors.red)
+            Message('Your gv.inventory is full, cannot pick up ' + self.name + '.', colors.red)
         else:
             gv.inventory.append(self)
             gv.gameobjects.remove(self)
@@ -37,18 +38,18 @@ class Item(GameObject):
         gv.inventory.remove(self)
         self.x = gv.player.x
         self.y = gv.player.y
-        message('You dropped a ' + self.name + '.', colors.yellow)
+        Message('You dropped a ' + self.name + '.', colors.yellow)
 
     def examine(self):
         '''examines the given'''
         # TODO: Pass description from generator; possibly open small menu instead of message to display longer texts
-        message('This is a ' + self.name + '.')
+        Message('This is a ' + self.name + '.')
 
     def use(self):
-        message('The ' + self.name + ' cannot be used.')
+        Message('The ' + self.name + ' cannot be used.')
 
     def equip(self):
-        message('The ' + self.name + ' cannot be equipped.')
+        Message('The ' + self.name + ' cannot be equipped.')
     
 class Useable(Item):
     '''an useable item (e.g. scroll, potion,wand)'''

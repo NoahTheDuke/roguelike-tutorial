@@ -5,10 +5,11 @@ import math
 import random
 from random import randint
 
+from classes.messages import Message
+
 import colors
 import settings
 import global_vars as gv
-from gui_util import message
 
 class BasicMonster:
     '''AI for a basic monster.'''
@@ -101,7 +102,7 @@ class BasicMonster:
     def blurb(self):
         ''' make some sounds '''
         if not self.owner.blurbs == None:
-            message(random.choice(self.owner.blurbs),colors.desaturated_red)
+            Message(random.choice(self.owner.blurbs),colors.desaturated_red)
 
 class ConfusedMonster:
     '''AI for a confused monster'''
@@ -117,7 +118,7 @@ class ConfusedMonster:
     
         else:  #restore the previous AI (this one will be deleted because it's not referenced anymore)
             self.owner.ai = self.old_ai
-            message('The ' + self.owner.name + ' is no longer confused!', colors.red)
+            Message('The ' + self.owner.name + ' is no longer confused!', colors.red)
 
     def move(self):
         ''' Confused monsters stumble around and attack randomly '''
@@ -135,10 +136,10 @@ class ConfusedMonster:
             if check and target == None:
                 self.owner.x += dx
                 self.owner.y += dy
-                message('The ' + self.owner.name + ' stumbles around.', colors.white)
+                Message('The ' + self.owner.name + ' stumbles around.', colors.white)
 
             # if blocking object is an enemy target
             elif not check and target:
                 self.owner.attack(target)
         else:
-            message('The ' + self.owner.name + ' bumbs into a wall.', colors.white)
+            Message('The ' + self.owner.name + ' bumbs into a wall.', colors.white)

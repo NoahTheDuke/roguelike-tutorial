@@ -6,8 +6,9 @@ import settings
 import colors
 import global_vars as gv
 
+from classes.messages import Message
+
 from game_states import GameStates
-from gui_util import message
 from input_util import handle_keys,process_input
 from render_util import render_all
 
@@ -15,11 +16,11 @@ def look_at_ground(x,y):
     # check if there's an object at the current position, excluding the cursor
     spotted = [obj.name for obj in gv.gameobjects if ([obj.x,obj.y] == [x,y] and not obj == gv.cursor and not obj == gv.player)]
     if len(spotted) > 0:    # if more than one object is present, output the names as a message
-         message('You see: ' + (', '.join(spotted)))
+         Message('You see: ' + (', '.join(spotted)))
 
 def target_tile():
     '''Display a targeting cursor'''
-    message('Select a target by moving your cursor. Enter to confirm the target, press ESC to cancel.')
+    Message('Select a target by moving your cursor. Enter to confirm the target, press ESC to cancel.')
     if gv.gamestate is not GameStates.CURSOR_ACTIVE:  # If the player-state is not yet targeting, enable it and create the cursor
         gv.gamestate = GameStates.CURSOR_ACTIVE
         gv.cursor.activate('X',colors.red)

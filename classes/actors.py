@@ -9,8 +9,9 @@ import colors
 import global_vars as gv
 
 import item_use as iu
-from gui_util import message,msgbox
+from gui_util import msgbox
 
+from classes.messages import Message
 from classes.objects import GameObject
 
 from generators.gen_items import gen_Corpse,gen_Corpsebits
@@ -41,10 +42,10 @@ class Fighter(GameObject):
         damage = self.power - target.defense
         if damage > 0:
             #make the target take some damage
-            message(self.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.')
+            Message(self.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.',log=gv.combat_log)
             target.take_damage(damage)
         else:
-            message(self.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!')
+            Message(self.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!',log=gv.combat_log)
     
     def heal(self, amount):
         #heal by the given amount, without going over the maximum
@@ -59,7 +60,7 @@ class Fighter(GameObject):
 
     def death(self):
         ''' Generic death for all actors '''
-        message('The ' + self.name.capitalize() + ' is dead!',colors.green)
+        Message('The ' + self.name.capitalize() + ' is dead!',log=gv.combat_log,color=colors.green)
         x,y = (self.x,self.y)
         item = gen_Corpse(x,y,self)
         #item = Useable(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,use_function=iu.eat_corpse,params=self.name)
@@ -118,18 +119,18 @@ class Player(Fighter):
             # if blocking object is an enemy target
             elif not check and not target == None:
                 if running:
-                    message('You bump into the ' + target.name,colors.red)
+                    Message('You bump into the ' + target.name,colors.red)
                     self.is_running = False
                 else:
                     self.attack(target)
             
         elif running: # if the player crashes into a wall
-                message('You run into something.',colors.red)
+                Message('You run into something.',colors.red)
                 self.is_running = False
                 self.take_damage(1)
         
         else:
-            message('Something blocks your way.')
+            Message('Something blocks your way.')
     
     def death(self):
         '''specific player death function'''

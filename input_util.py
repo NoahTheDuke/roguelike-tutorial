@@ -3,8 +3,10 @@
 import colors
 import global_vars as gv
 
+from classes.messages import Message
+
 from game_states import GameStates
-from gui_util import message, menu, inventory_menu, item_menu
+from gui_util import menu, inventory_menu, item_menu
 
 def handle_keys(user_input):
     ''' Handles all key input made by the player '''
@@ -100,29 +102,29 @@ def process_input(action):
     
     elif 'run' in action:
         if (gv.player.is_running):
-            message('You stop runningv.')
+            Message('You stop runningv.')
             gv.player.is_running = False
         else:
-            message('You start to run.')
+            Message('You start to run.')
             gv.player.is_running = True
 
     elif 'look' in action:
         if gv.gamestate == GameStates.CURSOR_ACTIVE:
-            message('You stop looking around.')
+            Message('You stop looking around.')
             gv.cursor.deactivate()
             gv.gamestate = GameStates.PLAYERS_TURN
         else:
-            message('You start looking around.')
+            Message('You start looking around.')
             gv.gamestate = GameStates.CURSOR_ACTIVE
             gv.cursor.activate('*',colors.white)
     
     # elif 'target' in action:
     #     if gv.player.is_targeting:
-    #         message('You stop targeting.')
+    #         Message('You stop targeting.')
     #         gv.player.is_targeting = False
     #         gv.cursor.deactivate()
     #     else:
-    #         message('You begin targeting.')
+    #         Message('You begin targeting.')
     #         gv.player.is_targeting = True
     #         gv.cursor.activate('X',colors.red)
     #     gv.player.is_active = False
@@ -132,14 +134,14 @@ def process_input(action):
         # get all items at the player's feet
         items = [obj for obj in gv.gameobjects if [obj.x,obj.y] == [gv.player.x, gv.player.y] and obj.is_item]
         if len(items) == 0:
-            message('There is nothing to pick up here!')
+            Message('There is nothing to pick up here!')
         elif len(items) == 1:
             item = 0
         else:
             item = menu('What do you want to pick up?',[item.name for item in items],24)
         if not item == None:
             items[item].pick_up()
-            message('You picked up a ' + items[item].name + '!', colors.green)
+            Message('You picked up a ' + items[item].name + '!', colors.green)
 
     elif 'inventory' in action:
         # Display the inventory, if it is not already active
@@ -157,12 +159,12 @@ def process_input(action):
     
     elif 'stairs' in action:
         if (action['stairs'] == '<' and gv.player.pos() == gv.stairs_down.pos()):
-            message('You descend further into the dark abyss.')
+            Message('You descend further into the dark abyss.')
             gv.stairs_down.descended = True
         elif (action['stairs'] == '>' and gv.player.pos() == gv.stairs_up.pos()):
-            message('A heavy trap door has fallen shut on the staircase. You can only go further down.')
+            Message('A heavy trap door has fallen shut on the staircase. You can only go further down.')
         else:
-            message('There are no stairs here.')
+            Message('There are no stairs here.')
     
     # elif 'confirm' in action:
     #     if gv.player.is_targeting:
