@@ -3,8 +3,6 @@
 # Console & GUI
 root = None
 con = None
-bottom_panel = None
-side_panel = None
 
 # Gameplay variables
 # TODO: noramlize variable names (game_objects,game_actors)

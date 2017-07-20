@@ -146,9 +146,6 @@ def gen_game(newgame):
 
     # Generate map content
     gen_map_content()
-
-    # initialize FOV
-    #fov_recompute()
     
     # clear the old console
     gv.con.clear()

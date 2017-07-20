@@ -18,8 +18,13 @@ def render_all():
     ''' draw all game objects '''
     root = gv.root
     con = gv.con
-    bottom_panel = gv.bottom_panel
-    side_panel = gv.side_panel
+    
+    # Create panels
+    bottom_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    side_panel = tdl.Console(settings.SIDE_PANEL_WIDTH, settings.SCREEN_HEIGHT)
+    stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
+    inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
+
     px,py = gv.player.x, gv.player.y
     visible_tiles = (tdl.map.quick_fov(px, py,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS))
     for y in range(settings.MAP_HEIGHT):
@@ -67,37 +72,45 @@ def render_all():
     root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
 
     # Draw panels
-    draw_side_panel(side_panel,root)
+    draw_stat_panel (stat_panel,root)
+    draw_inv_panel (inv_panel,root)    # TODO: Fix bottom border
     draw_bottom_panel(bottom_panel,root)
 
-def draw_side_panel(panel,root):
-    ''' draws the right (GUI) panel '''
+def draw_stat_panel(panel,root):
+    ''' panel containing player stats & name '''
 
-    # prepare to render the GUI panel
     panel.clear(fg=colors.white, bg=colors.black)
 
     # draw the panel's border
     draw_window_borders(panel)
+
+    # Add the panel's caption
+    panel.draw_str(2,0,'Player')
         
     # Show the player's name and stats
-    panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,1,gv.player.name, bg=None, fg=colors.gold)
-    panel.draw_str(1,2,' ')
-    render_bar(1,3,panel,settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp,
+    panel.draw_str(1,2,'Name: %s' % gv.player.name, bg=None, fg=colors.gold)
+    render_bar(1,4,panel,settings.BAR_WIDTH-2, 'HP', gv.player.hp, gv.player.max_hp,
         colors.light_red, colors.darker_red)
-    panel.draw_str(2,4,' ')
-    render_bar(1,5,panel,settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power,
+    render_bar(1,6,panel,settings.BAR_WIDTH-2, 'PWR', gv.player.power, gv.player.max_power,
         colors.black, colors.black)
-    panel.draw_str(2,6,' ')
-    render_bar(1,7,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
+    render_bar(1,8,panel,settings.BAR_WIDTH-2, 'DEF', gv.player.defense, gv.player.max_defense,
         colors.black, colors.black)
-    panel.draw_str(1,8,' ')
+
+    root.blit(panel,settings.SIDE_PANEL_X,0, settings.SIDE_PANEL_WIDTH, settings.STAT_PANEL_HEIGHT)
+
+def draw_inv_panel(panel,root):
+    ''' panel containing the inventory '''
+
+    panel.clear(fg=colors.white, bg=colors.black)
+
+    # draw the panel's border
+    draw_window_borders(panel)
+
+    # Add the panel's caption
+    panel.draw_str(2,0,'Inventory')
     
-    # Draw the inventory below the stats
     if len(gv.inventory) > 0:
-        y = 9
-        panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,y,'Inventory', bg=None, fg=colors.gold)
-        panel.draw_str(2,y+1,' ')
-        y += 2
+        y = 2   # Offset from the top of the panel
         for i in range(len(gv.inventory)):
             item = gv.inventory[i]
             text = wrap(item.name,settings.BAR_WIDTH-4)
@@ -109,10 +122,33 @@ def draw_side_panel(panel,root):
                     y += 1
             panel.draw_str(2,y,' ')
             y += 1
+    
+    root.blit(panel,settings.SIDE_PANEL_X,settings.STAT_PANEL_HEIGHT, settings.SIDE_PANEL_WIDTH, settings.INV_PANEL_HEIGHT)
 
-    # # Blit the content to root
-    # blit(source, x=0, y=0, width=None, height=None, srcX=0, srcY=0, fg_alpha=1.0, bg_alpha=1.0)
-    root.blit(panel, settings.SIDE_PANEL_X,0, settings.SIDE_PANEL_WIDTH, settings.SCREEN_HEIGHT)
+def draw_stat_window(panel):
+    ''' draw the player stats to a panel '''
+    
+    # draw the panel's border
+    draw_window_borders(panel)
+
+    # Add the panel's caption
+    panel.draw_str(2,0,'Player')
+        
+    # Show the player's name and stats
+    panel.draw_str(1,1,' ')
+    panel.draw_str(1,2,'Name: %s' % gv.player.name, bg=None, fg=colors.gold)
+    panel.draw_str(1,3,' ')
+    render_bar(1,4,panel,settings.BAR_WIDTH-2, 'HP', gv.player.hp, gv.player.max_hp,
+        colors.light_red, colors.darker_red)
+    panel.draw_str(1,5,' ')
+    render_bar(1,6,panel,settings.BAR_WIDTH-2, 'PWR', gv.player.power, gv.player.max_power,
+        colors.black, colors.black)
+    panel.draw_str(1,7,' ')
+    render_bar(1,8,panel,settings.BAR_WIDTH-2, 'DEF', gv.player.defense, gv.player.max_defense,
+        colors.black, colors.black)
+    panel.draw_str(1,9,' ')
+
+    return 9
 
 def draw_bottom_panel(panel,root):
     ''' draws the bottom (message) panel '''
@@ -122,6 +158,9 @@ def draw_bottom_panel(panel,root):
     
     # draw the panel's border
     draw_window_borders(panel)
+
+    # draw the panenl's heading
+    panel.draw_str(2,0,'Gamelog')
 
     #print the game messages, one line at a time
     y = 2

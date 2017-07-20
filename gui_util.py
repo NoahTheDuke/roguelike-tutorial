@@ -50,8 +50,9 @@ def item_menu(item):
 
 def display_manual():
     '''displays the game's manual'''
-    man = open('resources/manual.txt','r')
-    man = man.read().split('\n')
+    manfile = open('resources/manual.txt','r')   
+    man = manfile.read().split('\n')
+    manfile.close()
     menu(man,[],(settings.SCREEN_WIDTH//2),wrap_header=False,options_sorted=False)
 
 def msgbox(text, width=50,text_color=colors.white):
