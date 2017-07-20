@@ -36,8 +36,8 @@ def gen_map(width,height):
         w = randint(settings.ROOM_MIN_SIZE, settings.ROOM_MAX_SIZE)
         h = randint(settings.ROOM_MIN_SIZE, settings.ROOM_MAX_SIZE)
         #random position without going out of the boundaries of the map
-        x = randint(0, settings.MAP_WIDTH-w-1)
-        y = randint(0, settings.MAP_HEIGHT-h-1)
+        x = randint(0, settings.MAP_WIDTH-w-2)
+        y = randint(0, settings.MAP_HEIGHT-h-2)
 
         #"Rect" class makes rectangles easier to work with
         new_room = Rect(x, y, w, h)

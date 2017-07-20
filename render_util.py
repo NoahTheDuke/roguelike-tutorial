@@ -1,4 +1,5 @@
 import tdl
+import tcod
 from textwrap import wrap
 from enum import Enum,auto
 
@@ -60,11 +61,14 @@ def render_all():
             elif not gv.game_map.visible[obj.x][obj.y] and gv.game_map.explored[obj.x][obj.y] and obj.always_visible: # if obj is not in FOV but should always be visible
                 obj.draw(con,fgcolor=settings.COLOR_DARK_WALL_fg,bgcolor=settings.COLOR_DARK_GROUND)
     
+    # Draw borders for console window
+    draw_window_borders(con,width=settings.MAP_WIDTH,height=settings.MAP_HEIGHT)    
+
     root.blit(con , 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
 
     # Draw panels
     draw_side_panel(side_panel,root)
-    draw_bottom_panel(bottom_panel,root)    
+    draw_bottom_panel(bottom_panel,root)
 
 def draw_side_panel(panel,root):
     ''' draws the right (GUI) panel '''
@@ -73,8 +77,7 @@ def draw_side_panel(panel,root):
     panel.clear(fg=colors.white, bg=colors.black)
 
     # draw the panel's border
-    for y in range(settings.SCREEN_HEIGHT):
-        panel.draw_char(0,y,None,bg=colors.darker_grey)
+    draw_window_borders(panel)
         
     # Show the player's name and stats
     panel.draw_str((settings.BAR_WIDTH-len(gv.player.name))//2,1,gv.player.name, bg=None, fg=colors.gold)
@@ -118,8 +121,7 @@ def draw_bottom_panel(panel,root):
     panel.clear(fg=colors.white, bg=colors.black)       
     
     # draw the panel's border
-    for x in range(settings.SCREEN_WIDTH):
-        panel.draw_char(x,0,None,bg=colors.darker_grey)
+    draw_window_borders(panel)
 
     #print the game messages, one line at a time
     y = 2
@@ -128,7 +130,7 @@ def draw_bottom_panel(panel,root):
         y += 1
  
     #blit the contents of "panel" to the root console
-    root.blit(panel, 0, settings.BOTTOM_PANEL_Y, settings.SCREEN_WIDTH-settings.SIDE_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    root.blit(panel, 0, settings.BOTTOM_PANEL_Y,settings.SCREEN_WIDTH-settings.SIDE_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
 
 def render_bar(x, y, panel,total_width, name, value, maximum, bar_color, back_color):
     '''render a bar (HP, experience, etc).'''
@@ -146,6 +148,27 @@ def render_bar(x, y, panel,total_width, name, value, maximum, bar_color, back_co
     text = name + ': ' + str(value) + '/' + str(maximum)
     x_centered = x + (total_width-len(text))//2
     panel.draw_str(x_centered, y, text, fg=colors.white, bg=None)
+
+def draw_window_borders(window,width=None,height=None):
+    ''' draws an outline around the passed window. By default, the window's width & height will be used '''
+    
+    if width is None:
+        width = window.width
+    if height is None:
+        height = window.height
+
+    for x in range(width):
+        window.draw_char(x,0,'196')
+        window.draw_char(x,height-1,'196')
+
+    for y in range(height):
+        window.draw_char(0,y,'179')
+        window.draw_char(width-1,y,'179')
+    
+    window.draw_char(0,0,'218')
+    window.draw_char(width-1,0,'191')
+    window.draw_char(0,height-1,'192')
+    window.draw_char(width-1,height-1,'217')
 
 def is_visible_tile(x, y):
     if x >= settings.MAP_WIDTH or x < 0:
