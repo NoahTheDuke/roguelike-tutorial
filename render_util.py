@@ -108,33 +108,30 @@ def draw_stat_panel(panel,root):
     render_bar(1,8,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
         colors.black, colors.black)
 
-    #draw_spotted_panel(panel)
+    draw_spotteditems_panel(panel)
     
     root.blit(panel,settings.SIDE_PANEL_X,0, panel.width, panel.height)
     
-# def draw_spotted_panel(panel):
-#     ''' draws spotted items and monsters on a panel '''
+def draw_spotteditems_panel(panel):
+    ''' draws spotted items and monsters on a panel '''
    
-#     # Draw what the player can see (either at his feet or at the cursor's position)
-#     if gv.gamestate == GameStates.CURSOR_ACTIVE:
-#         x,y = gv.cursor.pos()
-#     else:
-#         x,y = gv.player.pos()
-    
-#     spotted = [obj.name for obj in gv.gameobjects if ([obj.x,obj.y] == [x,y] and not obj == gv.cursor and not obj == gv.player)]
-#     if len(spotted) > 0:    # if more than one object is present, output the names as a message
-#         y = settings.STAT_PANEL_HEIGHT//2
-#         panel.draw_str(1,settings.STAT_PANEL_HEIGHT//2,'I spot:', bg=None, fg=colors.white)
-#         y += 1
-#         for obj in spotted:    # Go through the object names and wrap them according to the panel's width
-#             line_wrapped = wrap(obj,panel.width - 3)
-#             if y + len(line_wrapped) < panel.height-1:  # As long as we don't exceed the panel's height, draw the items
-#                 for text in line_wrapped:
-#                     panel.draw_str(2,y,text.capitalize(),bg=None, fg=colors.white)
-#                     y+=1
-#             else:   # otherwise draw a line to indicate there's more than can be displayed
-#                 panel.draw_str(1,y,'~ ~ ~ more ~ ~ ~')
-#                 break
+    # Draw what the player can see at his feet
+
+    spotted = [obj.name for obj in gv.gameobjects if (obj.x,obj.y) == gv.player.pos() and obj.is_item]
+    if len(spotted) > 0:    # if more than one object is present, output the names as a message
+        x = 2
+        y = settings.STAT_PANEL_HEIGHT//2
+        panel.draw_str(x,settings.STAT_PANEL_HEIGHT//2,'At your feet:', bg=None, fg=colors.white)
+        y += 2
+        for obj in spotted:    # Go through the object names and wrap them according to the panel's width
+            line_wrapped = wrap(obj,panel.width - 3)
+            if y + len(line_wrapped) < panel.height-2:  # As long as we don't exceed the panel's height, draw the items
+                for text in line_wrapped:
+                    panel.draw_str(x,y,text.title(),bg=None, fg=colors.white)
+                    y+=1
+            else:   # otherwise draw a line to indicate there's more than can be displayed
+                panel.draw_str(x,y+1,'~ ~ ~ ~ MORE ~ ~ ~ ~')
+                break
 
 def draw_inv_panel(panel,root):
     ''' panel containing the inventory '''
@@ -203,7 +200,7 @@ def draw_combat_panel(panel,root,visible_tiles):
         x = 2
         y = 2
         for ent in spotted:    # Go through the object names and wrap them according to the panel's width
-            panel.draw_str(x,y,'{0} :'.format(ent.name),bg=None, fg=colors.white)
+            panel.draw_str(x,y,'{0}:'.format(ent.name),bg=None, fg=colors.white)
             wounded = ent.get_health_as_string_and_color()
             panel.draw_str(len(ent.name)+4,y,'{0}'.format(wounded[0].title()),bg=None, fg=wounded[1])
             y += 2

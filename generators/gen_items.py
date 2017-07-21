@@ -32,7 +32,7 @@ def gen_items():
 
     # Randomly pick an item from the list
     for room in gv.game_map.rooms:
-        for i in range(settings.MAX_ROOM_ITEMS):
+        for i in range(randint(1,settings.MAX_ROOM_ITEMS)):
             gen = random.choice(list(generators.keys()))
             while (randint(0,100) > generators[gen][0]):
                 gen = random.choice(list(generators.keys()))

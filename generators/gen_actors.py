@@ -19,10 +19,10 @@ def gen_monsters():
         'troll':(30,gen_Troll)
     }
 
-    # Randomly pick a monster from the list
-    for room in gv.game_map.rooms:
-        for i in range(settings.MAX_ROOM_MONSTERS):
-            gen = random.choice(list(generators.keys()))
+    # loop through all rooms but the first one (the one the player starts in)
+    for room in gv.game_map.rooms[1:]:
+        for i in range(randint(1,settings.MAX_ROOM_MONSTERS)): # place up as many monsters as the settings allow
+            gen = random.choice(list(generators.keys())) # Randomly pick a monster generator from the list
             while (randint(0,100) > generators[gen][0]):
                 gen = random.choice(list(generators.keys()))
         

@@ -89,14 +89,15 @@ def gen_map_content():
     
     rooms = gv.game_map.rooms
     
-    # Place player on upwards stairs in random room
-    x,y = ranchoice(rooms).ranpos()
+    # Place player on upwards stairs in the first room
+    room = rooms[0]
+    x,y = room.ranpos()
     gv.player.x,gv.player.y = x,y
     gv.stairs_up = Stairs(x,y,False)
     #gv.stairs_down = Stairs(x+1,y+1)
 
-    # Create downward stairs in a random room
-    x,y = ranchoice(rooms).ranpos()
+    # Create downward stairs in any room but the first
+    x,y = ranchoice(rooms[1:]).ranpos()
     while ((x,y) == gv.stairs_up.pos()):
         x,y = ranchoice(rooms).ranpos()
     gv.stairs_down = Stairs(x,y)
