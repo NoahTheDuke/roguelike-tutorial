@@ -40,7 +40,13 @@ def initialize_window():
     gv.stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
     gv.inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
     gv.gamelog_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
-    gv.combat_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    gv.combat_panel = tdl.Console(settings.COMBAT_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+
+    # set the default captions for all panels
+    gv.stat_panel.caption = 'Status'
+    gv.inv_panel.caption = 'Inventory'
+    gv.gamelog_panel.caption = 'Gamelog'
+    gv.combat_panel.caption = 'Enemies'
 
     # set the default border color for all panels
     for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
@@ -139,32 +145,44 @@ def main_loop():
         #print('main loop waiting again!')
         player_action = handle_keys(tdl.event.key_wait())
         #print('Gamestate: %s' % gv.gamestate)
-        if gv.gamestate is not GameStates.INVENTORY_ACTIVE:
-            if not player_action == None:
-                if 'exit' in player_action:
+        if not player_action == None:
+            if 'exit' in player_action:
+                # if the player is exit, prompt if he wants to quit the game
+                if gv.gamestate == GameStates.PLAYERS_TURN:
                     choice = menu('Save & Quit the %s' % settings.DUNGEONNAME + ' ?',['Yes','No'],24)
                     if choice == 0:
                         save_game()
                         break
-                elif 'fullscreen' in player_action:
-                    tdl.set_fullscreen(not tdl.get_fullscreen())
-                elif 'manual' in player_action:
-                    display_manual()
-    
-                else:              
-                    if gv.gamestate is GameStates.PLAYERS_TURN or gv.gamestate is GameStates.CURSOR_ACTIVE:
-                        print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
-                        #print('processing input!')
-                        process_input(player_action)
+
+                elif gv.gamestate == GameStates.PLAYER_DEAD:
+                    choice = menu('Quit the %s' % settings.DUNGEONNAME + ' ?',['Yes','No'],24)
+                    if choice == 0:
+                        break    
+            
+                # if the cursor is active, deactivate it
+                elif gv.gamestate == GameStates.CURSOR_ACTIVE:
+                    gv.cursor.deactivate()
+                    gv.gamestate = GameStates.PLAYERS_TURN
                     
-                    # If player has done an active turn
-                    if gv.gamestate == GameStates.ENEMY_TURN:
-                        #AI takes turn, if player is not considered inactive and is roughly in FOV
-                        for obj in gv.actors:
-                            if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj is not gv.player:
-                                obj.ai.take_turn()
-                        if gv.gamestate is not GameStates.PLAYER_DEAD:
-                            gv.gamestate = GameStates.PLAYERS_TURN
+            elif 'fullscreen' in player_action:
+                tdl.set_fullscreen(not tdl.get_fullscreen())
+            elif 'manual' in player_action:
+                display_manual()
+
+            else:              
+                if gv.gamestate is GameStates.PLAYERS_TURN or gv.gamestate is GameStates.CURSOR_ACTIVE:
+                    print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
+                    #print('processing input!')
+                    process_input(player_action)
+                
+                # If player has done an active turn
+                if gv.gamestate == GameStates.ENEMY_TURN:
+                    #AI takes turn, if player is not considered inactive and is roughly in FOV
+                    for obj in gv.actors:
+                        if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj is not gv.player:
+                            obj.ai.take_turn()
+                    if gv.gamestate is not GameStates.PLAYER_DEAD:
+                        gv.gamestate = GameStates.PLAYERS_TURN
 
 if __name__ == '__main__':
     initialize_window()

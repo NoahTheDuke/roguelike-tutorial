@@ -60,6 +60,19 @@ class Fighter(GameObject):
         if self.power == 1:
             self.power = 1
 
+    def get_health_as_string_and_color(self):
+        ''' returns the actor's hp as a tuple containing a descriptive string and an associated color'''
+
+        percentage = self.hp/self.max_hp * 100
+        if 86 <= percentage <= 100:
+            return ('healthy',colors.dark_green)
+        elif 71 <= percentage <= 85:
+            return ('scratched',colors.light_green)
+        elif 25 <= percentage <= 70:
+            return  ('wounded',colors.light_red)
+        else:
+            return ('nearly dead',colors.dark_red)
+
     def death(self):
         ''' Generic death for all actors '''
         Message('The ' + self.name.capitalize() + ' is dead!',log=gv.combat_log,color=colors.green)
