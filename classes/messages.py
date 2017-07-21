@@ -12,6 +12,7 @@ class Message:
         if log is None:
             log = gv.game_log
 
+        # Format the passed text according to the intended log's width
         self.lines = textwrap.wrap(self.text, log.width)
 
         # Add the new message to the specified log
@@ -36,7 +37,9 @@ class MessageLog:
     def display_messages(self,y,panel):
         ''' draws the messages to the indicated panel at height y'''
         for message in self.messages:
-            if y + len(message.lines) < settings.BOTTOM_PANEL_HEIGHT:
+            if y + len(message.lines) < panel.height:   # If the current height + upcoming lines wouldn't exceed the log's height, draw the lines
                 for line in message.lines:
                     panel.draw_str(settings.MSG_X, y, line, bg=None, fg=message.color)
                     y += 1
+            else:   # Otherwise delete the earliest message to make room
+                del self.messages[0]

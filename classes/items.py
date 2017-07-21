@@ -17,7 +17,7 @@ from render_util import RenderOrder
 class Item(GameObject):
     '''an item that can be picked up and used.'''
     def __init__(self, x, y,name,char, color,description=None):
-        super().__init__(x, y,name,char, color,blocks=False,item=True,render_order=RenderOrder.ITEM)
+        super().__init__(x, y,name,char, color,blocks=False,item=True,render_order=RenderOrder.ITEM,always_visible=True)
         
         self.description = description
         if description == None:

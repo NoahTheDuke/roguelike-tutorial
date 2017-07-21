@@ -7,6 +7,7 @@ stat_panel = None
 inv_panel = None
 gamelog_panel = None
 combat_panel = None
+#spotted_panel = None
 
 # Gameplay variables
 # TODO: noramlize variable names (game_objects,game_actors)

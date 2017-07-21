@@ -136,9 +136,9 @@ def main_loop():
             obj.clear(gv.con)
         
         #gv.player.is_active = True # Player is considered active by default
-        print('main loop waiting again!')
+        #print('main loop waiting again!')
         player_action = handle_keys(tdl.event.key_wait())
-        print('Gamestate: %s' % gv.gamestate)
+        #print('Gamestate: %s' % gv.gamestate)
         if gv.gamestate is not GameStates.INVENTORY_ACTIVE:
             if not player_action == None:
                 if 'exit' in player_action:
@@ -156,12 +156,6 @@ def main_loop():
                         print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
                         #print('processing input!')
                         process_input(player_action)
-                        # If the player has moved, check the ground for items
-                        if ('move' in player_action) and gv.gamestate is GameStates.ENEMY_TURN:
-                            look_at_ground(gv.player.x,gv.player.y)
-                        # or if the cursor is active and was moved, check as well
-                        elif ('move' in player_action) and gv.gamestate is GameStates.CURSOR_ACTIVE:
-                            look_at_ground(gv.cursor.x,gv.cursor.y)
                     
                     # If player has done an active turn
                     if gv.gamestate == GameStates.ENEMY_TURN:

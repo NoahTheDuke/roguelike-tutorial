@@ -138,7 +138,7 @@ def process_input(action):
         elif len(items) == 1:
             item = 0
         else:
-            item = menu('What do you want to pick up?',[item.name for item in items],24)
+            item = menu('What do you want to pick up?',[item.name for item in items],40)
         if not item == None:
             items[item].pick_up()
             Message('You picked up a ' + items[item].name + '!', colors.green)
