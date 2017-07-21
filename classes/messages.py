@@ -1,16 +1,19 @@
 import textwrap
 import colors
+import settings
 
 import global_vars as gv
 
 class Message:
-    def __init__(self, text,color=colors.white,log=None):
+    def __init__(self,text,lines=None,color=colors.white,log=None):
         self.text = text
         self.color = color
 
         if log is None:
             log = gv.game_log
-        
+
+        self.lines = textwrap.wrap(self.text, log.width)
+
         # Add the new message to the specified log
         log.add_message(self)
 
@@ -22,13 +25,18 @@ class MessageLog:
         self.height = height
 
     def add_message(self,message):
-        # Split the message if necessary, among multiple lines
-        new_msg_lines = textwrap.wrap(message.text, self.width)
+        ''' add a message to the log, deleting earlier message if necessary '''   
+              
+        if len(self.messages) == self.height:
+            del self.messages[0]
 
-        for line in new_msg_lines:
-            # If the buffer is full, remove the first line to make room for the new one
-            if len(self.messages) == self.height:
-                del self.messages[0]
-
-            # Add the new line as a Message object, with the text and the color
-            self.messages.append(message)
+        # Add the Message to the messages list
+        self.messages.append(message)
+    
+    def display_messages(self,y,panel):
+        ''' draws the messages to the indicated panel at height y'''
+        for message in self.messages:
+            if y + len(message.lines) < settings.BOTTOM_PANEL_HEIGHT:
+                for line in message.lines:
+                    panel.draw_str(settings.MSG_X, y, line, bg=None, fg=message.color)
+                    y += 1

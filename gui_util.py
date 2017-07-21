@@ -26,12 +26,16 @@ def inventory_menu(header,filter=None):
         return None
     return gv.inventory[index]
 
+def interactive_inventory_panel():
+    '''show a menu with each item of the inventory as an option'''
+    gv.inv_panel.border_color = settings.PANELS_BORDER_COLOR_ACTIVE
+
 def item_menu(item):
     '''displays an item's descriptions and related options '''
     render_all()    # Re-render the screen so the menus wont overlap
 
-    header = [(item.name).title(),' ']+(textwrap.wrap(item.description,30)) # Construct a header out of the item's name and description
-    menu(header,['(u)se','(e)quip','(d)rop',' ','Any other key to cancel.'],30,wrap_header=False,options_sorted=False)
+    header = [(item.name).title(),' ']+(textwrap.wrap(item.description,50)+[' ']) # Construct a header out of the item's name and description
+    menu(header,['(u)se','(e)quip','(d)rop',' ','Any other key to cancel.'],50,wrap_header=False,options_sorted=False)
 
     # Wait for the player make a selection
     key = tdl.event.key_wait()
@@ -121,15 +125,3 @@ def menu(header, options, width,wrap_header=True,options_sorted=True,text_color=
     if index >= 0 and index < len(options):
         return index
     return None
-
-# def Message(new_msg, color = colors.white):
-#     '''split the message if necessary, among multiple lines'''
-#     new_msg_lines = textwrap.wrap(new_msg, settings.MSG_WIDTH)
- 
-#     for line in new_msg_lines:
-#         #if the buffer is full, remove the first line to make room for the new one
-#         if len(gv.game_msgs) == settings.MSG_HEIGHT:
-#             del gv.game_msgs[0]
- 
-#         #add the new line as a tuple, with the text and the color
-#         gv.game_msgs.append((line, color))

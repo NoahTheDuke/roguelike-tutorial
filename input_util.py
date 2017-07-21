@@ -6,7 +6,7 @@ import global_vars as gv
 from classes.messages import Message
 
 from game_states import GameStates
-from gui_util import menu, inventory_menu, item_menu
+from gui_util import menu, inventory_menu, item_menu,interactive_inventory_panel
 
 def handle_keys(user_input):
     ''' Handles all key input made by the player '''

@@ -7,6 +7,8 @@ import settings
 import colors
 import global_vars as gv
 
+from classes.messages import MessageLog
+
 #from classes.messages import MessageLog
 
 class RenderOrder(Enum):
@@ -70,32 +72,26 @@ def render_all():
 
     # render the panels containing the GUI
     render_panels(root)
-
+    
 def render_panels(root):
     ''' renders the GUI panels containing stats, logs etc. '''
 
-    # Create panels
-    stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
-    inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
-    gamelog_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
-    combat_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
-    
-    # Draw panels
-    draw_stat_panel (stat_panel,root)
-    draw_inv_panel (inv_panel,root)    # TODO: Fix bottom border
-    draw_gamelog_panel(gamelog_panel,root)
-    draw_combat_panel(combat_panel,root)
+    # Setup each panel by clearing it and drawing it's borders
+    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
+        panel.clear(fg=colors.white, bg=colors.black)
+        draw_window_borders(panel,color=panel.border_color)
+
+    # call the individual function for each panel to draw it
+    draw_stat_panel(gv.stat_panel,root)
+    draw_inv_panel(gv.inv_panel,root)
+    draw_gamelog_panel(gv.gamelog_panel,root)
+    draw_combat_panel(gv.combat_panel,root)
 
 def draw_stat_panel(panel,root):
     ''' panel containing player stats & name '''
 
-    panel.clear(fg=colors.white, bg=colors.black)
-
-    # draw the panel's border
-    draw_window_borders(panel)
-
     # Add the panel's caption
-    panel.draw_str(2,0,'Player')
+    panel.draw_str(2,0,'Status')
         
     # Show the player's name and stats
     panel.draw_str(1,2,'Name: %s' % gv.player.name, bg=None, fg=colors.gold)
@@ -106,32 +102,37 @@ def draw_stat_panel(panel,root):
     render_bar(1,8,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
         colors.black, colors.black)
 
+    # spotted = [obj.name for obj in gv.gameobjects if ([obj.x,obj.y] == [x,y] and not obj == gv.cursor and not obj == gv.player)]
+    # if len(spotted) > 0:    # if at least one object is present, output the names as a message
+    #      Message('You see: ' + (', '.join(spotted)))
+
     root.blit(panel,settings.SIDE_PANEL_X,0, settings.SIDE_PANEL_WIDTH, settings.STAT_PANEL_HEIGHT)
 
 def draw_inv_panel(panel,root):
     ''' panel containing the inventory '''
 
-    panel.clear(fg=colors.white, bg=colors.black)
-
-    # draw the panel's border
-    draw_window_borders(panel)
-
     # Add the panel's caption
-    panel.draw_str(2,0,'Inventory')
+    panel.draw_str(2,0,'Inventory {0}/26'.format(len(gv.inventory)))
     
     if len(gv.inventory) > 0:
-        y = 2   # Offset from the top of the panel
+        y = 2 # offset from the top of the panel
+        x = 1 # offset from the left of the panel
+        li = ord('a')   # index used to display the letters next to the inventory
         for i in range(len(gv.inventory)):
             item = gv.inventory[i]
             text = wrap(item.name,settings.BAR_WIDTH-4)
-            panel.draw_str(2,y,'- {0}'.format(text[0].title()))
+            panel.draw_str(x,y,'({0}) {1}'.format(chr(li),text[0].title()))
             y += 1
-            if len(text) > 1:
-                for line in text[1:]:
-                    panel.draw_str(2,y,line.title())
+            li += 1
+            if len(text) > 1:   # if the text was wrapped
+                for line in text[1:]:   # draw subsequent lines in the following line (NOTE: should I add very long item names, this will need to be tweaked)
+                    panel.draw_str(x,y,line.title())
                     y += 1
-            panel.draw_str(2,y,' ')
+            panel.draw_str(x,y,' ')
             y += 1
+            if y >= settings.INV_PANEL_HEIGHT - 2: # If the limit's of the panel are reached, cut the inventory off 
+                panel.draw_str(x,y,'~ ~ ~ more ~ ~ ~')
+                break
     
     root.blit(panel,settings.SIDE_PANEL_X,settings.STAT_PANEL_HEIGHT, settings.SIDE_PANEL_WIDTH, settings.INV_PANEL_HEIGHT)
 
@@ -163,20 +164,11 @@ def draw_stat_window(panel):
 def draw_gamelog_panel(panel,root):
     ''' draws the bottom (message) panel '''
 
-    # prepare to render the bottom panel
-    panel.clear(fg=colors.white, bg=colors.black)       
-    
-    # draw the panel's border
-    draw_window_borders(panel)
-
     # draw the panenl's heading
     panel.draw_str(2,0,'Gamelog')
 
     #print the game messages, one line at a time
-    y = 2
-    for message in gv.game_log.messages:
-        panel.draw_str(settings.MSG_X, y, message.text, bg=None, fg=message.color)
-        y += 1
+    gv.game_log.display_messages(2,panel)
  
     #blit the contents of "panel" to the root console
     root.blit(panel, settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_Y,settings.BOTTOM_PANEL_WIDTH,settings.BOTTOM_PANEL_HEIGHT)
@@ -184,20 +176,11 @@ def draw_gamelog_panel(panel,root):
 def draw_combat_panel(panel,root):
     ''' draws the bottom (message) panel '''
 
-    # prepare to render the bottom panel
-    panel.clear(fg=colors.white, bg=colors.black)       
-    
-    # draw the panel's border
-    draw_window_borders(panel)
-
     # draw the panenl's heading
     panel.draw_str(2,0,'Combatlog')
 
     #print the game messages, one line at a time
-    y = 2
-    for message in gv.combat_log.messages:
-        panel.draw_str(settings.MSG_X, y, message.text, bg=None, fg=message.color)
-        y += 1
+    gv.combat_log.display_messages(2,panel)
  
     #blit the contents of "panel" to the root console
     root.blit(panel,0, settings.BOTTOM_PANEL_Y,settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
@@ -219,7 +202,7 @@ def render_bar(x, y, panel,total_width, name, value, maximum, bar_color, back_co
     x_centered = x + (total_width-len(text))//2
     panel.draw_str(x_centered, y, text, fg=colors.white, bg=None)
 
-def draw_window_borders(window,width=None,height=None):
+def draw_window_borders(window,width=None,height=None,color=colors.dark_grey):
     ''' draws an outline around the passed window. By default, the window's width & height will be used '''
     
     if width is None:
@@ -228,17 +211,17 @@ def draw_window_borders(window,width=None,height=None):
         height = window.height
 
     for x in range(width):
-        window.draw_char(x,0,'196')
-        window.draw_char(x,height-1,'196')
+        window.draw_char(x,0,'196',bg=None,fg=color)
+        window.draw_char(x,height-1,'196',bg=None,fg=color)
 
     for y in range(height):
-        window.draw_char(0,y,'179')
-        window.draw_char(width-1,y,'179')
+        window.draw_char(0,y,'179',bg=None,fg=color)
+        window.draw_char(width-1,y,'179',bg=None,fg=color)
     
-    window.draw_char(0,0,'218')
-    window.draw_char(width-1,0,'191')
-    window.draw_char(0,height-1,'192')
-    window.draw_char(width-1,height-1,'217')
+    window.draw_char(0,0,'218',bg=None,fg=color)
+    window.draw_char(width-1,0,'191',bg=None,fg=color)
+    window.draw_char(0,height-1,'192',bg=None,fg=color)
+    window.draw_char(width-1,height-1,'217',bg=None,fg=color)
 
 def is_visible_tile(x, y):
     if x >= settings.MAP_WIDTH or x < 0:

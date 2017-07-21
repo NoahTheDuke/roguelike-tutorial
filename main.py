@@ -36,6 +36,16 @@ def initialize_window():
     gv.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title=settings.DUNGEONNAME, fullscreen=False)
     gv.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
 
+    # initialize the panels
+    gv.stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
+    gv.inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
+    gv.gamelog_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    gv.combat_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+
+    # set the default border color for all panels
+    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
+        panel.border_color = settings.PANELS_BORDER_COLOR
+
     # begin the main game loop
     tdl.setFPS(settings.LIMIT_FPS)
     main_menu()
@@ -159,7 +169,8 @@ def main_loop():
                         for obj in gv.actors:
                             if (obj.distance_to(gv.player) <= settings.TORCH_RADIUS + 2) and obj is not gv.player:
                                 obj.ai.take_turn()
-                        gv.gamestate = GameStates.PLAYERS_TURN
+                        if gv.gamestate is not GameStates.PLAYER_DEAD:
+                            gv.gamestate = GameStates.PLAYERS_TURN
 
 if __name__ == '__main__':
     initialize_window()
