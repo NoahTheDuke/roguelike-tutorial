@@ -176,7 +176,7 @@ def draw_gamelog_panel(panel,root):
     gv.game_log.display_messages(2,panel)
  
     #blit the contents of "panel" to the root console
-    root.blit(panel, settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_Y, panel.width, panel.height)
+    root.blit(panel, settings.COMBAT_PANEL_WIDTH, settings.BOTTOM_PANEL_Y, panel.width, panel.height)
 
 def draw_combatlog_panel(panel,root):
     ''' draws the bottom (message) panel '''
@@ -200,14 +200,15 @@ def draw_combat_panel(panel,root,visible_tiles):
     spotted = [ent for ent in gv.actors if (ent.x,ent.y) in visible_tiles and ent is not gv.player]
 
     if len(spotted) > 0:
+        x = 2
         y = 2
         for ent in spotted:    # Go through the object names and wrap them according to the panel's width
-            panel.draw_str(1,y,'{0} :'.format(ent.name),bg=None, fg=colors.white)
+            panel.draw_str(x,y,'{0} :'.format(ent.name),bg=None, fg=colors.white)
             wounded = ent.get_health_as_string_and_color()
             panel.draw_str(len(ent.name)+4,y,'{0}'.format(wounded[0].title()),bg=None, fg=wounded[1])
             y += 2
             if y >= panel.height - 2: # If the limit's of the panel are reached, cut the panel off
-                panel.draw_str(1,y,'~ ~ ~ ~ MORE ~ ~ ~ ~')
+                panel.draw_str(x,y,'~ ~ ~ ~ MORE ~ ~ ~ ~')
                 break
  
     #blit the contents of "panel" to the root console

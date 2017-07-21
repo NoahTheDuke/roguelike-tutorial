@@ -21,21 +21,22 @@ def gen_monsters():
 
     # Randomly pick a monster from the list
     for room in gv.game_map.rooms:
-        gen = random.choice(list(generators.keys()))
-        while (randint(0,100) > generators[gen][0]):
+        for i in range(settings.MAX_ROOM_MONSTERS):
             gen = random.choice(list(generators.keys()))
-    
-        # Get a good position for the monster
-        x,y = room.ranpos()
-        i = 0
-        while sum([obj.x,obj.y] == [x,y] for obj in gv.actors) > 0:
-            x,y = room.ranpos()
-            i += 1
-            if i == 0:
-                break
+            while (randint(0,100) > generators[gen][0]):
+                gen = random.choice(list(generators.keys()))
         
-        # Place it
-        m = generators[gen][1](x,y)
+            # Get a good position for the monster
+            x,y = room.ranpos()
+            i = 0
+            while sum([obj.x,obj.y] == [x,y] for obj in gv.actors) > 0:
+                x,y = room.ranpos()
+                i += 1
+                if i == 0:
+                    break
+            
+            # Place it
+            m = generators[gen][1](x,y)
 
 def gen_Player(x,y):
     name='Player'

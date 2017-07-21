@@ -32,15 +32,16 @@ def gen_items():
 
     # Randomly pick an item from the list
     for room in gv.game_map.rooms:
-        gen = random.choice(list(generators.keys()))
-        while (randint(0,100) > generators[gen][0]):
+        for i in range(settings.MAX_ROOM_ITEMS):
             gen = random.choice(list(generators.keys()))
-    
-        # Get a good position for the item
-        x,y = room.ranpos()
+            while (randint(0,100) > generators[gen][0]):
+                gen = random.choice(list(generators.keys()))
+        
+            # Get a good position for the item
+            x,y = room.ranpos()
 
-        # Place it  
-        i = generators[gen][1](x,y)
+            # Place it  
+            i = generators[gen][1](x,y)
 
 def gen_inventory():
     ''' creates an initial inventory (PLACEHOLDER) '''
