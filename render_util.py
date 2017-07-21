@@ -74,6 +74,9 @@ def render_all():
 
     # render the panels containing the GUI
     render_panels(root)
+
+    if gv.gamestate == GameStates.CURSOR_ACTIVE:
+        draw_spotted_window()
     
 def render_panels(root):
     ''' renders the GUI panels containing stats, logs etc. '''
@@ -104,10 +107,38 @@ def draw_stat_panel(panel,root):
     render_bar(1,8,panel,settings.BAR_WIDTH, 'DEF', gv.player.defense, gv.player.max_defense,
         colors.black, colors.black)
 
-    draw_spotted_panel(panel)
+    #draw_spotted_panel(panel)
     
     root.blit(panel,settings.SIDE_PANEL_X,0, panel.width, panel.height)
 
+def draw_spotted_window():
+    ''' draws a window next to the cursor if any objects are in the area '''
+
+    cx,cy = gv.cursor.pos()
+
+    spotted = [obj for obj in gv.gameobjects if ([obj.x,obj.y] == [cx,cy] and not obj == gv.cursor and not obj == gv.player)]
+
+    if len(spotted) > 0:    # if more than one object is present, output the names as a message
+        lines = []
+        width = max([len(obj.name) for obj in spotted]+[len('I spot:')]) + 3 # Window width is adapted to longest object name in list
+        for obj in spotted:    # Go through the object names and wrap them according to the panel's width
+            line_wrapped = wrap(obj.name,width)
+            for text in line_wrapped:
+                lines.append(text)
+
+        panel = tdl.Console(width,5 + len(lines))
+        panel.border_color = settings.PANELS_BORDER_COLOR
+        panel.clear(fg=colors.white, bg=colors.black)
+        draw_window_borders(panel,color=panel.border_color)
+        
+        panel.draw_str(1,2,'I spot:', bg=None, fg=colors.white)
+        y = 3
+        for text in lines:
+            panel.draw_str(2,y,text.title(),bg=None, fg=colors.white)
+            y += 1
+
+        gv.root.blit(panel,cx+2,cy, panel.width, panel.height)
+    
 def draw_spotted_panel(panel):
     ''' draws spotted items and monsters on a panel '''
    
@@ -120,13 +151,13 @@ def draw_spotted_panel(panel):
     spotted = [obj.name for obj in gv.gameobjects if ([obj.x,obj.y] == [x,y] and not obj == gv.cursor and not obj == gv.player)]
     if len(spotted) > 0:    # if more than one object is present, output the names as a message
         y = settings.STAT_PANEL_HEIGHT//2
-        panel.draw_str(1,settings.STAT_PANEL_HEIGHT//2,'I can see:', bg=None, fg=colors.white)
+        panel.draw_str(1,settings.STAT_PANEL_HEIGHT//2,'I spot:', bg=None, fg=colors.white)
         y += 1
         for obj in spotted:    # Go through the object names and wrap them according to the panel's width
             line_wrapped = wrap(obj,panel.width - 3)
             if y + len(line_wrapped) < panel.height-1:  # As long as we don't exceed the panel's height, draw the items
                 for text in line_wrapped:
-                    panel.draw_str(2,y,text,bg=None, fg=colors.white)
+                    panel.draw_str(2,y,text.capitalize(),bg=None, fg=colors.white)
                     y+=1
             else:   # otherwise draw a line to indicate there's more than can be displayed
                 panel.draw_str(1,y,'~ ~ ~ more ~ ~ ~')

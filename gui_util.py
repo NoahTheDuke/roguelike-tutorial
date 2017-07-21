@@ -34,8 +34,9 @@ def item_menu(item):
     '''displays an item's descriptions and related options '''
     render_all()    # Re-render the screen so the menus wont overlap
 
-    header = [(item.name).title(),' ']+(textwrap.wrap(item.description,50)+[' ']) # Construct a header out of the item's name and description
-    menu(header,['(u)se','(e)quip','(d)rop',' ','Any other key to cancel.'],50,wrap_header=False,options_sorted=False)
+    width = 30
+    header = [(item.name).title(),' ']+(textwrap.wrap(item.description,width)+[' ']) # Construct a header out of the item's name and description
+    menu(header,['(u)se','(e)quip','(d)rop',' ','Any other key to cancel.'],width,wrap_header=False,options_sorted=False)
 
     # Wait for the player make a selection
     key = tdl.event.key_wait()

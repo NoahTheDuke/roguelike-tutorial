@@ -47,7 +47,7 @@ COLOR_LIGHT_WALL = colors.lighter_grey
 COLOR_LIGHT_GROUND = colors.lighter_grey
 
 # Interaction
-INVENTORY_WIDTH = 50
+INVENTORY_WIDTH = 30
 
 # FOV
 FOV_ALGO = 'SHADOW'
