@@ -1,5 +1,4 @@
 ''' Code related to entitity creation '''
-# TODO: split item-related code into own module
 
 import math
 from random import randint
@@ -24,18 +23,18 @@ class Item(GameObject):
             description = '{0} lacks a description!'.format[str(self.name)]
             print(str(self.name) + ' lacks a description!')
     
-    def pick_up(self):
-        '''add to the gv.player's gv.inventory and remove from the map'''
-        if len(gv.inventory) >= 26:
-            Message('Your gv.inventory is full, cannot pick up ' + self.name + '.', colors.red)
+    def pick_up(self,actor):
+        '''add to the gv.player's inventory and remove from the map'''
+        if len(actor.inventory) >= 26:
+            Message('Your gv.player.inventory is full, cannot pick up ' + self.name + '.', colors.red)
         else:
-            gv.inventory.append(self)
+            actor.inventory.append(self)
             gv.gameobjects.remove(self)
     
     def drop(self):
-        '''add to the map and remove from the gv.player's gv.inventory. also, place it at the gv.player's coordinates'''
+        '''add to the map and remove from the gv.player's gv.player.inventory. also, place it at the gv.player's coordinates'''
         gv.gameobjects.append(self)
-        gv.inventory.remove(self)
+        gv.player.inventory.remove(self)
         self.x = gv.player.x
         self.y = gv.player.y
         Message('You dropped a ' + self.name + '.', colors.yellow)
@@ -62,7 +61,7 @@ class Useable(Item):
     def use(self):
         '''just call the "use_function" if it is defined'''
         if self.use_function(params = self.params) != 'cancelled': #the use_function is called and unless it isn't cancelled, True is returned
-            gv.inventory.remove(self)  #destroy after use, unless it was cancelled for some reason
+            gv.player.inventory.remove(self)  #destroy after use, unless it was cancelled for some reason
 
 class Equipment(Item):
     '''an equipable item (e.g. armor, weapon)'''

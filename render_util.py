@@ -136,14 +136,14 @@ def draw_inv_panel(panel,root):
     ''' panel containing the inventory '''
 
     # Add the panel's caption
-    panel.draw_str(2,0,'Inventory {0}/26'.format(len(gv.inventory)))
+    panel.draw_str(2,0,'Inventory {0}/26'.format(len(gv.player.inventory)))
     
-    if len(gv.inventory) > 0:
+    if len(gv.player.inventory) > 0:
         y = 2 # offset from the top of the panel
         x = 1 # offset from the left of the panel
         li = ord('a')   # index used to display the letters next to the inventory
-        for i in range(len(gv.inventory)):
-            item = gv.inventory[i]
+        for i in range(len(gv.player.inventory)):
+            item = gv.player.inventory[i]
             text = wrap(item.name,settings.BAR_WIDTH-4)
             panel.draw_str(x,y,'({0}) {1}'.format(chr(li),text[0].title()))
             y += 1

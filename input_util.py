@@ -140,7 +140,7 @@ def process_input(action):
         else:
             item = menu('What do you want to pick up?',[item.name for item in items],40)
         if not item == None:
-            items[item].pick_up()
+            items[item].pick_up(gv.player)
             Message('You picked up a ' + items[item].name + '!', colors.green)
 
     elif 'inventory' in action:

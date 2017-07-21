@@ -91,7 +91,7 @@ def save_game():
         savefile['map'] = gv.game_map
         savefile['objects'] = gv.gameobjects
         savefile['actors'] = gv.actors
-        savefile['inventory'] = gv.inventory
+        savefile['inventory'] = gv.player.inventory
         #savefile['messages']=gv.game_msgs
 
         # Store the index of special objects, so they can be later restored from the gv.gameobjects array
@@ -109,7 +109,7 @@ def load_game():
         gv.gameobjects = savefile['objects']
         gv.actors = savefile['actors']
         #gv.actors = [obj for obj in gameobjects if ]
-        gv.inventory = savefile['inventory']
+        gv.player.inventory = savefile['inventory']
         #gv.game_msgs = savefile['messages']
 
         # Restore special objects

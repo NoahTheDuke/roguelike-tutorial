@@ -102,7 +102,7 @@ class BasicMonster:
     def blurb(self):
         ''' make some sounds '''
         if not self.owner.blurbs == None:
-            Message(random.choice(self.owner.blurbs),colors.desaturated_red)
+            Message(random.choice(self.owner.blurbs),color=colors.desaturated_red)
 
 class ConfusedMonster:
     '''AI for a confused monster'''

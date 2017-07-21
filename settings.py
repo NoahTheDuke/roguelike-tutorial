@@ -7,9 +7,9 @@ import colors
 DUNGEONNAME = 'The Fiendish Abyss'
 
 # Console
-SCREEN_WIDTH = 115
+SCREEN_WIDTH = 95
 SCREEN_HEIGHT = 70
-MAP_WIDTH = 90  # Should be at least 20 less than SCREEN_WIDTH
+MAP_WIDTH = 70  # Should be at least 20 less than SCREEN_WIDTH
 MAP_HEIGHT = 55
 LIMIT_FPS = 30
 

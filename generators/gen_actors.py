@@ -61,8 +61,8 @@ def gen_Orc(x,y):
         df = 0,
         ai = BasicMonster(),
         blurbs = (
-            ('The ' + name + ' growls'),
-            ('The ' + name + ' screeches'),
+            ('The ' + name + ' growls.'),
+            ('The ' + name + ' screeches!'),
             ('The ' + name + ' screams in a strange language.')
         )
     )
@@ -83,7 +83,7 @@ def gen_Troll(x,y):
         ai = BasicMonster(),
         blurbs = (
             ('The ' + name + ' stares at you.'),
-            ('The ' + name + ' licks his lips')
+            ('The ' + name + ' licks his lips.')
         )
     )
     return ent

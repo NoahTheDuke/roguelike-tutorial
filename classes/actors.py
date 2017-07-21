@@ -21,12 +21,14 @@ from render_util import RenderOrder
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''
-    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,blocks=False):
+    def __init__(self, x, y,name,char,color,hp=10,pwr=5,df=2,inventory=[],blocks=False):
         super().__init__(x, y,name,char,color,blocks=True,render_order=RenderOrder.ACTOR)
         self.hp, self.power, self.defense = hp, pwr, df
         self.max_hp = hp
         self.max_power = pwr
         self.max_defense = df
+        
+        self.inventory = inventory
     
         gv.actors.append(self)
 

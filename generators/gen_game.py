@@ -115,12 +115,12 @@ def gen_game(newgame):
         gv.actors = []
         gv.game_log = MessageLog(settings.MSG_X,settings.MSG_WIDTH,settings.MSG_HEIGHT)
         gv.combat_log = MessageLog(settings.MSG_X,settings.MSG_WIDTH,settings.MSG_HEIGHT)
-        gv.inventory = []
         gv.dungeon_level = 1
         #gv.cursor = Cursor(0,0)
 
         # create the player & cursor
         gv.player = gen_Player(0,0)
+        gv.player.inventory = []
         gv.cursor = Cursor(0,0)
         
         # Setup an initial inventory

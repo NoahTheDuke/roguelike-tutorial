@@ -14,17 +14,17 @@ from render_util import render_all, draw_window_borders
 def inventory_menu(header,filter=None):
     '''show a menu with each item of the inventory as an option'''
     if filter is not None:  # if filter is set, only display items of a certain class
-        inventory = [item for item in gv.inventory if type(item).__name__ == filter]
+        inventory = [item for item in gv.player.inventory if type(item).__name__ == filter]
     else:
-        inventory = gv.inventory
+        inventory = gv.player.inventory
     if len(inventory) == 0:
         Message('Your Inventory is empty.')
     options = [item.name for item in inventory]
     index = menu(header, options, settings.INVENTORY_WIDTH)
     #if an item was chosen, return it
-    if index is None or len(gv.inventory) == 0:
+    if index is None or len(gv.player.inventory) == 0:
         return None
-    return gv.inventory[index]
+    return gv.player.inventory[index]
 
 def interactive_inventory_panel():
     '''show a menu with each item of the inventory as an option'''

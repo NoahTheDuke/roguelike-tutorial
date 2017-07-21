@@ -13,7 +13,6 @@ combat_panel = None
 # TODO: noramlize variable names (game_objects,game_actors)
 gameobjects = []
 actors = []
-inventory = []  # TODO: Make this a class variable of the Fighter class
 game_log = None
 combat_log = None
 player = None
