@@ -91,7 +91,6 @@ def draw_inv_panel(panel,root):
     
     root.blit(panel,settings.SIDE_PANEL_X,settings.STAT_PANEL_HEIGHT, panel.width, panel.height)
 
-
 def draw_gamelog_panel(panel,root):
     ''' draws the bottom (message) panel '''
 

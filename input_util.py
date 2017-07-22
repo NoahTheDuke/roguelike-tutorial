@@ -141,7 +141,7 @@ def process_input(action):
             item = menu('What do you want to pick up?',[item.name for item in items],40)
         if not item == None:
             items[item].pick_up(gv.player)
-            Message('You picked up a ' + items[item].name + '!', colors.green)
+            Message('You picked up ' + items[item].name.title() + '!', colors.green)
 
     elif 'inventory' in action:
         # Display the inventory, if it is not already active

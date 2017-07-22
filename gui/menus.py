@@ -11,6 +11,8 @@ from gui.render_main import render_all
 from gui.panels import draw_panel_borders
 from gui.messages import Message
 
+from game_states import GameStates
+
 def inventory_menu(header,filter=None):
     '''show a menu with each item of the inventory as an option'''
     if filter is not None:  # if filter is set, only display items of a certain class

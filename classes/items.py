@@ -37,7 +37,7 @@ class Item(GameObject):
         gv.player.inventory.remove(self)
         self.x = gv.player.x
         self.y = gv.player.y
-        Message('You dropped a ' + self.name + '.', colors.yellow)
+        Message('You dropped ' + self.name.title() + '.', colors.yellow)
 
     def examine(self):
         '''examines the given'''

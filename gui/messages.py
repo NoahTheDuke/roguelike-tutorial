@@ -10,7 +10,7 @@ import global_vars as gv
 from gui.panels import draw_panel_borders
 
 class Message:
-    def __init__(self,text,lines=None,color=colors.white,log=None):
+    def __init__(self,text,color=colors.white,log=None):
         self.text = text
         self.color = color
 
@@ -49,7 +49,7 @@ class MessageLog:
             else:   # Otherwise delete the earliest message to make room
                 del self.messages[0]
 
-def msgbox(text,title=None,width=50,text_color=colors.white,border_color=colors.white):
+def msgbox(text,title=None,width=50,text_color=colors.white,border_color=settings.PANELS_BORDER_COLOR_ACTIVE):
     '''display a simple message box'''
 
     text_wrapped = textwrap.wrap(text,width-2) # Calculate how many lines are required
@@ -61,15 +61,15 @@ def msgbox(text,title=None,width=50,text_color=colors.white,border_color=colors.
 
     # Draw the panel title (if passed)
     if title is not None:
-        panel.draw_str(1,0,title,fg=text_color)
+        panel.draw_str(2,0,title,fg=text_color)
     
     # Draw the panel's contents
     y = 2
     for line in text_wrapped:
-        panel.draw_str(1,y,line,fg=text_color)
+        panel.draw_str(2,y,line,fg=text_color)
         y += 1
     
-    # 
-    gv.root.blit(panel,settings.MAP_WIDTH//2,settings.MAP_HEIGHT//2, panel.width, panel.height)
+    # Blit the box to the root window, flush the console to display it and wait for a key input to remove it
+    gv.root.blit(panel,settings.SCREEN_WIDTH//2 - panel.width//2,settings.SCREEN_HEIGHT//2 - panel.height//2, panel.width, panel.height)
     tdl.flush()
     tdl.event.key_wait()

@@ -9,7 +9,7 @@ import settings
 import colors
 import global_vars as gv
 
-from gui.panels import render_panels, draw_panel_borders
+from gui.panels import render_panels, draw_panel_borders, draw_spotted_window
 
 from game_states import GameStates
 

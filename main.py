@@ -76,10 +76,7 @@ def main_menu():
         choice = menu('', ['Play a new game', 'Quit'], 24)
 
         if choice == 0: # new game:
-            #msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=30,text_color=colors.red)
             gen_game(True)
-            
-            #Message('Press ? to open the manual.')
         # elif choice == 1:
         #     try:
         #         load_game()
