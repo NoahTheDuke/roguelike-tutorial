@@ -11,7 +11,7 @@ def render_panels(root,visible_tiles):
     ''' renders the GUI panels containing stats, logs etc. '''
 
     # Setup each panel by clearing it and drawing it's borders
-    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel,gv.spotted_window]:
+    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
         panel.clear(fg=colors.white, bg=colors.black)
         draw_panel_borders(panel,color=panel.border_color)
 

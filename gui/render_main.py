@@ -38,25 +38,24 @@ def initialize_window():
     gv.inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
     gv.gamelog_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
     gv.combat_panel = tdl.Console(settings.COMBAT_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
-    
-    # initialize the windows
-    gv.spotted_window = tdl.Console(1,1)
 
-    # set the default captions for all panels and windows
+    # set the default captions for all panels
     gv.stat_panel.caption = 'Status'
     gv.inv_panel.caption = 'Inventory'
     gv.gamelog_panel.caption = 'Gamelog'
     gv.combat_panel.caption = 'Enemies'
-    gv.spotted_window.caption = 'I spot:'
 
-    # set the default border color for all panels and windows
-    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel,gv.spotted_window]:
+    # set the default border color for all panels
+    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
         panel.border_color = settings.PANELS_BORDER_COLOR
 
 def render_all():
     ''' draw all game objects '''
     root = gv.root
     con = gv.con
+
+    # clear the console of all temporary windows
+    con.clear(fg=colors.white, bg=colors.black)
 
     # render the dungeon map and it's objects
     px,py = gv.player.x, gv.player.y
@@ -108,6 +107,7 @@ def render_all():
     # render the panels containing the GUI
     render_panels(root,visible_tiles)
 
+    # If the cursor is active, draw the spotted window
     if gv.gamestate == GameStates.CURSOR_ACTIVE:
         draw_spotted_window(root)
 
