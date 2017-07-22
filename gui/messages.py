@@ -72,4 +72,6 @@ def msgbox(text,title=None,width=50,text_color=colors.white,border_color=setting
     # Blit the box to the root window, flush the console to display it and wait for a key input to remove it
     gv.root.blit(panel,settings.SCREEN_WIDTH//2 - panel.width//2,settings.SCREEN_HEIGHT//2 - panel.height//2, panel.width, panel.height)
     tdl.flush()
+    # No idea why it needs two but it does, otherwise the window is skipped
+    tdl.event.key_wait()
     tdl.event.key_wait()

@@ -9,7 +9,8 @@ import settings
 import colors
 import global_vars as gv
 
-from gui.panels import render_panels, draw_panel_borders, draw_spotted_window
+from gui.panels import render_panels, draw_panel_borders
+from gui.windows import draw_spotted_window
 
 from game_states import GameStates
 
@@ -21,6 +22,36 @@ class RenderOrder(Enum):
     ITEM = auto()
     ACTOR = auto()
     CURSOR = auto()
+
+def initialize_window():
+    ''' initializes & launches the game '''
+    
+    # Set custom font
+    tdl.set_font('resources/terminal12x12_gs_ro.png', greyscale=True)
+
+    # initialize the main console
+    gv.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title=settings.DUNGEONNAME, fullscreen=False)
+    gv.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
+
+    # initialize the panels
+    gv.stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
+    gv.inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
+    gv.gamelog_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    gv.combat_panel = tdl.Console(settings.COMBAT_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    
+    # initialize the windows
+    gv.spotted_window = tdl.Console(1,1)
+
+    # set the default captions for all panels and windows
+    gv.stat_panel.caption = 'Status'
+    gv.inv_panel.caption = 'Inventory'
+    gv.gamelog_panel.caption = 'Gamelog'
+    gv.combat_panel.caption = 'Enemies'
+    gv.spotted_window.caption = 'I spot:'
+
+    # set the default border color for all panels and windows
+    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel,gv.spotted_window]:
+        panel.border_color = settings.PANELS_BORDER_COLOR
 
 def render_all():
     ''' draw all game objects '''
@@ -78,7 +109,7 @@ def render_all():
     render_panels(root,visible_tiles)
 
     if gv.gamestate == GameStates.CURSOR_ACTIVE:
-        draw_spotted_window()
+        draw_spotted_window(root)
 
 def is_visible_tile(x, y):
     ''' a helper function to determine whether a tile is in within the game's playing field '''

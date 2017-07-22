@@ -11,7 +11,7 @@ def render_panels(root,visible_tiles):
     ''' renders the GUI panels containing stats, logs etc. '''
 
     # Setup each panel by clearing it and drawing it's borders
-    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
+    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel,gv.spotted_window]:
         panel.clear(fg=colors.white, bg=colors.black)
         draw_panel_borders(panel,color=panel.border_color)
 
@@ -20,7 +20,6 @@ def render_panels(root,visible_tiles):
     draw_inv_panel(gv.inv_panel,root)
     draw_gamelog_panel(gv.gamelog_panel,root)
     draw_combat_panel(gv.combat_panel,root,visible_tiles)
-    #draw_enemy_panel(gv.enemy_panel,root)
 
 def draw_stat_panel(panel,root):
     ''' panel containing player stats & name '''
@@ -42,7 +41,7 @@ def draw_stat_panel(panel,root):
     root.blit(panel,settings.SIDE_PANEL_X,0, panel.width, panel.height)
     
 def draw_spotteditems_panel(panel):
-    ''' draws spotted items and monsters on a panel '''
+    ''' draws items below the player a panel '''
    
     # Draw what the player can see at his feet
 
@@ -104,7 +103,7 @@ def draw_gamelog_panel(panel,root):
     root.blit(panel, settings.COMBAT_PANEL_WIDTH, settings.BOTTOM_PANEL_Y, panel.width, panel.height)
 
 def draw_combatlog_panel(panel,root):
-    ''' draws the bottom (message) panel '''
+    ''' (OBSOLETE) draws the bottom (message) panel '''
 
     # draw the panenl's heading
     panel.draw_str(2,0,panel.caption)
@@ -139,33 +138,7 @@ def draw_combat_panel(panel,root,visible_tiles):
     #blit the contents of "panel" to the root console
     root.blit(panel,0, settings.BOTTOM_PANEL_Y, panel.width, panel.height)
 
-def draw_spotted_window():
-    ''' draws a window next to the cursor if any objects are in the area '''
 
-    cx,cy = gv.cursor.pos()
-
-    spotted = [obj for obj in gv.gameobjects if ([obj.x,obj.y] == [cx,cy] and not obj == gv.cursor and not obj == gv.player)]
-
-    if len(spotted) > 0:    # if more than one object is present, output the names as a message
-        lines = []
-        width = max([len(obj.name) for obj in spotted]+[len('I spot:')]) + 3 # Window width is adapted to longest object name in list
-        for obj in spotted:    # Go through the object names and wrap them according to the panel's width
-            line_wrapped = wrap(obj.name,width)
-            for text in line_wrapped:
-                lines.append(text)
-
-        panel = tdl.Console(width,4 + len(lines))
-        panel.border_color = settings.PANELS_BORDER_COLOR
-        panel.clear(fg=colors.white, bg=colors.black)
-        draw_panel_borders(panel,color=panel.border_color)
-        
-        panel.draw_str(1,1,'I spot:', bg=None, fg=colors.white)
-        y = 2
-        for text in lines:
-            panel.draw_str(2,y,text.title(),bg=None, fg=colors.white)
-            y += 1
-
-        gv.root.blit(panel,cx+2,cy-2, panel.width, panel.height)
 
 def render_bar(x, y, panel,total_width, name, value, maximum, bar_color, back_color):
     '''render a status bar (HP, experience, etc).'''

@@ -13,7 +13,7 @@ import global_vars as gv
 import settings
 
 # GUI
-from gui.render_main import render_all
+from gui.render_main import render_all, initialize_window
 from gui.menus import menu
 from gui.messages import MessageLog,msgbox
 from gui.manual import display_manual
@@ -24,36 +24,6 @@ from generators.gen_game import gen_game
 # Game-related modules
 from game_states import GameStates
 from input_util import handle_keys, process_input
-
-def initialize_window():
-    ''' initializes & launches the game '''
-    
-    # Set custom font
-    tdl.set_font('resources/terminal12x12_gs_ro.png', greyscale=True)
-
-    # initialize the window
-    gv.root = tdl.init(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, title=settings.DUNGEONNAME, fullscreen=False)
-    gv.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
-
-    # initialize the panels
-    gv.stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
-    gv.inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
-    gv.gamelog_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
-    gv.combat_panel = tdl.Console(settings.COMBAT_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
-
-    # set the default captions for all panels
-    gv.stat_panel.caption = 'Status'
-    gv.inv_panel.caption = 'Inventory'
-    gv.gamelog_panel.caption = 'Gamelog'
-    gv.combat_panel.caption = 'Enemies'
-
-    # set the default border color for all panels
-    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
-        panel.border_color = settings.PANELS_BORDER_COLOR
-
-    # begin the main game loop
-    tdl.setFPS(settings.LIMIT_FPS)
-    main_menu()
 
 def main_menu():
     img = image_load('resources\menu_background3.png')
@@ -87,44 +57,13 @@ def main_menu():
 
         main_loop()
 
-def save_game():
-    ''' open a new empty shelve (possibly overwriting an old one) to write the game data '''
-    with shelve.open('savegames/savegame', 'n') as savefile:
-        savefile['map'] = gv.game_map
-        savefile['objects'] = gv.gameobjects
-        savefile['actors'] = gv.actors
-        savefile['inventory'] = gv.player.inventory
-        #savefile['messages']=gv.game_msgs
-
-        # Store the index of special objects, so they can be later restored from the gv.gameobjects array
-        savefile['p_index'] = gv.gameobjects.index(gv.player)
-        savefile['c_index'] = gv.gameobjects.index(gv.cursor)
-        savefile['sd_index'] = gv.gameobjects.index(gv.stairs_down)
-        savefile['su_index'] = gv.gameobjects.index(gv.stairs_up)
-        
-        savefile.close()
-
-def load_game():
-    ''' load an existing savegame '''
-    with shelve.open('savegames/savegame', 'r') as savefile:
-        gv.game_map = savefile['map']
-        gv.gameobjects = savefile['objects']
-        gv.actors = savefile['actors']
-        #gv.actors = [obj for obj in gameobjects if ]
-        gv.player.inventory = savefile['inventory']
-        #gv.game_msgs = savefile['messages']
-
-        # Restore special objects
-        gv.player = gv.gameobjects[savefile['p_index']]
-        print('{0} is new gv.player'.format(gv.player.name))
-        gv.cursor = gv.gameobjects[savefile['c_index']]
-        gv.stairs_down = gv.gameobjects[savefile['sd_index']]
-        gv.stairs_up = gv.gameobjects[savefile['su_index']]
-
-        Message('Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME,gv.dungeon_level), color=colors.red)
-
 def main_loop():
     ''' begin main game loop '''
+
+    # limit the game's FPS
+    tdl.setFPS(settings.LIMIT_FPS)
+
+    # set the gamestate to the player's turn
     gv.gamestate = GameStates.PLAYERS_TURN
 
     while not tdl.event.is_window_closed():
@@ -180,5 +119,42 @@ def main_loop():
                     if gv.gamestate is not GameStates.PLAYER_DEAD:
                         gv.gamestate = GameStates.PLAYERS_TURN
 
+def save_game():
+    ''' open a new empty shelve (possibly overwriting an old one) to write the game data '''
+    with shelve.open('savegames/savegame', 'n') as savefile:
+        savefile['map'] = gv.game_map
+        savefile['objects'] = gv.gameobjects
+        savefile['actors'] = gv.actors
+        savefile['inventory'] = gv.player.inventory
+        #savefile['messages']=gv.game_msgs
+
+        # Store the index of special objects, so they can be later restored from the gv.gameobjects array
+        savefile['p_index'] = gv.gameobjects.index(gv.player)
+        savefile['c_index'] = gv.gameobjects.index(gv.cursor)
+        savefile['sd_index'] = gv.gameobjects.index(gv.stairs_down)
+        savefile['su_index'] = gv.gameobjects.index(gv.stairs_up)
+        
+        savefile.close()
+
+def load_game():
+    ''' load an existing savegame '''
+    with shelve.open('savegames/savegame', 'r') as savefile:
+        gv.game_map = savefile['map']
+        gv.gameobjects = savefile['objects']
+        gv.actors = savefile['actors']
+        #gv.actors = [obj for obj in gameobjects if ]
+        gv.player.inventory = savefile['inventory']
+        #gv.game_msgs = savefile['messages']
+
+        # Restore special objects
+        gv.player = gv.gameobjects[savefile['p_index']]
+        print('{0} is new gv.player'.format(gv.player.name))
+        gv.cursor = gv.gameobjects[savefile['c_index']]
+        gv.stairs_down = gv.gameobjects[savefile['sd_index']]
+        gv.stairs_up = gv.gameobjects[savefile['su_index']]
+
+        Message('Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME,gv.dungeon_level), color=colors.red)
+
 if __name__ == '__main__':
     initialize_window()
+    main_menu()

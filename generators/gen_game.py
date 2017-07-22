@@ -116,7 +116,6 @@ def gen_game(newgame):
         gv.game_log = MessageLog(settings.MSG_X,settings.MSG_WIDTH,settings.MSG_HEIGHT)
         gv.combat_log = MessageLog(settings.MSG_X,settings.MSG_WIDTH,settings.MSG_HEIGHT)
         gv.dungeon_level = 1
-        #gv.cursor = Cursor(0,0)
 
         # create the player & cursor
         gv.player = gen_Player(0,0)
@@ -128,9 +127,7 @@ def gen_game(newgame):
 
         # a warm welcoming message!
         msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=35, text_color=colors.red)
-        tdl.event.key_wait()
         Message('Press ? to open the manual.', color=colors.green)
-        #gv.game_log.add_message(Message('Press ? to open the manual.', color=colors.green))
 
     else: # new dungeon level
         gv.dungeon_level += 1 # Increase the dungeon leavel by one
