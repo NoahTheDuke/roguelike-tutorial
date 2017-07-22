@@ -7,11 +7,11 @@ import settings
 import colors
 import global_vars as gv
 
-from classes.messages import Message
+from gui.render_main import RenderOrder
+from gui.messages import Message
 
 import item_use as iu
 from classes.objects import GameObject
-from render_util import RenderOrder
 
 class Item(GameObject):
     '''an item that can be picked up and used.'''

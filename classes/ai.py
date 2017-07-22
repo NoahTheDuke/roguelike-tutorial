@@ -5,7 +5,7 @@ import math
 import random
 from random import randint
 
-from classes.messages import Message
+from gui.messages import Message
 
 import colors
 import settings

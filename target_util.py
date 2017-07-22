@@ -6,18 +6,12 @@ import settings
 import colors
 import global_vars as gv
 
-from classes.messages import Message
+# GUI
+from gui.render_main import render_all
+from gui.messages import Message
 
 from game_states import GameStates
 from input_util import handle_keys,process_input
-from render_util import render_all
-
-def look_at_ground(x,y):
-    pass
-    # check if there's an object at the current position, excluding the cursor
-    # spotted = [obj.name for obj in gv.gameobjects if ([obj.x,obj.y] == [x,y] and not obj == gv.cursor and not obj == gv.player)]
-    # if len(spotted) > 0:    # if more than one object is present, output the names as a message
-    #      Message('You see: ' + (', '.join(spotted)))
 
 def target_tile():
     '''Display a targeting cursor'''

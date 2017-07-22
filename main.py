@@ -12,19 +12,18 @@ import colors
 import global_vars as gv
 import settings
 
-# Classes
-from classes.messages import MessageLog
+# GUI
+from gui.render_main import render_all
+from gui.menus import menu
+from gui.messages import MessageLog,msgbox
+from gui.manual import display_manual
 
 # Generators
 from generators.gen_game import gen_game
 
 # Game-related modules
 from game_states import GameStates
-from gui_util import menu, msgbox
 from input_util import handle_keys, process_input
-from render_util import render_all
-from target_util import look_at_ground
-from gui_util import display_manual
 
 def initialize_window():
     ''' initializes & launches the game '''

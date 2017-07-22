@@ -11,17 +11,16 @@ import global_vars as gv
 import settings
 import colors
 
+# GUI
+from gui.messages import MessageLog, Message, msgbox
+
 # Classes
 from classes.objects import Cursor, Stairs
 from classes.map import GameMap,Rect
-from classes.messages import MessageLog, Message
 
 # Generators
 from generators.gen_actors import gen_monsters, gen_Player
 from generators.gen_items import gen_inventory, gen_items
-
-# Other game-related functions
-from gui_util import msgbox
 
 def gen_map(width,height):
     ''' Sets up the game's map '''
@@ -128,7 +127,7 @@ def gen_game(newgame):
         gen_inventory()
 
         # a warm welcoming message!
-        msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=30, text_color=colors.red)
+        msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=35, text_color=colors.red)
         tdl.event.key_wait()
         Message('Press ? to open the manual.', color=colors.green)
         #gv.game_log.add_message(Message('Press ? to open the manual.', color=colors.green))

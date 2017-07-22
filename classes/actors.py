@@ -8,16 +8,16 @@ import settings
 import colors
 import global_vars as gv
 
-import item_use as iu
-from gui_util import msgbox
 
-from classes.messages import Message
+from gui.messages import Message,msgbox
+from gui.render_main import RenderOrder
+
 from classes.objects import GameObject
 
 from generators.gen_items import gen_Corpse,gen_Corpsebits
 
+import item_use as iu
 from game_states import GameStates
-from render_util import RenderOrder
 
 class Fighter(GameObject):
     ''' combat-related properties and methods (monster, gv.player, NPC) '''

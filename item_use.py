@@ -6,9 +6,9 @@ import settings
 import colors
 import global_vars as gv
 
-from classes.messages import Message
+from gui.messages import Message
+from gui.menus import menu
 
-from gui_util import menu
 from target_util import target_tile
 from classes.ai import ConfusedMonster
 

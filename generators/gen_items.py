@@ -8,8 +8,9 @@ import settings
 import colors
 import global_vars as gv
 
+
 import item_use as iu
-from render_util import RenderOrder
+from gui.render_main import RenderOrder
 from classes.items import Useable,Equipment
 
 # Constants for item generation

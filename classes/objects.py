@@ -7,7 +7,7 @@ import settings
 import colors
 import global_vars as gv
 
-from render_util import RenderOrder
+from gui.render_main import RenderOrder
 
 class GameObject:
     ''' Main class of game objects'''
