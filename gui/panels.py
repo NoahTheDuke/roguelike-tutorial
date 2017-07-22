@@ -7,25 +7,29 @@ import settings
 import colors
 import global_vars as gv
 
+from game_states import GameStates
+
 def render_panels(root,visible_tiles):
     ''' renders the GUI panels containing stats, logs etc. '''
 
-    # Setup each panel by clearing it and drawing it's borders
+    # Setup each panel by clearing it and drawing it's borders and caption
     for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
         panel.clear(fg=colors.white, bg=colors.black)
         draw_panel_borders(panel,color=panel.border_color)
+        panel.draw_str(2,0,panel.caption)
 
     # call the individual function for each panel to draw it
     draw_stat_panel(gv.stat_panel,root)
     draw_inv_panel(gv.inv_panel,root)
     draw_gamelog_panel(gv.gamelog_panel,root)
-    draw_combat_panel(gv.combat_panel,root,visible_tiles)
+
+    if gv.combat_panel.mode == 'description' and gv.gamestate == GameStates.CURSOR_ACTIVE:
+        draw_description_panel(gv.combat_panel,root)
+    else:
+        draw_combat_panel(gv.combat_panel,root,visible_tiles)
 
 def draw_stat_panel(panel,root):
     ''' panel containing player stats & name '''
-
-    # Add the panel's caption
-    panel.draw_str(2,0,panel.caption)
         
     # Show the player's name and stats
     panel.draw_str(1,2,'Name: %s' % gv.player.name, bg=None, fg=colors.gold)
@@ -93,9 +97,6 @@ def draw_inv_panel(panel,root):
 def draw_gamelog_panel(panel,root):
     ''' draws the bottom (message) panel '''
 
-    # draw the panenl's heading
-    panel.draw_str(2,0,panel.caption)
-
     #print the game messages, one line at a time
     gv.game_log.display_messages(2,panel)
  
@@ -104,9 +105,6 @@ def draw_gamelog_panel(panel,root):
 
 def draw_combatlog_panel(panel,root):
     ''' (OBSOLETE) draws the bottom (message) panel '''
-
-    # draw the panenl's heading
-    panel.draw_str(2,0,panel.caption)
 
     #print the game messages, one line at a time
     gv.combat_log.display_messages(2,panel)
@@ -117,9 +115,6 @@ def draw_combatlog_panel(panel,root):
 def draw_combat_panel(panel,root,visible_tiles):
     ''' draws the bottom left panel '''
 
-    # draw the panenl's heading
-    panel.draw_str(2,0,panel.caption)
-
     # check for monsters in FOV
     spotted = [ent for ent in gv.actors if (ent.x,ent.y) in visible_tiles and ent is not gv.player]
 
@@ -128,8 +123,8 @@ def draw_combat_panel(panel,root,visible_tiles):
         y = 2
         for ent in spotted:    # Go through the object names and wrap them according to the panel's width
             panel.draw_str(x,y,'{0}:'.format(ent.name),bg=None, fg=colors.white)
-            wounded = ent.get_health_as_string_and_color()
-            panel.draw_str(len(ent.name)+4,y,'{0}'.format(wounded[0].title()),bg=None, fg=wounded[1])
+            status = ent.get_health_as_string_and_color()
+            panel.draw_str(len(ent.name)+4,y,'{0}'.format(status[0].title()),bg=None, fg=status[1])
             y += 2
             if y >= panel.height - 2: # If the limit's of the panel are reached, cut the panel off
                 panel.draw_str(x,y,'~ ~ ~ ~ MORE ~ ~ ~ ~')
@@ -138,7 +133,23 @@ def draw_combat_panel(panel,root,visible_tiles):
     #blit the contents of "panel" to the root console
     root.blit(panel,0, settings.BOTTOM_PANEL_Y, panel.width, panel.height)
 
+def draw_description_panel(panel,root):
 
+    ent = next(ent for ent in gv.actors if (ent.x,ent.y)==(gv.cursor.pos()))
+    
+    x = 2
+    y = 2
+    panel.draw_str(x,y,'{0}:'.format(ent.name),bg=None, fg=colors.white)
+    status = ent.get_health_as_string_and_color()
+    panel.draw_str(len(ent.name)+4,y,'{0}'.format(status[0].title()),bg=None, fg=status[1])
+
+    text_wrapped = wrap(ent.description,settings.BAR_WIDTH-4)
+    y += 2
+    for line in text_wrapped:
+        panel.draw_str(x,y,line,bg=None, fg=colors.white)
+        y += 1
+
+    root.blit(panel,0, settings.BOTTOM_PANEL_Y, panel.width, panel.height)
 
 def render_bar(x, y, panel,total_width, name, value, maximum, bar_color, back_color):
     '''render a status bar (HP, experience, etc).'''

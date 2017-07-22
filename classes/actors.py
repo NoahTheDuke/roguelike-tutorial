@@ -1,5 +1,4 @@
 ''' Actor-related classes '''
-# TODO: split item-related code into own module
 
 import math
 from random import randint
@@ -29,6 +28,8 @@ class Fighter(GameObject):
         self.max_defense = df
         
         self.inventory = inventory
+        
+        self.description = 'It is you.'
     
         gv.actors.append(self)
 
@@ -92,10 +93,12 @@ class Fighter(GameObject):
 
 class Monster(Fighter):
     ''' base-class for all hostile mobs '''
-    def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2,ai=None,blurbs=None):
+    def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2,ai=None,blurbs=None,descr = None):
         super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
 
         self.blurbs = blurbs
+
+        self.description = descr
 
         self.ai = ai
         if self.ai: #let the AI component know who owns it

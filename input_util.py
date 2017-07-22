@@ -115,8 +115,8 @@ def process_input(action):
             gv.gamestate = GameStates.PLAYERS_TURN
         else:
             Message('You start looking around.')
-            gv.gamestate = GameStates.CURSOR_ACTIVE
             gv.cursor.activate('*',colors.white)
+            gv.gamestate = GameStates.CURSOR_ACTIVE
     
     # elif 'target' in action:
     #     if gv.player.is_targeting:

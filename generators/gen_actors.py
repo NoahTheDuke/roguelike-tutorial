@@ -52,6 +52,7 @@ def gen_Orc(x,y):
     ''' generic orc'''
 
     name = 'Orc'
+    descr = 'An Orc.'
     ent = Monster (
         x,y,
         name,
@@ -65,7 +66,8 @@ def gen_Orc(x,y):
             ('The ' + name + ' growls.'),
             ('The ' + name + ' screeches!'),
             ('The ' + name + ' screams in a strange language.')
-        )
+        ),
+        descr = descr
     )
     return ent
 
@@ -73,6 +75,7 @@ def gen_Troll(x,y):
     ''' generic Troll'''
 
     name = 'Troll'
+    descr = 'A Troll, it is big.'
     ent = Monster (
         x,y,
         name,
@@ -85,6 +88,7 @@ def gen_Troll(x,y):
         blurbs = (
             ('The ' + name + ' stares at you.'),
             ('The ' + name + ' licks his lips.')
-        )
+        ),
+        descr = descr
     )
     return ent

@@ -45,8 +45,9 @@ def initialize_window():
     gv.gamelog_panel.caption = 'Gamelog'
     gv.combat_panel.caption = 'Enemies'
 
-    # set the default border color for all panels
+    # set the default border color and mode for all panels
     for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
+        panel.mode = 'default'
         panel.border_color = settings.PANELS_BORDER_COLOR
 
 def render_all():
@@ -104,13 +105,13 @@ def render_all():
 
     root.blit(con, 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
 
-    # render the panels containing the GUI
-    render_panels(root,visible_tiles)
-
     # If the cursor is active, draw the spotted window
     if gv.gamestate == GameStates.CURSOR_ACTIVE:
         draw_spotted_window(root)
 
+    # render the panels containing the GUI
+    render_panels(root,visible_tiles)
+    
 def is_visible_tile(x, y):
     ''' a helper function to determine whether a tile is in within the game's playing field '''
 

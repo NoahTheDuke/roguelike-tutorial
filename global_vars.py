@@ -10,9 +10,6 @@ inv_panel = None
 gamelog_panel = None
 combat_panel = None
 
-# Windows
-spotted_window = None
-
 # Gameplay variables
 # TODO: noramlize variable names (game_objects,game_actors)
 gameobjects = []
