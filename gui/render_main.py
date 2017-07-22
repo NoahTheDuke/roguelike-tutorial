@@ -1,0 +1,93 @@
+''' main function for drawing all objects in the game '''
+
+import tdl
+#import tcod
+#from textwrap import wrap
+from enum import Enum,auto
+
+import settings
+import colors
+import global_vars as gv
+
+from gui.panels import render_panels, draw_panel_borders
+
+from game_states import GameStates
+
+class RenderOrder(Enum):
+    ''' the RenderOrder class is a component of all objects and determines their render priority '''
+
+    NONE = auto()
+    CORPSE = auto()
+    ITEM = auto()
+    ACTOR = auto()
+    CURSOR = auto()
+
+def render_all():
+    ''' draw all game objects '''
+    root = gv.root
+    con = gv.con
+
+    # render the dungeon map and it's objects
+    px,py = gv.player.x, gv.player.y
+    visible_tiles = (tdl.map.quick_fov(px, py,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS))
+    for y in range(settings.MAP_HEIGHT):
+        for x in range(settings.MAP_WIDTH):
+            wall = not gv.game_map.transparent[x][y]
+            #if not gv.game_map.fov[x, y]:
+            visible = (x, y) in visible_tiles
+            
+            #tdl.map.quick_fov(px, py,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS)
+            if not visible:
+                #it's out of the gv.player's.visible[self.x + dx][self.y+dy]but explored
+                if gv.game_map.explored[x][y]:
+                    if wall:
+                        con.draw_char(x, y,'#', fg=settings.COLOR_DARK_GROUND_fg, bg=settings.COLOR_DARK_GROUND)
+                    else:
+                        con.draw_char(x, y,'.', fg=settings.COLOR_DARK_WALL_fg, bg=settings.COLOR_DARK_WALL)
+                gv.game_map.visible[x][y] = False
+            else:
+                #it's visible
+                if gv.game_map.gibbed[x][y]:
+                    fgcolor = colors.red
+                else:
+                    fgcolor = settings.COLOR_LIGHT_GROUND
+                
+                if wall:
+                    con.draw_char(x, y,'#', fg=fgcolor, bg=colors.black)
+                else:
+                    con.draw_char(x, y,'.', fg=fgcolor, bg=colors.black)
+                gv.game_map.explored[x][y] = True
+                gv.game_map.visible[x][y] = True
+    
+    # sort the objects according to their render order
+    sorted_objects = sorted(gv.gameobjects, key=lambda x: x.render_order.value)
+    # then render them accordingly
+    for obj in sorted_objects:
+        if obj.render_order is not RenderOrder.NONE:
+            if gv.game_map.visible[obj.x][obj.y]:
+                obj.draw(con)
+            elif not gv.game_map.visible[obj.x][obj.y] and gv.game_map.explored[obj.x][obj.y] and obj.always_visible: # if obj is not in FOV but should always be visible
+                obj.draw(con,fgcolor=settings.COLOR_DARK_WALL_fg,bgcolor=settings.COLOR_DARK_GROUND)
+    
+    # Draw borders for console window
+    draw_panel_borders(con,width=settings.MAP_WIDTH,height=settings.MAP_HEIGHT)    
+
+    root.blit(con, 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
+
+    # render the panels containing the GUI
+    render_panels(root,visible_tiles)
+
+    if gv.gamestate == GameStates.CURSOR_ACTIVE:
+        draw_spotted_window()
+
+def is_visible_tile(x, y):
+    ''' a helper function to determine whether a tile is in within the game's playing field '''
+
+    if x >= settings.MAP_WIDTH or x < 0:
+        return False
+    elif y >= settings.MAP_HEIGHT or y < 0:
+        return False
+    elif gv.game_map.transparent[x][y] == True:
+        return True
+    else:
+        return False
