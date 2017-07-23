@@ -23,7 +23,7 @@ def handle_keys(user_input):
     elif user_input.char == 'q' and user_input.leftCtrl:
         return 'exit'
     # '?' opens the manual
-    elif user_input.text == '?':
+    elif user_input.char == '?':
         return 'manual'
     
     # movement keys
@@ -54,35 +54,35 @@ def handle_keys(user_input):
     elif user_input.key in ['KP5','.']:
         return {'move':(0,0)}
 
-    elif user_input.text == 'r':
+    elif user_input.char == 'r':
         return 'run'
 
-    elif user_input.text in ['<','>']:
-        return {'stairs':user_input.text}
+    elif user_input.char in ['<','>']:
+        return {'stairs':user_input.char}
 
     # looking and targeting
-    if user_input.text == 'l':
+    if user_input.char == 'l':
         return 'look'
-    # elif user_input.text == 't':
+    # elif user_input.char == 't':
     #     return 'target'
 
     # item handling
-    if user_input.text == 'g':
+    if user_input.char == 'g':
         return 'get'
 
-    elif user_input.text == 'i':
+    elif user_input.char == 'i':
         return {'inventory':'interact'}
 
-    elif user_input.text == 'u':
+    elif user_input.char == 'u':
         return {'inventory':'use'}
 
-    # elif user_input.text == 'd':
+    # elif user_input.char == 'd':
     #     return {'inventory':'drop'}
 
-    # elif user_input.text == 'e':
+    # elif user_input.char == 'e':
     #     return {'inventory':'equip'}
 
-    # elif user_input.text == 'x':
+    # elif user_input.char == 'x':
     #     return {'inventory':'examine'}
 
     # other
@@ -92,8 +92,8 @@ def handle_keys(user_input):
     else:
         return None
 
-def process_input(action):
-    ''' process key input into game actions '''
+def process_input_noncombat(action):
+    ''' process key input into game actions outside of combat'''
 
     print('Processing {0}'.format(action))
 
@@ -107,7 +107,7 @@ def process_input(action):
     
     elif 'run' in action:
         if (gv.player.is_running):
-            Message('You stop runningv.')
+            Message('You stop running.')
             gv.player.is_running = False
         else:
             Message('You start to run.')
@@ -151,32 +151,36 @@ def process_input(action):
     elif 'inventory' in action:
         if len(gv.player.inventory) == 0:
             Message('Your inventory is empty!')
-        
+            
         # Display the inventory, if it is not already active
         elif gv.gamestate is not GameStates.INVENTORY_ACTIVE: # if the inventory isn't already active
-            if (action['inventory'] == 'interact'):
-                gv.gamestate = GameStates.INVENTORY_ACTIVE
-                chosen_item = item_selection_menu() # first, pick an item from the inventory
-        
-                while chosen_item is not None:
-                    item_action = item_interaction_menu(chosen_item) # then decide what to do with it
-                    if item_action is None:  # if player cancels, let him/her pick another item (if he cancels here, the entire loop quits)
-                        chosen_item = item_selection_menu()
-                    elif item_action == 'use':
-                        chosen_item.use()
-                        gv.gamestate = GameStates.ENEMY_TURN
-                        break
-                    elif item_action == 'drop':
-                        chosen_item.drop()
-                        gv.gamestate = GameStates.PLAYERS_TURN
-                        break
-                    elif item_action == 'equip':
-                        chosen_item.equip()
-                        gv.gamestate = GameStates.PLAYERS_TURN
-                        break
-                if chosen_item is None: # if inventory interaction was canceled, return to normal
-                    gv.gamestate = GameStates.PLAYERS_TURN         
+            if (action['inventory'] == 'interact'):         
+                if gv.player.opponent is None:
+                    gv.gamestate = GameStates.INVENTORY_ACTIVE
+                    chosen_item = item_selection_menu() # first, pick an item from the inventory
             
+                    while chosen_item is not None:
+                        item_action = item_interaction_menu(chosen_item) # then decide what to do with it
+                        if item_action is None:  # if player cancels, let him/her pick another item (if he cancels here, the entire loop quits)
+                            chosen_item = item_selection_menu()
+                        elif item_action == 'use':
+                            chosen_item.use()
+                            gv.gamestate = GameStates.ENEMY_TURN
+                            break
+                        elif item_action == 'drop':
+                            chosen_item.drop()
+                            gv.gamestate = GameStates.PLAYERS_TURN
+                            break
+                        elif item_action == 'equip':
+                            chosen_item.equip()
+                            gv.gamestate = GameStates.PLAYERS_TURN
+                            break
+                    if chosen_item is None: # if inventory interaction was canceled, return to normal
+                        gv.gamestate = GameStates.PLAYERS_TURN         
+                else:
+                    # Being locked in combat prevents the player from more complex inventory interaction
+                    Message('You are locked in combat!')
+
             elif (action['inventory'] == 'use'):
                 chosen_item = inventory_popup_menu(caption='Select item to use:',filter='Useable')
                 if chosen_item is not None:
@@ -198,3 +202,30 @@ def process_input(action):
     #     if gv.player.is_targeting:
     #         gv.player.fire_weapon(gv.cursor.x,gv.cursor.y)
     #     gv.player.is_active = False
+
+def process_input_combat(action):
+    ''' input processing while the player is locked in combat '''
+
+    opponent = gv.player.opponent
+
+    if 'move' in action:
+        x,y = action['move']
+        if gv.player.direction_to(opponent) == (x,y):
+            gv.player.move(x,y,False)
+            gv.gamestate = GameStates.ENEMY_TURN
+        else:
+            Message('You are locked in combat!')
+
+    if 'inventory' in action:
+        if (action['inventory'] == 'use'):
+            chosen_item = inventory_popup_menu(caption='Select item to use:',filter='Useable')
+            if chosen_item is not None:
+                chosen_item.use()
+                gv.gamestate = GameStates.ENEMY_TURN
+            else:
+                gv.gamestate = GameStates.PLAYERS_TURN
+        else:
+            Message('You are locked in combat!')
+
+    else:
+        Message('You are locked in combat!')

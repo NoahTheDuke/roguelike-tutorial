@@ -11,7 +11,7 @@ from gui.render_main import render_all
 from gui.messages import Message
 
 from game_states import GameStates
-from input_util import handle_keys,process_input
+from input_util import handle_keys,process_input_noncombat
 
 def target_tile():
     '''Display a targeting cursor'''
@@ -28,7 +28,7 @@ def target_tile():
         player_action = handle_keys(tdl.event.key_wait())
         if not player_action == None:
             if 'move' in player_action: # if key is a movement key process input as normal (will move the cursor)
-                process_input(player_action)
+                process_input_noncombat(player_action)
             elif 'confirm' in player_action: # if enter was pressed, return the coordinates of the cursor
                 gv.gamestate = GameStates.ENEMY_TURN
                 gv.cursor.deactivate()

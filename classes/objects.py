@@ -29,6 +29,8 @@ class GameObject:
         ''' Draw the object '''
         if fgcolor == None:
             fgcolor = self.color
+        if gv.player.opponent == self: # if the object is locked in combat with the player, change it's background color
+            bgcolor = colors.darker_crimson
         con.draw_char(self.x, self.y, self.char, fgcolor,bgcolor)
 
     def clear(self,con):
@@ -42,6 +44,12 @@ class GameObject:
     def is_player(self):
         ''' returns true if the object is the player '''
         return (self == gv.player)
+
+    def direction_to(self, other):
+        dx = other.x - self.x
+        dy = other.y - self.y
+        print(dx,dy)
+        return(dx,dy)
 
     def distance_to(self, other):
         '''return the distance to another object'''

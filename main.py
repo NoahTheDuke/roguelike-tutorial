@@ -23,7 +23,7 @@ from generators.gen_game import gen_game
 
 # Game-related modules
 from game_states import GameStates
-from input_util import handle_keys, process_input
+from input_util import handle_keys, process_input_noncombat, process_input_combat
 
 def main_menu():
     img = image_load('resources\menu_background3.png')
@@ -111,7 +111,10 @@ def main_loop():
             else:              
                 if gv.gamestate in [GameStates.PLAYERS_TURN, GameStates.CURSOR_ACTIVE, GameStates.INVENTORY_ACTIVE]:
                     print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
-                    process_input(player_action)
+                    if gv.player.opponent is None:
+                        process_input_noncombat(player_action)
+                    else:
+                        process_input_combat(player_action)
                 
                 # If player has done an active turn
                 if gv.gamestate == GameStates.ENEMY_TURN:

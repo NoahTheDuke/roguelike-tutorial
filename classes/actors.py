@@ -110,7 +110,13 @@ class Player(Fighter):
         super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
         self.is_running = False
         self.is_dead = False
-      
+
+        self.opponent = None
+
+    #def attack(self):
+
+    #def disengage(self,dx,dy):
+
     def move(self, dx, dy,running=False):
         ''' Move the player, after checking if the target space is legitimate'''
 
@@ -125,13 +131,12 @@ class Player(Fighter):
                     if obj in gv.actors  and (not obj == gv.player):                         # if it's another actor, target it
                         target = obj
                     break
-            if check and target == None:
+            if check and target is None:
                 self.x += dx
                 self.y += dy
                 
                 # if entity is running, re-call the move function once
                 if (running):
-
                     self.move(dx,dy,running=False)
             
             # if blocking object is an enemy target
@@ -141,6 +146,7 @@ class Player(Fighter):
                     self.is_running = False
                 else:
                     self.attack(target)
+                    self.opponent = target
             
         elif running: # if the player crashes into a wall
                 Message('You run into something.',colors.red)
