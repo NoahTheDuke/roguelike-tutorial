@@ -23,7 +23,7 @@ def handle_keys(user_input):
     elif user_input.char == 'q' and user_input.leftCtrl:
         return 'exit'
     # '?' opens the manual
-    elif user_input.text == '?':
+    elif user_input.char == '?':
         return 'manual'
     
     # movement keys
@@ -54,35 +54,35 @@ def handle_keys(user_input):
     elif user_input.key in ['KP5','.']:
         return {'move':(0,0)}
 
-    elif user_input.text == 'r':
+    elif user_input.char == 'r':
         return 'run'
 
-    elif user_input.text in ['<','>']:
-        return {'stairs':user_input.text}
+    elif user_input.char in ['<','>']:
+        return {'stairs':user_input.char}
 
     # looking and targeting
-    if user_input.text == 'l':
+    if user_input.char == 'l':
         return 'look'
-    # elif user_input.text == 't':
+    # elif user_input.char == 't':
     #     return 'target'
 
     # item handling
-    if user_input.text == 'g':
+    if user_input.char == 'g':
         return 'get'
 
-    elif user_input.text == 'i':
+    elif user_input.char == 'i':
         return {'inventory':'interact'}
 
-    elif user_input.text == 'u':
+    elif user_input.char == 'u':
         return {'inventory':'use'}
 
-    # elif user_input.text == 'd':
+    # elif user_input.char == 'd':
     #     return {'inventory':'drop'}
 
-    # elif user_input.text == 'e':
+    # elif user_input.char == 'e':
     #     return {'inventory':'equip'}
 
-    # elif user_input.text == 'x':
+    # elif user_input.char == 'x':
     #     return {'inventory':'examine'}
 
     # other
