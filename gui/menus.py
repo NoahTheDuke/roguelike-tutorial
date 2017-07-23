@@ -8,58 +8,105 @@ import global_vars as gv
 
 # GUI
 from gui.render_main import render_all
-from gui.panels import draw_panel_borders
+from gui.windows import draw_item_window, draw_options_window
+from gui.panels import setup_panel, draw_panel_borders, draw_inv_panel
 from gui.messages import Message
 
 from game_states import GameStates
 
-def inventory_menu(header,filter=None):
-    '''show a menu with each item of the inventory as an option'''
+def item_selection_menu():
+    
+    # update the inventory panel's caption and border
+    render_all()
+    #draw_inv_panel(gv.inv_panel,gv.root)
+    tdl.flush()
+
+    item = None
+    key = ' '
+
+    # begin a loop waiting for input. the loop will only quit when ESC is pressed or an item is selected
+    while key != 'ESCAPE':
+        user_input = tdl.event.key_wait()
+        key = user_input.key
+        char = user_input.char
+        if key == 'ESCAPE':
+            break
+        # elif it's an arrow key or pageup/pagedown, scroll the inventory:
+            #
+        # for any other key, check if a corresponding item exists in the player's inventory
+        elif len(char) > 0:
+            index = ord(char) - ord('a')
+            if 0 <= index < len(gv.player.inventory):
+                item = gv.player.inventory[index]
+                break
+    
+    return item
+
+def item_interaction_menu(item):
+    ''' interaction menu for a single item '''
+
+    panel = gv.inv_panel # panel to draw the window over
+
+    # draw the item's description window + options
+    draw_item_window(item,settings.SIDE_PANEL_X,settings.STAT_PANEL_HEIGHT,panel.width,panel.height)
+    tdl.flush()
+
+    key = ' '
+    # begin a loop waiting for a key. the loop will only quit when ESC is pressed or an item is selected
+    while key != 'ESCAPE':
+        print('item loop')
+        user_input = tdl.event.key_wait()
+        key = user_input.key
+        text = user_input.char
+        if key == 'ESCAPE':
+            return None
+            break
+        if text == 'u':
+            print(text)
+            return 'use'
+        elif text == 'd':
+            print(text)
+            return 'drop'
+        elif text == 'e':
+            print(text)
+            return 'equip'
+
+def inventory_popup_menu(caption='Select item:',filter=None):
+    '''show a menu next to the player, with all or a filtered selection of items as options'''
     if filter is not None:  # if filter is set, only display items of a certain class
         inventory = [item for item in gv.player.inventory if type(item).__name__ == filter]
     else:
         inventory = gv.player.inventory
-    if len(inventory) == 0:
-        Message('Your Inventory is empty.')
-    options = [item.name for item in inventory]
-    index = menu(header, options, settings.INVENTORY_WIDTH)
-    #if an item was chosen, return it
-    if index is None or len(gv.player.inventory) == 0:
-        return None
-    return gv.player.inventory[index]
 
-def interactive_inventory_panel():
-    '''show a menu with each item of the inventory as an option'''
-    gv.inv_panel.border_color = settings.PANELS_BORDER_COLOR_ACTIVE
+    options_list = [item.name for item in inventory]
 
-def item_menu(item):
-    '''displays an item's descriptions and related options '''
-    render_all()    # Re-render the screen so the menus wont overlap
+    # draw a window with the options next to the player
+    draw_options_window(caption,options_list,gv.player.x+2,gv.player.y-1)
+    tdl.flush()
 
-    width = 30
-    header = [(item.name).title(),' ']+(textwrap.wrap(item.description,width)+[' ']) # Construct a header out of the item's name and description
-    menu(header,['(u)se','(e)quip','(d)rop',' ','Any other key to cancel.'],width,wrap_header=False,options_sorted=False)
+    item = None
+    key = ' '
 
-    # Wait for the player make a selection
-    key = tdl.event.key_wait()
-
-    # After the player has made his choice (or canceled), game play resumes
-    if key.char == 'u':
-        gv.gamestate = GameStates.ENEMY_TURN
-        item.use()
-    elif key.char == 'e':
-        gv.gamestate = GameStates.PLAYERS_TURN
-        item.equip()
-    elif key.char == 'd':
-        gv.gamestate = GameStates.PLAYERS_TURN
-        item.drop()
-    else:
-        gv.gamestate = GameStates.PLAYERS_TURN
-        pass
+    # begin a loop waiting for input. the loop will only quit when ESC is pressed or an item is selected
+    while key != 'ESCAPE':
+        user_input = tdl.event.key_wait()
+        key = user_input.key
+        char = user_input.char
+        if key == 'ESCAPE':
+            break
+        # elif it's an arrow key or pageup/pagedown, scroll the inventory:
+            #
+        # for any other key, check if a corresponding item exists in the player's inventory
+        elif len(char) > 0:
+            index = ord(char) - ord('a')
+            if 0 <= index < len(inventory):
+                item = inventory[index]
+                break
+    
+    return item
 
 def menu(header, options, width,wrap_header=True,options_sorted=True,text_color=colors.white):
     '''display a simple menu to the player'''
-    if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
     
     if wrap_header:
         header_wrapped = textwrap.wrap(header, width)
@@ -97,7 +144,7 @@ def menu(header, options, width,wrap_header=True,options_sorted=True,text_color=
     window.draw_str(0,y+1,' ')
 
     # Draw the window's borders
-    draw_panel_borders(window)
+    draw_panel_borders(window,color=settings.PANELS_BORDER_COLOR_ACTIVE)
 
     #blit the contents of "window" to the root console
     x = settings.SCREEN_WIDTH//2 - width//2

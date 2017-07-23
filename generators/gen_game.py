@@ -125,8 +125,8 @@ def gen_game(newgame):
         # Setup an initial inventory
         gen_inventory()
 
-        # a warm welcoming message!
-        msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=35, text_color=colors.red)
+        # introductionary messages
+        msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME,width=35,text_color=colors.red)
         Message('Press ? to open the manual.', color=colors.green)
 
     else: # new dungeon level

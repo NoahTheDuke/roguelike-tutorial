@@ -12,12 +12,6 @@ from game_states import GameStates
 def render_panels(root,visible_tiles):
     ''' renders the GUI panels containing stats, logs etc. '''
 
-    # Setup each panel by clearing it and drawing it's borders and caption
-    # for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
-    #     panel.clear(fg=colors.white, bg=colors.black)
-    #     draw_panel_borders(panel,color=panel.border_color)
-    #     panel.draw_str(2,0,panel.caption)
-
     # call the individual function for each panel to draw it
     draw_stat_panel(gv.stat_panel,root)
     draw_inv_panel(gv.inv_panel,root)
@@ -31,7 +25,7 @@ def render_panels(root,visible_tiles):
             draw_description_panel(gv.combat_panel,root)
         except:
             gv.combat_panel.caption = 'Enemies'
-            draw_combat_panel(gv.combat_panel,root,visible_tiles)
+            draw_combat_panel(gv.combat_panel,root,visible_tiles)       
 
 def setup_panel(panel):
     panel.clear(fg=colors.white, bg=colors.black)
@@ -75,18 +69,21 @@ def draw_spotteditems_panel(panel):
                     panel.draw_str(x,y,text.title(),bg=None, fg=colors.white)
                     y+=1
             else:   # otherwise draw a line to indicate there's more than can be displayed
-                panel.draw_str(x,y+1,'~ ~ ~ ~ MORE ~ ~ ~ ~')
+                panel.draw_str((panel.width-6)//2,panel.height-1,'< MORE >')
                 break
 
 def draw_inv_panel(panel,root):
     ''' panel containing the inventory '''
 
-    # sets up the panel's basic functionality
-    setup_panel(panel)
+    if gv.gamestate == GameStates.INVENTORY_ACTIVE:
+        panel.border_color = settings.PANELS_BORDER_COLOR_ACTIVE
+        panel.caption = 'Select item:'
+    else:
+        panel.border_color = settings.PANELS_BORDER_COLOR
+        panel.caption = 'Inventory {0}/26:'.format(len(gv.player.inventory))
 
-    # Add the panel's caption
-    if panel.caption == 'Inventory':
-        panel.draw_str(2,0,'Inventory {0}/26'.format(len(gv.player.inventory)))
+    # sets up the panel's basic functionality
+    setup_panel(panel)   
     
     if len(gv.player.inventory) > 0:
         y = 2 # offset from the top of the panel
@@ -104,9 +101,12 @@ def draw_inv_panel(panel,root):
                     y += 1
             panel.draw_str(x,y,' ')
             y += 1
+            
             if y >= panel.height - 2: # If the limit's of the panel are reached, cut the inventory off 
-                panel.draw_str(x,y,'~ ~ ~ more ~ ~ ~')
+                panel.draw_str((panel.width-6)//2,panel.height-1,'< MORE >')
                 break
+        
+                
     
     root.blit(panel,settings.SIDE_PANEL_X,settings.STAT_PANEL_HEIGHT, panel.width, panel.height)
 
@@ -157,10 +157,13 @@ def draw_combat_panel(panel,root,visible_tiles):
     root.blit(panel,0, settings.BOTTOM_PANEL_Y, panel.width, panel.height)
 
 def draw_description_panel(panel,root):
+    ''' shows a monster's description in the combat panel '''
 
     # sets up the panel's basic functionality
     setup_panel(panel)
 
+    # get the first entity from the actors array under the cursor position
+    # (if this fails, the except in render_panels() catches it)
     ent = next(ent for ent in gv.actors if (ent.x,ent.y)==(gv.cursor.pos()))
     
     x = 2

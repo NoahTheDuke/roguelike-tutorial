@@ -3,13 +3,14 @@
 import tdl
 import textwrap
 
+import settings
 import colors
 
-from gui.panels import draw_panel_borders
+from gui.panels import setup_panel
 
 import global_vars as gv
 
-def draw_spotted_window(root):
+def draw_spotted_window():
     ''' draws a window next to the cursor if any objects are in the area '''
 
     cx,cy = gv.cursor.pos()
@@ -20,20 +21,63 @@ def draw_spotted_window(root):
         lines = []
         #gv.cursor.color = colors.yellow
         width = max([len(obj.name) for obj in spotted]) + 6 # Window width is adapted to longest object name in list
-        for obj in spotted:    # Go through the object names and wrap them according to the panel's width
+        for obj in spotted:    # Go through the object names and wrap them according to the window's width
             line_wrapped = textwrap.wrap(obj.name,width)
             for text in line_wrapped:
                 lines.append(text)
 
-        panel = tdl.Window(gv.con,cx+2,cy-2,width,4 + len(lines))
-        panel.border_color=colors.white
-        panel.clear(fg=colors.white, bg=colors.black)
-        draw_panel_borders(panel,color=panel.border_color)
-        
-        panel.draw_str(1,0,'I spot:')
+        window = tdl.Window(gv.root,cx+2,cy-2,width,4 + len(lines))
+        window.caption = 'I spot:'
+        window.border_color=settings.PANELS_BORDER_COLOR
+        setup_panel(window)
+
         y = 2
         for text in lines:
-            panel.draw_str(1,y,text.title(),bg=None, fg=colors.white)
+            window.draw_str(1,y,text.title(),bg=None, fg=colors.white)
             y += 1
 
-        root.blit(panel,cx+2,cy-2, panel.width, panel.height)
+        #gv.root.blit(window,cx+2,cy-2, window.width, window.height)
+
+def draw_item_window(item,px,py,width,height):
+    ''' draws a window containing an item's description and related options '''
+
+    window = tdl.Window(gv.root,px,py,width,height)
+    window.caption = item.name.title()
+    window.border_color=settings.PANELS_BORDER_COLOR_ACTIVE
+    setup_panel(window)
+
+    wrapped_descr = textwrap.wrap(item.description,window.width-2)
+    y = 2
+    for line in wrapped_descr:
+        window.draw_str(1,y,line,bg=None, fg=colors.white)
+        y += 1
+    
+    y += 2
+    window.draw_str(1,y,'(u)se?',bg=None, fg=colors.white)
+    y += 2
+    window.draw_str(1,y,'(e)quip?',bg=None, fg=colors.white)
+    y += 2
+    window.draw_str(1,y,'(d)rop?',bg=None, fg=colors.white)
+    y += 2
+    window.draw_str(3,y,'<ESC to cancel>',bg=None, fg=colors.white)
+
+    #gv.root.blit(window,px,py,window.width,window.height)
+
+def draw_options_window(caption,options,x,y):
+    ''' draws a window listing the passed options '''
+
+    width = (max(len(option) for option in options)) + 7
+    height = len(options) + 4
+
+    window = tdl.Window(gv.root,x,y,width,height)
+    window.caption = caption
+    window.border_color=settings.PANELS_BORDER_COLOR_ACTIVE
+    setup_panel(window)
+
+    y = 2
+    letter_index = ord('a') #ord returns the ascii code for a string-letter
+    for option_text in options:
+        text = '(' + chr(letter_index) + ') ' + option_text
+        window.draw_str(1, y, text,fg=colors.white, bg=None)
+        y += 1
+        letter_index += 1 #by incrementing the ascii code for the letter, we go through the alphabet

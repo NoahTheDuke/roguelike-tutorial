@@ -20,18 +20,20 @@ def target_tile():
         gv.gamestate = GameStates.CURSOR_ACTIVE
         gv.cursor.activate('X',colors.red)
     while gv.gamestate == GameStates.CURSOR_ACTIVE: # While the player is considered targeting, suspend game-play to control the cursor and get a target
+        
+        # update the screen
         render_all()
         tdl.flush()
+
         player_action = handle_keys(tdl.event.key_wait())
         if not player_action == None:
             if 'move' in player_action: # if key is a movement key process input as normal (will move the cursor)
                 process_input(player_action)
-                look_at_ground(gv.cursor.x,gv.cursor.y)
             elif 'confirm' in player_action: # if enter was pressed, return the coordinates of the cursor
                 gv.gamestate = GameStates.ENEMY_TURN
                 gv.cursor.deactivate()
                 return (gv.cursor.x,gv.cursor.y) #Return the cursor's current coordinates to the calling function
-            elif 'exit' in player_action:
+            elif 'cancel' in player_action:
                 gv.gamestate =  GameStates.ENEMY_TURN
                 gv.cursor.deactivate()
                 break

@@ -100,17 +100,22 @@ def render_all():
             elif not gv.game_map.visible[obj.x][obj.y] and gv.game_map.explored[obj.x][obj.y] and obj.always_visible: # if obj is not in FOV but should always be visible
                 obj.draw(con,fgcolor=settings.COLOR_DARK_WALL_fg,bgcolor=settings.COLOR_DARK_GROUND)
     
-    # Draw borders for console window
-    draw_panel_borders(con,width=settings.MAP_WIDTH,height=settings.MAP_HEIGHT)    
+    # Draw borders for the map window
+    if gv.gamestate in [GameStates.PLAYERS_TURN,GameStates.CURSOR_ACTIVE]:
+        map_border = settings.PANELS_BORDER_COLOR_ACTIVE
+    else:
+        map_border = settings.PANELS_BORDER_COLOR
+
+    draw_panel_borders(con,width=settings.MAP_WIDTH,height=settings.MAP_HEIGHT,color=map_border)    
 
     root.blit(con, 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
 
-    # If the cursor is active, draw the spotted window
-    if gv.gamestate == GameStates.CURSOR_ACTIVE:
-        draw_spotted_window(root)
-
     # render the panels containing the GUI
     render_panels(root,visible_tiles)
+
+    # If the cursor is active, draw the spotted window
+    if gv.gamestate == GameStates.CURSOR_ACTIVE:
+        draw_spotted_window()
     
 def is_visible_tile(x, y):
     ''' a helper function to determine whether a tile is in within the game's playing field '''

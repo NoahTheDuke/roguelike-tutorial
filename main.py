@@ -15,7 +15,7 @@ import settings
 # GUI
 from gui.render_main import render_all, initialize_window
 from gui.menus import menu
-from gui.messages import MessageLog,msgbox
+from gui.messages import MessageLog,Message, msgbox
 from gui.manual import display_manual
 
 # Generators
@@ -47,15 +47,15 @@ def main_menu():
 
         if choice == 0: # new game:
             gen_game(True)
+            main_loop()
         # elif choice == 1:
         #     try:
         #         load_game()
+        #         main_loop()
         #     except:
         #         msgbox('\n No saved game to load.\n', 24)
-        else: #quit
+        elif choice == 1: #quit
             break
-
-        main_loop()
 
 def main_loop():
     ''' begin main game loop '''
@@ -80,9 +80,11 @@ def main_loop():
         #print('main loop waiting again!')
         player_action = handle_keys(tdl.event.key_wait())
         #print('Gamestate: %s' % gv.gamestate)
+        
+        # if the action is recognized, proceed
         if not player_action == None:
             if 'exit' in player_action:
-                # if the player is exit, prompt if he wants to quit the game
+                # if the player action is exit, prompt if he wants to quit the game
                 if gv.gamestate == GameStates.PLAYERS_TURN:
                     choice = menu('Save & Quit the %s' % settings.DUNGEONNAME + ' ?',['Yes','No'],24)
                     if choice == 0:
@@ -92,20 +94,20 @@ def main_loop():
                 elif gv.gamestate == GameStates.PLAYER_DEAD:
                     choice = menu('Quit the %s' % settings.DUNGEONNAME + ' ?',['Yes','No'],24)
                     if choice == 0:
-                        break    
-            
-                # if the cursor is active, deactivate it
-                elif gv.gamestate == GameStates.CURSOR_ACTIVE:
-                    gv.cursor.deactivate()
-                    gv.gamestate = GameStates.PLAYERS_TURN
+                        break
+
+            # Esc cancels inventory interaction or cursor mode
+            elif 'cancel' in player_action and gv.gamestate in [GameStates.INVENTORY_ACTIVE,GameStates.CURSOR_ACTIVE]:
+                gv.gamestate = GameStates.PLAYERS_TURN    
                     
             elif 'fullscreen' in player_action:
                 tdl.set_fullscreen(not tdl.get_fullscreen())
+            
             elif 'manual' in player_action:
                 display_manual()
 
             else:              
-                if gv.gamestate is GameStates.PLAYERS_TURN or gv.gamestate is GameStates.CURSOR_ACTIVE:
+                if gv.gamestate in [GameStates.PLAYERS_TURN, GameStates.CURSOR_ACTIVE, GameStates.INVENTORY_ACTIVE]:
                     print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
                     #print('processing input!')
                     process_input(player_action)

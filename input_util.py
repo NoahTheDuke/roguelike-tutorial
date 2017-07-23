@@ -4,7 +4,7 @@ import colors
 import global_vars as gv
 
 from gui.messages import Message
-from gui.menus import menu, inventory_menu, item_menu,interactive_inventory_panel
+from gui.menus import menu, inventory_popup_menu, item_selection_menu,item_interaction_menu
 
 from game_states import GameStates
 
@@ -13,16 +13,21 @@ def handle_keys(user_input):
     
     print(user_input)
 
+    #Alt+Enter: toggle fullscreen
     if user_input.key == 'ENTER' and user_input.alt:
-        #Alt+Enter: toggle fullscreen
-        return {'fullscreen':None}
+        return 'fullscreen'
+    # escape cancels menus
     elif user_input.key == 'ESCAPE':
-        return {'exit':None}  #exit game
+        return 'cancel'
+    # control-q exists the game
+    elif user_input.char == 'q' and user_input.leftCtrl:
+        return 'exit'
+    # '?' opens the manual
     elif user_input.text == '?':
         return 'manual'
     
     # movement keys
-    if user_input.key in ['UP','KP8']:
+    elif user_input.key in ['UP','KP8']:
         return {'move':(0,-1)}
 
     elif user_input.key in ['DOWN','KP2']:
@@ -144,15 +149,36 @@ def process_input(action):
             Message('You picked up ' + items[item].name.title() + '!', colors.green)
 
     elif 'inventory' in action:
+        if len(gv.player.inventory) == 0:
+            Message('Your inventory is empty!')
+        
         # Display the inventory, if it is not already active
-        if gv.gamestate is not GameStates.INVENTORY_ACTIVE:
+        elif gv.gamestate is not GameStates.INVENTORY_ACTIVE: # if the inventory isn't already active
             if (action['inventory'] == 'interact'):
-                chosen_item = inventory_menu('Select the item to interact with:')
-                if chosen_item is not None:
-                    gv.gamestate = GameStates.INVENTORY_ACTIVE
-                    item_menu(chosen_item)    
+                gv.gamestate = GameStates.INVENTORY_ACTIVE
+                chosen_item = item_selection_menu() # first, pick an item from the inventory
+        
+                while chosen_item is not None:
+                    action = item_interaction_menu(chosen_item) # then decide what to do with it
+                    if action is None:  # if player cancels, let him/her pick another item (if he cancels here, the entire loop quits)
+                        chosen_item = item_selection_menu()
+                    elif action == 'use':
+                        chosen_item.use()
+                        gv.gamestate = GameStates.ENEMY_TURN
+                        break
+                    elif action == 'drop':
+                        chosen_item.drop()
+                        gv.gamestate = GameStates.PLAYERS_TURN
+                        break
+                    elif action == 'equip':
+                        chosen_item.equip()
+                        gv.gamestate = GameStates.PLAYERS_TURN
+                        break
+                if chosen_item is None: # if inventory interaction was canceled, return to normal
+                    gv.gamestate = GameStates.PLAYERS_TURN         
+            
             elif (action['inventory'] == 'use'):
-                chosen_item = inventory_menu('Select the item to use:',filter='Useable')
+                chosen_item = inventory_popup_menu(caption='Select item to use:',filter='Useable')
                 if chosen_item is not None:
                     chosen_item.use()
                     gv.gamestate = GameStates.ENEMY_TURN
