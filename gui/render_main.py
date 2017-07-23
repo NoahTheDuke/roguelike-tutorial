@@ -9,7 +9,8 @@ import settings
 import colors
 import global_vars as gv
 
-from gui.panels import render_panels, draw_panel_borders
+from gui.helpers import draw_window_borders
+from gui.panels import render_panels
 from gui.windows import draw_spotted_window
 
 from game_states import GameStates
@@ -106,7 +107,7 @@ def render_all():
     else:
         map_border = settings.PANELS_BORDER_COLOR
 
-    draw_panel_borders(con,width=settings.MAP_WIDTH,height=settings.MAP_HEIGHT,color=map_border)    
+    draw_window_borders(con,width=settings.MAP_WIDTH,height=settings.MAP_HEIGHT,color=map_border)    
 
     root.blit(con, 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
 

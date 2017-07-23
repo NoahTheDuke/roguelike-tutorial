@@ -9,7 +9,8 @@ import global_vars as gv
 # GUI
 from gui.render_main import render_all
 from gui.windows import draw_item_window, draw_options_window
-from gui.panels import setup_panel, draw_panel_borders, draw_inv_panel
+from gui.helpers import draw_window_borders
+from gui.panels import setup_panel,draw_inv_panel
 from gui.messages import Message
 
 from game_states import GameStates
@@ -107,6 +108,7 @@ def inventory_popup_menu(caption='Select item:',filter=None):
 
 def menu(header, options, width,wrap_header=True,options_sorted=True,text_color=colors.white):
     '''display a simple menu to the player'''
+    '''NOTE: legacy function, needs to be updated'''
     
     if wrap_header:
         header_wrapped = textwrap.wrap(header, width)
@@ -144,7 +146,7 @@ def menu(header, options, width,wrap_header=True,options_sorted=True,text_color=
     window.draw_str(0,y+1,' ')
 
     # Draw the window's borders
-    draw_panel_borders(window,color=settings.PANELS_BORDER_COLOR_ACTIVE)
+    draw_window_borders(window,color=settings.PANELS_BORDER_COLOR_ACTIVE)
 
     #blit the contents of "window" to the root console
     x = settings.SCREEN_WIDTH//2 - width//2

@@ -65,8 +65,10 @@ def main_loop():
 
     # set the gamestate to the player's turn
     gv.gamestate = GameStates.PLAYERS_TURN
+    turnnumber = 0
 
     while not tdl.event.is_window_closed():
+        turnnumber += 1
         if gv.stairs_down.descended:
             #msgbox('You descend further downwards %s' % settings.DUNGEONNAME,colors.dark_red)
             gen_game(newgame=False)
@@ -77,7 +79,7 @@ def main_loop():
             obj.clear(gv.con)
         
         #gv.player.is_active = True # Player is considered active by default
-        #print('main loop waiting again!')
+        print('main loop waiting on input in turn {0}!'.format(turnnumber))
         player_action = handle_keys(tdl.event.key_wait())
         #print('Gamestate: %s' % gv.gamestate)
         
@@ -109,7 +111,6 @@ def main_loop():
             else:              
                 if gv.gamestate in [GameStates.PLAYERS_TURN, GameStates.CURSOR_ACTIVE, GameStates.INVENTORY_ACTIVE]:
                     print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
-                    #print('processing input!')
                     process_input(player_action)
                 
                 # If player has done an active turn

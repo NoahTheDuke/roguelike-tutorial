@@ -159,18 +159,18 @@ def process_input(action):
                 chosen_item = item_selection_menu() # first, pick an item from the inventory
         
                 while chosen_item is not None:
-                    action = item_interaction_menu(chosen_item) # then decide what to do with it
-                    if action is None:  # if player cancels, let him/her pick another item (if he cancels here, the entire loop quits)
+                    item_action = item_interaction_menu(chosen_item) # then decide what to do with it
+                    if item_action is None:  # if player cancels, let him/her pick another item (if he cancels here, the entire loop quits)
                         chosen_item = item_selection_menu()
-                    elif action == 'use':
+                    elif item_action == 'use':
                         chosen_item.use()
                         gv.gamestate = GameStates.ENEMY_TURN
                         break
-                    elif action == 'drop':
+                    elif item_action == 'drop':
                         chosen_item.drop()
                         gv.gamestate = GameStates.PLAYERS_TURN
                         break
-                    elif action == 'equip':
+                    elif item_action == 'equip':
                         chosen_item.equip()
                         gv.gamestate = GameStates.PLAYERS_TURN
                         break
@@ -182,6 +182,8 @@ def process_input(action):
                 if chosen_item is not None:
                     chosen_item.use()
                     gv.gamestate = GameStates.ENEMY_TURN
+                else:
+                    gv.gamestate = GameStates.PLAYERS_TURN
     
     elif 'stairs' in action:
         if (action['stairs'] == '<' and gv.player.pos() == gv.stairs_down.pos()):

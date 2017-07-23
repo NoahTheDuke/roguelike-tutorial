@@ -7,6 +7,7 @@ import settings
 import colors
 
 from gui.panels import setup_panel
+from gui.helpers import center_x_for_text
 
 import global_vars as gv
 
@@ -59,7 +60,7 @@ def draw_item_window(item,px,py,width,height):
     y += 2
     window.draw_str(1,y,'(d)rop?',bg=None, fg=colors.white)
     y += 2
-    window.draw_str(3,y,'<ESC to cancel>',bg=None, fg=colors.white)
+    window.draw_str(center_x_for_text(window,'<ESC TO CANCEL>'),y,'<ESC TO CANCEL>')
 
     #gv.root.blit(window,px,py,window.width,window.height)
 
@@ -81,3 +82,5 @@ def draw_options_window(caption,options,x,y):
         window.draw_str(1, y, text,fg=colors.white, bg=None)
         y += 1
         letter_index += 1 #by incrementing the ascii code for the letter, we go through the alphabet
+    
+    window.draw_str(center_x_for_text(window,'<ESC TO CANCEL>'),window.height-1,'<ESC TO CANCEL>')
