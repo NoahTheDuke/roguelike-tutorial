@@ -143,8 +143,8 @@ def draw_combat_panel(panel,root,visible_tiles):
     if len(spotted) > 0:
         x = 2
         y = 2
-        spotted.sort(gv.player.distance_to) # sort the spotted array by distance to player
-        for ent in spotted_sorted:    # Go through the object names and wrap them according to the panel's width
+        spotted.sort(key=gv.player.distance_to) # sort the spotted array by distance to player
+        for ent in spotted:    # Go through the object names and wrap them according to the panel's width
             panel.draw_str(x,y,'{0}:'.format(ent.name),bg=None, fg=colors.white)
             status = ent.get_health_as_string_and_color()
             panel.draw_str(len(ent.name)+4,y,'{0}'.format(status[0].title()),bg=None, fg=status[1])
