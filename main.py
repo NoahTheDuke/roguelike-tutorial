@@ -126,7 +126,8 @@ def save_game():
         savefile['objects'] = gv.gameobjects
         savefile['actors'] = gv.actors
         savefile['inventory'] = gv.player.inventory
-        #savefile['messages']=gv.game_msgs
+
+        # TODO: message logs
 
         # Store the index of special objects, so they can be later restored from the gv.gameobjects array
         savefile['p_index'] = gv.gameobjects.index(gv.player)

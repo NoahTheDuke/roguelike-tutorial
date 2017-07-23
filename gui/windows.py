@@ -37,12 +37,3 @@ def draw_spotted_window(root):
             y += 1
 
         root.blit(panel,cx+2,cy-2, panel.width, panel.height)
-
-        #if there is an actor amongst the spotted objects:
-            # switch the "enemies" panel to a "description" panel
-        if len([obj for obj in spotted if obj in gv.actors]) > 0:
-            gv.combat_panel.caption = 'Description'
-            gv.combat_panel.mode = 'description'
-    else:
-        gv.combat_panel.caption = 'Enemies'
-        gv.combat_panel.mode = 'default'

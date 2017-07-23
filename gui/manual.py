@@ -1,5 +1,7 @@
 ''' code related to the manual display '''
 
+import settings
+
 from gui.menus import menu
 
 def display_manual():
