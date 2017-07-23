@@ -48,7 +48,6 @@ class GameObject:
     def direction_to(self, other):
         dx = other.x - self.x
         dy = other.y - self.y
-        print(dx,dy)
         return(dx,dy)
 
     def distance_to(self, other):

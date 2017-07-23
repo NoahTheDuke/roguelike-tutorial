@@ -9,7 +9,7 @@ import settings
 import colors
 import global_vars as gv
 
-from gui.helpers import draw_window_borders
+from gui.helpers import draw_window_borders, center_x_for_text
 from gui.panels import render_panels
 from gui.windows import draw_spotted_window
 
@@ -117,6 +117,12 @@ def render_all():
     # If the cursor is active, draw the spotted window
     if gv.gamestate == GameStates.CURSOR_ACTIVE:
         draw_spotted_window()
+    
+    # if the player is locked in combat, display a text at the top
+    if gv.player.opponent:
+        string = '* * * COMBAT * * *'
+        root.draw_str((settings.MAP_WIDTH - len(string))//2,settings.MAP_HEIGHT-2,string,fg=colors.red)
+
     
 def is_visible_tile(x, y):
     ''' a helper function to determine whether a tile is in within the game's playing field '''

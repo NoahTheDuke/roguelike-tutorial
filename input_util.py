@@ -215,6 +215,16 @@ def process_input_combat(action):
             gv.gamestate = GameStates.ENEMY_TURN
         else:
             Message('You are locked in combat!')
+    
+    elif 'look' in action:
+        if gv.gamestate == GameStates.CURSOR_ACTIVE:
+            Message('You stop looking around.')
+            gv.cursor.deactivate()
+            gv.gamestate = GameStates.PLAYERS_TURN
+        else:
+            Message('You start looking around.')
+            gv.cursor.activate('*',colors.white)
+            gv.gamestate = GameStates.CURSOR_ACTIVE
 
     if 'inventory' in action:
         if (action['inventory'] == 'use'):

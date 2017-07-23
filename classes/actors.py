@@ -77,18 +77,21 @@ class Fighter(GameObject):
     def death(self):
         ''' Generic death for all actors '''
         Message('The ' + self.name.capitalize() + ' is dead!',log=gv.combat_log,color=colors.green)
+
+        # if the enemy was the player's opponent, reset opponent to None
+        if self == gv.player.opponent:
+            gv.player.opponent = None
+
         x,y = (self.x,self.y)
         item = gen_Corpse(x,y,self)
-        #item = Useable(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,use_function=iu.eat_corpse,params=self.name)
         gv.game_map.gibbed[x][y] = True # Set the tile to 'gibbed' (will be rendered red)
         for i in range(1,randint(3,5)):
             x,y = (randint(x-1,x+1),randint(y-1,y+1))
             gv.game_map.gibbed[x][y] = True
         for i in range(1,randint(1,3)):
-            x,y = (randint(x-2,x+2),randint(y-2,y+2))
+            x,y = (randint(x-1,x+1),randint(y-2,y+2))
             if randint(0,100) < 40:
                 item = gen_Corpsebits(x,y,self)
-                #item = Useable(x,y,(self.name + ' bits'), '~', colors.darker_red,use_function=iu.eat_corpse,params=self.name)
         self.delete()
 
 class Monster(Fighter):
@@ -146,7 +149,10 @@ class Player(Fighter):
                     self.is_running = False
                 else:
                     self.attack(target)
-                    self.opponent = target
+                    
+                    # set the target as the player's opponent
+                    if self.opponent == None and target.hp > 0:
+                        self.opponent = target
             
         elif running: # if the player crashes into a wall
                 Message('You run into something.',colors.red)

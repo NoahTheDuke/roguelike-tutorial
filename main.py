@@ -79,10 +79,9 @@ def main_loop():
             obj.clear(gv.con)
         
         #gv.player.is_active = True # Player is considered active by default
-        print('main loop waiting on input in turn {0}!'.format(turnnumber))
+        #print('main loop waiting on input in turn {0}!'.format(turnnumber))
         player_action = handle_keys(tdl.event.key_wait())
-        #print('Gamestate: %s' % gv.gamestate)
-        
+
         # if the action is recognized, proceed
         if not player_action == None:
             if 'exit' in player_action:
@@ -110,10 +109,11 @@ def main_loop():
 
             else:              
                 if gv.gamestate in [GameStates.PLAYERS_TURN, GameStates.CURSOR_ACTIVE, GameStates.INVENTORY_ACTIVE]:
-                    print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
-                    if gv.player.opponent is None:
+                    
+                    # if the player is not engaged or the cursor is active use non-combat actions
+                    if gv.player.opponent is None or gv.gamestate is GameStates.CURSOR_ACTIVE:
                         process_input_noncombat(player_action)
-                    else:
+                    else:   # otherwise use combat actions
                         process_input_combat(player_action)
                 
                 # If player has done an active turn
