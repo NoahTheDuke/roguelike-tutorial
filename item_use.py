@@ -81,7 +81,7 @@ def cast_fireball(params = (10,3)):
         x,y = target
         check = True # Choice is True by default, but can be set to False if the player decided not to hit him-/herself
         if gv.player.distance_to_coord(x,y) <= radius:
-            check = menu('The spell would hit you as well. Proceed?',['No','Yes'],24)
+            check = menu('The spell would hit you as well. Proceed?',['No','Yes'],40)
         if check:
             Message('The fireball explodes, burning everything within ' + str(radius) + ' tiles!', colors.orange)
             for obj in gv.actors:  #damage every actor in range, including the player

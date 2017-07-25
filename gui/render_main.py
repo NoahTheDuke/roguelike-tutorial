@@ -9,7 +9,7 @@ import settings
 import colors
 import global_vars as gv
 
-from gui.helpers import draw_window_borders
+from gui.helpers import draw_window_borders, is_visible_tile
 from gui.panels import render_panels
 from gui.windows import draw_spotted_window
 
@@ -117,15 +117,3 @@ def render_all():
     # If the cursor is active, draw the spotted window
     if gv.gamestate == GameStates.CURSOR_ACTIVE:
         draw_spotted_window()
-    
-def is_visible_tile(x, y):
-    ''' a helper function to determine whether a tile is in within the game's playing field '''
-
-    if x >= settings.MAP_WIDTH or x < 0:
-        return False
-    elif y >= settings.MAP_HEIGHT or y < 0:
-        return False
-    elif gv.game_map.transparent[x][y] == True:
-        return True
-    else:
-        return False

@@ -28,3 +28,15 @@ def center_x_for_text(window,text,padding=0):
     '''returns the x for a text centered in the passed window'''
     x = padding+(window.width-len(text))//2
     return x
+    
+def is_visible_tile(x, y):
+    ''' a helper function to determine whether a tile is in within the game's playing field '''
+
+    if x >= settings.MAP_WIDTH or x < 0:
+        return False
+    elif y >= settings.MAP_HEIGHT or y < 0:
+        return False
+    elif gv.game_map.transparent[x][y] == True:
+        return True
+    else:
+        return False
