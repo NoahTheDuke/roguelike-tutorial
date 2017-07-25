@@ -1,7 +1,10 @@
 ''' helper functions for the gui '''
 
 import tdl
+
 import colors
+import settings
+import global_vars as gv
 
 def draw_window_borders(window,width=None,height=None,color=colors.dark_grey):
     ''' draws an outline around the passed window. By default, the window's width & height will be used '''
