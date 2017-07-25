@@ -7,7 +7,7 @@ import settings
 import colors
 import global_vars as gv
 
-from gui.helpers import draw_window_borders, center_x_for_text
+from gui.helpers import draw_window_borders, is_visible_tile
 from gui.panels import render_panels
 from gui.windows import draw_spotted_window
 
@@ -121,16 +121,3 @@ def render_all():
         string = '* * * COMBAT * * *'
         root.draw_str((settings.MAP_WIDTH - len(string))//2,0,string,fg=colors.red)
         root.draw_str((settings.MAP_WIDTH - len(string))//2,settings.MAP_HEIGHT-1,string,fg=colors.red)
-
-    
-def is_visible_tile(x, y):
-    ''' a helper function to determine whether a tile is in within the game's playing field '''
-
-    if x >= settings.MAP_WIDTH or x < 0:
-        return False
-    elif y >= settings.MAP_HEIGHT or y < 0:
-        return False
-    elif gv.game_map.transparent[x][y] == True:
-        return True
-    else:
-        return False
