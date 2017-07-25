@@ -107,10 +107,10 @@ def eat_corpse(params = ''):
     Message('You eat the corpse of a ' + params + '. It is disgusting!')
 
 def closest_monster(max_range):
-    '''find closest enemy, up to a maximum range, and in the gv.player's FOV'''
+    '''find closest enemy, up to a maximum range, and in the player's FOV'''
     closest_enemy = None
     closest_dist = max_range + 1  #start with (slightly more than) maximum range
- 
+    
     for obj in gv.actors:
         if gv.game_map.visible[obj.x][obj.y] and (not obj == gv.player):
             #calculate distance between this object and the gv.player

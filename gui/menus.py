@@ -63,13 +63,10 @@ def item_interaction_menu(item):
             return None
             break
         if text == 'u':
-            print(text)
             return 'use'
         elif text == 'd':
-            print(text)
             return 'drop'
         elif text == 'e':
-            print(text)
             return 'equip'
 
 def inventory_popup_menu(caption='Select item:',filter=None):

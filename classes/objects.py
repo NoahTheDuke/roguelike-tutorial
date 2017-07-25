@@ -91,6 +91,7 @@ class Cursor(GameObject):
         self.render_order = RenderOrder.CURSOR
     
     def deactivate(self):
+        self.char = None
         self.render_order = RenderOrder.NONE
 
 class Stairs(GameObject):

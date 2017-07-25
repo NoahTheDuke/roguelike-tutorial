@@ -11,7 +11,7 @@ log_panel = None
 combat_panel = None
 
 # Gameplay variables
-# TODO: noramlize variable names (game_objects,game_actors)
+# TODO: standardize variable names (game_objects,game_actors)
 gameobjects = []
 actors = []
 game_log = None
