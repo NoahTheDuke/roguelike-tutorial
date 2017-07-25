@@ -1,18 +1,30 @@
 ''' all code related to handling messages in-game '''
 
 import tdl
+from enum import Enum,auto
 import textwrap
+
 import colors
 import settings
-
 import global_vars as gv
 
 from gui.helpers import draw_window_borders, center_x_for_text
 
+class LogLevel(Enum):
+    ''' the log-level of a message '''
+    SYSTEM = auto()     # system and debug messages, displayed in all logs
+    GAMEPLAY = auto()   # messages displayed in all logs
+    NONCOMBAT = auto()  # messages displayed only outside of combat
+    COMBAT = auto()     # messages displayed only in the combat_log
+
 class Message:
-    def __init__(self,text,color=colors.white,log=None):
+    def __init__(self,text,color=colors.white,log=None,log_level = LogLevel.NONCOMBAT):
         self.text = text
         self.color = color
+        if log_level == LogLevel.SYSTEM:
+            message.color = colors.yellow
+
+        self.log_level = log_level
 
         if log is None:
             log = gv.game_log
@@ -39,11 +51,12 @@ class MessageLog:
         # Add the Message to the messages list
         self.messages.append(message)
     
-    def display_messages(self,y,panel):
+    def display_messages(self,y,panel,log_level=LogLevel.GAMEPLAY):
         ''' draws the messages to the indicated panel at height y'''
-        for message in self.messages:
+        messages = [message for message in self.messages if message.log_level in [LogLevel.SYSTEM,LogLevel.GAMEPLAY,log_level]]
+        for message in messages:
             if y + len(message.lines) < panel.height:   # If the current height + upcoming lines wouldn't exceed the log's height, draw the lines
-                for line in message.lines:
+                for line in message.lines:                      
                     panel.draw_str(settings.MSG_X, y, line, bg=None, fg=message.color)
                     y += 1
             else:   # Otherwise delete the earliest message to make room

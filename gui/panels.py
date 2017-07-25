@@ -7,6 +7,7 @@ import settings
 import colors
 import global_vars as gv
 
+from gui.messages import LogLevel
 from gui.helpers import draw_window_borders as draw_panel_borders
 
 from game_states import GameStates
@@ -17,16 +18,14 @@ def render_panels(root,visible_tiles):
     # call the individual function for each panel to draw it
     draw_stat_panel(gv.stat_panel,root)
     draw_inv_panel(gv.inv_panel,root)
-    draw_gamelog_panel(gv.gamelog_panel,root)
     draw_combat_panel(gv.combat_panel,root,visible_tiles)
+    draw_log_panel(gv.log_panel,root)
     
     # if the cursor is active, try drawing the description panel
     if gv.gamestate == GameStates.CURSOR_ACTIVE:
         try:
-            gv.combat_panel.caption = 'Description'
             draw_description_panel(gv.combat_panel,root)
         except:
-            gv.combat_panel.caption = 'Enemies'
             draw_combat_panel(gv.combat_panel,root,visible_tiles)       
 
 def setup_panel(panel):
@@ -112,29 +111,34 @@ def draw_inv_panel(panel,root):
     
     root.blit(panel,settings.SIDE_PANEL_X,settings.STAT_PANEL_HEIGHT, panel.width, panel.height)
 
-def draw_gamelog_panel(panel,root):
+def draw_log_panel(panel,root):
     ''' draws the bottom (message) panel '''
+
+    # Check if player is in engagement, if yes, switch the log
+    if gv.player.opponent == None:
+        gv.log_panel.caption = 'Gamelog'
+        log = LogLevel.NONCOMBAT
+    else:
+        gv.log_panel.caption = 'Combatlog'
+        log = LogLevel.COMBAT
 
     # sets up the panel's basic functionality
     setup_panel(panel)
 
     #print the game messages, one line at a time
-    gv.game_log.display_messages(2,panel)
+    gv.game_log.display_messages(2,panel,log_level = log)
  
     #blit the contents of "panel" to the root console
     root.blit(panel, settings.COMBAT_PANEL_WIDTH, settings.BOTTOM_PANEL_Y, panel.width, panel.height)
 
-def draw_combatlog_panel(panel,root):
-    ''' (OBSOLETE) draws the bottom (message) panel '''
-
-    #print the game messages, one line at a time
-    gv.combat_log.display_messages(2,panel)
- 
-    #blit the contents of "panel" to the root console
-    root.blit(panel,0, settings.BOTTOM_PANEL_Y, panel.width, panel.height)
-
 def draw_combat_panel(panel,root,visible_tiles):
     ''' draws the bottom left panel '''
+
+    # check if player is combat locked, if yes, change the caption
+    if gv.player.opponent == None:
+        panel.caption = 'Enemies'
+    else:
+        panel.caption = '* * * COMBAT * * *'
 
     # sets up the panel's basic functionality
     setup_panel(panel)
@@ -146,7 +150,15 @@ def draw_combat_panel(panel,root,visible_tiles):
         x = 2
         y = 2
         spotted.sort(key=gv.player.distance_to) # sort the spotted array by distance to player
+
+        # if player is combat locked, put opponent at first position in the array
+        if gv.player.opponent:
+            spotted.remove(gv.player.opponent)
+            spotted.insert(0,gv.player.opponent)
+        
         for ent in spotted:    # Go through the object names and wrap them according to the panel's width
+            if ent == gv.player.opponent:   # if entity is the combat-locked opponent, highlight it
+                panel.draw_rect(1, y,panel.width-4, 1, None, bg=colors.darker_red)
             panel.draw_str(x,y,'{0}:'.format(ent.name),bg=None, fg=colors.white)
             status = ent.get_health_as_string_and_color()
             panel.draw_str(len(ent.name)+4,y,'{0}'.format(status[0].title()),bg=None, fg=status[1])
@@ -161,12 +173,13 @@ def draw_combat_panel(panel,root,visible_tiles):
 def draw_description_panel(panel,root):
     ''' shows a monster's description in the combat panel '''
 
-    # sets up the panel's basic functionality
-    setup_panel(panel)
-
     # get the first entity from the actors array under the cursor position
-    # (if this fails, the except in render_panels() catches it)
+    # (if this fails, this function throws an error which is caught by the except in render_panels())
     ent = next(ent for ent in gv.actors if (ent.x,ent.y)==(gv.cursor.pos()))
+
+    # sets up the panel's basic functionality
+    gv.combat_panel.caption = 'Description'
+    setup_panel(panel)
     
     x = 2
     y = 2

@@ -15,6 +15,7 @@ def gen_monsters():
     '''creates a new monster at the given position'''
     
     generators = {
+        'goblin':(80,gen_Goblin),
         'orc':(80,gen_Orc),
         'troll':(30,gen_Troll)
     }
@@ -52,7 +53,7 @@ def gen_Orc(x,y):
     ''' generic orc'''
 
     name = 'Orc'
-    descr = 'An Orc.'
+    descr = 'The most generic of monsters you could imagine. Thankfully, it will probably kill you before you become bored to death.'
     ent = Monster (
         x,y,
         name,
@@ -62,7 +63,7 @@ def gen_Orc(x,y):
         pwr = 3,
         df = 0,
         ai = BasicMonster(),
-        blurbs = (
+        barks = (
             ('The ' + name + ' growls.'),
             ('The ' + name + ' screeches!'),
             ('The ' + name + ' screams in a strange language.')
@@ -75,7 +76,7 @@ def gen_Troll(x,y):
     ''' generic Troll'''
 
     name = 'Troll'
-    descr = 'A Troll, it is big.'
+    descr = 'There are many different and imaginative interpretations of what a Troll could look like. This is not one of them. It is big, ugly and strong.'
     ent = Monster (
         x,y,
         name,
@@ -85,9 +86,31 @@ def gen_Troll(x,y):
         pwr = 4,
         df = 1,
         ai = BasicMonster(),
-        blurbs = (
+        barks = (
             ('The ' + name + ' stares at you.'),
             ('The ' + name + ' licks his lips.')
+        ),
+        descr = descr
+    )
+    return ent
+
+def gen_Goblin(x,y):
+    ''' generic Troll'''
+
+    name = 'Goblin'
+    descr = 'The Goblin is just as generic as an orc but smaller.'
+    ent = Monster (
+        x,y,
+        name,
+        'g',
+        colors.lighter_green,
+        hp = randint(6,8),
+        pwr = 1,
+        df = 0,
+        ai = BasicMonster(),
+        barks = (
+            ('The {0} is visibly agitated'.format(name)),
+            ('The {0} does a generic thing.'.format(name))
         ),
         descr = descr
     )

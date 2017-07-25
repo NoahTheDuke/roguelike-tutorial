@@ -1,8 +1,6 @@
 ''' main function for drawing all objects in the game '''
 
 import tdl
-#import tcod
-#from textwrap import wrap
 from enum import Enum,auto
 
 import settings
@@ -37,17 +35,17 @@ def initialize_window():
     # initialize the panels
     gv.stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
     gv.inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
-    gv.gamelog_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
+    gv.log_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
     gv.combat_panel = tdl.Console(settings.COMBAT_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
 
     # set the default captions for all panels
     gv.stat_panel.caption = 'Status'
     gv.inv_panel.caption = 'Inventory'
-    gv.gamelog_panel.caption = 'Gamelog'
+    gv.log_panel.caption = 'Gamelog'
     gv.combat_panel.caption = 'Enemies'
 
     # set the default border color and mode for all panels
-    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
+    for panel in [gv.stat_panel,gv.inv_panel,gv.log_panel,gv.combat_panel]:
         panel.mode = 'default'
         panel.border_color = settings.PANELS_BORDER_COLOR
 
@@ -121,7 +119,8 @@ def render_all():
     # if the player is locked in combat, display a text at the top
     if gv.player.opponent:
         string = '* * * COMBAT * * *'
-        root.draw_str((settings.MAP_WIDTH - len(string))//2,settings.MAP_HEIGHT-2,string,fg=colors.red)
+        root.draw_str((settings.MAP_WIDTH - len(string))//2,0,string,fg=colors.red)
+        root.draw_str((settings.MAP_WIDTH - len(string))//2,settings.MAP_HEIGHT-1,string,fg=colors.red)
 
     
 def is_visible_tile(x, y):

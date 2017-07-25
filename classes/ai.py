@@ -5,7 +5,7 @@ import math
 import random
 from random import randint
 
-from gui.messages import Message
+from gui.messages import LogLevel, Message
 
 import colors
 import settings
@@ -29,7 +29,7 @@ class BasicMonster:
             
             # 25% chance to produce a sound
             if randint(0,100) > 75:
-                self.blurb()
+                self.bark()
     
     def move(self, dx, dy):
         ''' Move the monster, after checking if the target space is legitimate '''
@@ -99,10 +99,10 @@ class BasicMonster:
         
         self.move(dx, dy)
     
-    def blurb(self):
+    def bark(self):
         ''' make some sounds '''
-        if not self.owner.blurbs == None:
-            Message(random.choice(self.owner.blurbs),color=colors.desaturated_red)
+        if not self.owner.barks == None:
+            Message(random.choice(self.owner.barks),color=colors.desaturated_red,log_level = LogLevel.GAMEPLAY)
 
 class ConfusedMonster:
     '''AI for a confused monster'''

@@ -8,7 +8,7 @@ import colors
 import global_vars as gv
 
 
-from gui.messages import Message,msgbox
+from gui.messages import Message,msgbox, LogLevel
 from gui.render_main import RenderOrder
 
 from classes.objects import GameObject
@@ -45,10 +45,16 @@ class Fighter(GameObject):
         damage = self.power - target.defense
         if damage > 0:
             #make the target take some damage
-            Message(self.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.',log=gv.combat_log)
+            Message(self.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.',log_level=LogLevel.COMBAT)
             target.take_damage(damage)
         else:
-            Message(self.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!',log=gv.combat_log)
+            Message(self.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!',log_level=LogLevel.COMBAT)
+        
+        # Engage the combat lock, depending on conditions
+        if self == gv.player and self.opponent == None and target.hp>0:
+            gv.player.opponent = target
+        elif target == gv.player and gv.player.opponent == None and self.hp>0:
+            gv.player.opponent = self
     
     def heal(self, amount):
         #heal by the given amount, without going over the maximum
@@ -76,7 +82,7 @@ class Fighter(GameObject):
 
     def death(self):
         ''' Generic death for all actors '''
-        Message('The ' + self.name.capitalize() + ' is dead!',log=gv.combat_log,color=colors.green)
+        Message('The ' + self.name.capitalize() + ' is dead!',log_level=LogLevel.GAMEPLAY,color=colors.green)
 
         # if the enemy was the player's opponent, reset opponent to None
         if self == gv.player.opponent:
@@ -96,10 +102,10 @@ class Fighter(GameObject):
 
 class Monster(Fighter):
     ''' base-class for all hostile mobs '''
-    def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2,ai=None,blurbs=None,descr = None):
+    def __init__(self, x, y,name,char, color,hp=10,pwr=5,df=2,ai=None,barks=None,descr = None):
         super().__init__(x, y,name,char,color,hp=hp,pwr=pwr,df=df)
 
-        self.blurbs = blurbs
+        self.barks = barks
 
         self.description = descr
 
@@ -119,6 +125,13 @@ class Player(Fighter):
     #def attack(self):
 
     #def disengage(self,dx,dy):
+
+    def take_damage(self, damage):
+        '''apply damage if possible'''
+        if damage > 0:
+            self.hp -= damage
+        if self.hp <= 0:
+            self.death()
 
     def move(self, dx, dy,running=False):
         ''' Move the player, after checking if the target space is legitimate'''
@@ -149,10 +162,6 @@ class Player(Fighter):
                     self.is_running = False
                 else:
                     self.attack(target)
-                    
-                    # set the target as the player's opponent
-                    if self.opponent == None and target.hp > 0:
-                        self.opponent = target
             
         elif running: # if the player crashes into a wall
                 Message('You run into something.',colors.red)

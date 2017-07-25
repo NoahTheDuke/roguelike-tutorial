@@ -8,7 +8,7 @@ import colors
 import global_vars as gv
 
 from gui.render_main import RenderOrder
-from gui.messages import Message
+from gui.messages import Message, LogLevel
 
 import item_use as iu
 from classes.objects import GameObject
@@ -26,7 +26,7 @@ class Item(GameObject):
     def pick_up(self,actor):
         '''add to the gv.player's inventory and remove from the map'''
         if len(actor.inventory) >= 26:
-            Message('Your gv.player.inventory is full, cannot pick up ' + self.name + '.', colors.red)
+            Message('Your inventory is full, cannot pick up ' + self.name + '.', colors.red,log_level = LogLevel.NONCOMBAT)
         else:
             actor.inventory.append(self)
             gv.gameobjects.remove(self)

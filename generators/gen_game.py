@@ -114,7 +114,6 @@ def gen_game(newgame):
         gv.gameobjects = []
         gv.actors = []
         gv.game_log = MessageLog(settings.MSG_X,settings.MSG_WIDTH,settings.MSG_HEIGHT)
-        gv.combat_log = MessageLog(settings.MSG_X,settings.MSG_WIDTH,settings.MSG_HEIGHT)
         gv.dungeon_level = 1
 
         # create the player & cursor

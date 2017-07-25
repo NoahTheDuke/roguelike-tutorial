@@ -3,7 +3,7 @@
 import colors
 import global_vars as gv
 
-from gui.messages import Message
+from gui.messages import LogLevel, Message
 from gui.menus import menu, inventory_popup_menu, item_selection_menu,item_interaction_menu
 
 from game_states import GameStates
@@ -210,19 +210,19 @@ def process_input_combat(action):
 
     if 'move' in action:
         x,y = action['move']
-        if gv.player.direction_to(opponent) == (x,y):
+        if (x,y) == (0,0) or gv.player.direction_to(opponent) == (x,y):
             gv.player.move(x,y,False)
             gv.gamestate = GameStates.ENEMY_TURN
         else:
-            Message('You are locked in combat!')
+            Message('You are locked in combat!',log_level = LogLevel.COMBAT)
     
     elif 'look' in action:
         if gv.gamestate == GameStates.CURSOR_ACTIVE:
-            Message('You stop looking around.')
+            Message('You stop looking around.',log_level = LogLevel.COMBAT)
             gv.cursor.deactivate()
             gv.gamestate = GameStates.PLAYERS_TURN
         else:
-            Message('You start looking around.')
+            Message('You start looking around.',log_level = LogLevel.COMBAT)
             gv.cursor.activate('*',colors.white)
             gv.gamestate = GameStates.CURSOR_ACTIVE
 
@@ -235,7 +235,7 @@ def process_input_combat(action):
             else:
                 gv.gamestate = GameStates.PLAYERS_TURN
         else:
-            Message('You are locked in combat!')
+            Message('You are locked in combat!',log_level = LogLevel.COMBAT)
 
     else:
-        Message('You are locked in combat!')
+        Message('You are locked in combat!',log_level = LogLevel.COMBAT)

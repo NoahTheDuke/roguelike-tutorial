@@ -7,7 +7,7 @@ con = None
 # Panels
 stat_panel = None
 inv_panel = None
-gamelog_panel = None
+log_panel = None
 combat_panel = None
 
 # Gameplay variables
@@ -15,7 +15,6 @@ combat_panel = None
 gameobjects = []
 actors = []
 game_log = None
-combat_log = None
 player = None
 game_map = None
 cursor = None
