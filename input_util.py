@@ -8,85 +8,83 @@ from gui.menus import menu, inventory_popup_menu, item_selection_menu,item_inter
 
 from game_states import GameStates
 
+MOVE_PATTERNS = {
+    # arrow keys
+    'UP':(0,-1),'DOWN':(0,1),'LEFT':(-1,0),'RIGHT':(-1,0),
+
+    # Numpad
+    'KP7':(-1,-1),'KP8':(0,-1),'KP9':(1,-1),
+    'KP4':(-1,0),'KP5':(0,0),'KP6':(1,0),
+    'KP1':(-1,1),'KP2':(0,1),'KP3':(1,1)
+
+    # TODO VIM keys
+}
+
 def handle_keys(user_input):
     ''' Handles all key input made by the player '''
     
     print(user_input)
+    key = user_input.key
+    char = user_input.char
 
     #Alt+Enter: toggle fullscreen
-    if user_input.key == 'ENTER' and user_input.alt:
+    if key == 'ENTER' and user_input.alt:
         return 'fullscreen'
     # escape cancels menus
-    elif user_input.key == 'ESCAPE':
+    elif key == 'ESCAPE':
         return 'cancel'
     # control-q exists the game
-    elif user_input.char == 'q' and user_input.leftCtrl:
+    elif char == 'q' and user_input.leftCtrl:
         return 'exit'
     # '?' opens the manual
-    elif user_input.char == '?':
+    elif char == '?':
         return 'manual'
     
-    # movement keys
-    elif user_input.key in ['UP','KP8']:
-        return {'move':(0,-1)}
+    # directional keys
+    if key in MOVE_PATTERNS.keys():
+        if user_input.shift:
+            return {'attention':MOVE_PATTERNS[key]}
+        elif user_input.control:
+            # force attack
+            pass
+        else:
+            return {'move':MOVE_PATTERNS[key]}
 
-    elif user_input.key in ['DOWN','KP2']:
-        return {'move':(0,1)}
-
-    elif user_input.key in ['LEFT','KP4']:
-        return {'move':(-1,0)}
-
-    elif user_input.key in ['RIGHT','KP6']:
-        return {'move':(1,0)}
-
-    elif user_input.key in ['KP9']:
-        return {'move':(1,-1)}
-
-    elif user_input.key in ['KP7']:
-        return {'move':(-1,-1)}    
-
-    elif user_input.key in ['KP1']:
-        return {'move':(-1,1)}    
-
-    elif user_input.key in ['KP3']:
-        return {'move':(1,1)}          
-
-    elif user_input.key in ['KP5','.']:
-        return {'move':(0,0)}
-
-    elif user_input.char == 'r':
+    # running
+    elif char == 'r':
         return 'run'
 
-    elif user_input.char in ['<','>']:
-        return {'stairs':user_input.char}
+    # stair usage
+    elif char in ['<','>']:
+        return {'stairs':char}
 
     # looking and targeting
-    if user_input.char == 'l':
+    elif char == 'l':
         return 'look'
-    # elif user_input.char == 't':
+    # elif char == 't':
     #     return 'target'
 
     # item handling
-    if user_input.char == 'g':
+    elif char == 'g':
         return 'get'
 
-    elif user_input.char == 'i':
+    elif char == 'i':
         return {'inventory':'interact'}
 
-    elif user_input.char == 'u':
+    elif char == 'u':
         return {'inventory':'use'}
 
-    # elif user_input.char == 'd':
+    # elif char == 'd':
     #     return {'inventory':'drop'}
 
-    # elif user_input.char == 'e':
+    # elif char == 'e':
     #     return {'inventory':'equip'}
 
-    # elif user_input.char == 'x':
+    # elif char == 'x':
     #     return {'inventory':'examine'}
 
     # other
-    elif user_input.key in ['ENTER','KPENTER']:
+    elif key in ['ENTER','KPENTER']:
         return 'confirm'
 
     else:
