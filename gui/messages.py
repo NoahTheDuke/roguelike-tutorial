@@ -57,7 +57,7 @@ def msgbox(text, title=None, width=0, text_color=colors.white, border_color=sett
     '''display a simple message box'''
 
     # if width wasn't set, it's automatically length of text + padding
-    if width == 0:
+    if not width:
         width = len(text) + 4
 
     text_wrapped = textwrap.wrap(text, width - 2)  # Calculate how many lines are required

@@ -19,12 +19,12 @@ def draw_spotted_window():
 
     spotted = [
         obj for obj in gv.gameobjects
-        if ([obj.x, obj.y] == [cx, cy] and not obj == gv.cursor and not obj == gv.player)]
+        if [obj.x, obj.y] == [cx, cy] and not obj == gv.cursor and not obj == gv.player]
 
-    if len(spotted) > 0:  # if more than one object is present, output the names as a message
+    if spotted:  # if more than one object is present, output the names as a message
         lines = []
         #gv.cursor.color = colors.yellow
-        width = max([len(obj.name) for obj in spotted]) + 6  # Window width is adapted to longest object name in list
+        width = max(len(obj.name) for obj in spotted) + 6  # Window width is adapted to longest object name in list
         for obj in spotted:  # Go through the object names and wrap them according to the window's width
             line_wrapped = textwrap.wrap(obj.name, width)
             for text in line_wrapped:
@@ -72,7 +72,7 @@ def draw_item_window(item, px, py, width, height):
 def draw_options_window(caption, options, x, y):
     ''' draws a window listing the passed options '''
 
-    width = (max(len(option) for option in options)) + 7
+    width = max(len(option) for option in options) + 7
     height = len(options) + 4
 
     window = tdl.Window(gv.root, x, y, width, height)

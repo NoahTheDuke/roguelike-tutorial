@@ -27,7 +27,7 @@ def cast_heal(params=0):
 def cast_powerup(params=0):
     '''modify characters power'''
     pwr = params
-    if (pwr > 0):
+    if pwr:
         Message('Your power has been increased!', colors.light_violet)
     else:
         Message('The potion of power was cursed!', colors.light_violet)
@@ -37,30 +37,30 @@ def cast_powerup(params=0):
 
 def cast_lightning(params=(0, 0)):
     '''zap something'''
-    pwr, range = params
+    pwr, spell_range = params
     #find closest enemy (inside a maximum range) and damage it
-    if range == 0:
+    if spell_range:
+        monster = closest_monster(spell_range)
+
+        if monster is None:  #no enemy found within maximum range
+            Message('No enemy is close enough to strike.', colors.red)
+            return 'cancelled'
+    else:
         monster = gv.player
         Message('The scroll of lightning was cursed!', colors.light_violet)
-    else:
-        monster = closest_monster(range)
-
-    if monster is None:  #no enemy found within maximum range
-        Message('No enemy is close enough to strike.', colors.red)
-        return 'cancelled'
 
     #zap it!
-    Message('A lighting bolt strikes the ' + monster.name + ' with a loud thunder! The damage is ' + str(pwr) +
-            ' hit points.', colors.light_blue)
+    Message('A lighting bolt strikes the {} with a loud thunder! The damage is {} hit points.'.format(
+        monster.name, str(pwr)), colors.light_blue)
     monster.take_damage(pwr)
 
 
 def cast_confusion(params=(6, 3)):
     '''find closest enemy in-range and confuse it'''  #TODO: Make confused monster attack random monsters
-    dur, range = params
+    dur, spell_range = params
     monster = None
-    if (range > 0):
-        monster = closest_monster(range)
+    if spell_range:
+        monster = closest_monster(spell_range)
 
         if monster is None:  #no enemy found within maximum range
             Message('No enemy is close enough to confuse.', colors.red)
@@ -69,7 +69,7 @@ def cast_confusion(params=(6, 3)):
             old_ai = monster.ai
             monster.ai = ConfusedMonster(old_ai, num_turns=dur)
             monster.ai.owner = monster  #tell the new component who owns it
-            Message('The eyes of the ' + monster.name + ' look vacant, as he starts to stumble around!',
+            Message('The eyes of the {} look vacant, as he starts to stumble around!'.format(monster.name),
                     colors.light_green)
     else:
         Message('The scroll of confusion was cursed!')
@@ -88,11 +88,11 @@ def cast_fireball(params=(10, 3)):
         if gv.player.distance_to_coord(x, y) <= radius:
             check = menu('The spell would hit you as well. Proceed?', ['No', 'Yes'], 40)
         if check:
-            Message('The fireball explodes, burning everything within ' + str(radius) + ' tiles!', colors.orange)
+            Message('The fireball explodes, burning everything within {} tiles!'.format(str(radius)), colors.orange)
             for obj in gv.actors:  #damage every actor in range, including the player
                 if obj.distance_to_coord(x, y) <= radius:
                     dmg = randint(pwr / 2, pwr)
-                    Message('The ' + obj.name + ' gets burned for ' + str(dmg) + ' hit points.', colors.orange)
+                    Message('The {} gets burned for {} hit points.'.format(obj.name, str(dmg)), colors.orange)
                     obj.take_damage(dmg)
         else:
             Message('Your spell fizzles.')
@@ -102,13 +102,13 @@ def cast_magicmissile(params=(10, 3)):
     '''ask the player for a target tile to throw a magic missile at it'''
     pwr, radius = params
     target = target_tile()
-    monster = [obj for obj in gv.actors if (obj.x, obj.y) == target]
-    if len(monster) == 0:  # if no actor is at the selected location, the spell fails
+    monster = next(obj for obj in gv.actors if (obj.x, obj.y) == target)
+    if not monster:  # if no actor is at the selected location, the spell fails
         Message('There is no target at the position and your spell fizzles.')
     else:
-        Message('Your magical projectile hits the ' + monster[0].name + ' for ' + str(pwr) + ' damage!',
-                colors.turquoise)
-        monster[0].take_damage(pwr)
+        Message('Your magical projectile hits the {} for {} damage!'.format(
+            monster.name, str(pwr)), colors.turquoise)
+        monster.take_damage(pwr)
 
 
 def eat_corpse(params=''):

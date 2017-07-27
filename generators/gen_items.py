@@ -95,7 +95,7 @@ def gen_Scr_Ltng(x, y):
     name = 'scroll of lightning bolt'
     descr = 'A scroll of lightning bolt. It will strike one of the nearest enemies.'
     pwr = randint(8, 10)
-    range = 3
+    spell_range = 3
     i = Useable(
         x,
         y,
@@ -104,14 +104,14 @@ def gen_Scr_Ltng(x, y):
         COLOR_SCROLL,
         description=descr,
         use_function=iu.cast_lightning,
-        params=(pwr, range))  # power/radius
+        params=(pwr, spell_range))  # power/radius
     return i
 
 
 def gen_Scr_Frb(x, y):
     name = 'scroll of fireball'
     pwr = 12
-    range = 3
+    spell_range = 3
     i = Useable(
         x,
         y,
@@ -120,7 +120,7 @@ def gen_Scr_Frb(x, y):
         COLOR_SCROLL,
         description='A scroll of fireball. It will burn anything in a small radius.',
         use_function=iu.cast_fireball,
-        params=(pwr, range))  # power/radius
+        params=(pwr, spell_range))  # power/radius
     return i
 
 
@@ -128,9 +128,9 @@ def gen_Scr_Conf(x, y):
     name = 'scroll of confusion'
     pwr = randint(4, 6)
     if randint(0, 100) > 85:  # 15% chance to be cursed
-        range = -1
+        spell_range = -1
     else:
-        range = 3
+        spell_range = 3
     i = Useable(
         x,
         y,
@@ -139,7 +139,7 @@ def gen_Scr_Conf(x, y):
         COLOR_SCROLL,
         description='A scroll of confusion. It will turn a foes brain into mush temporarily.',
         use_function=iu.cast_confusion,
-        params=(pwr, range)  # power/radius
+        params=(pwr, spell_range)  # power/radius
     )
     return i
 
@@ -147,7 +147,7 @@ def gen_Scr_Conf(x, y):
 def gen_Scr_Mami(x, y):
     name = 'scroll of magic missile'
     pwr = randint(4, 8)
-    range = 6
+    spell_range = 6
     i = Useable(
         x,
         y,
@@ -156,7 +156,7 @@ def gen_Scr_Mami(x, y):
         COLOR_SCROLL,
         description='A scroll of magic missile. Inflicts direct damage on a single enemy.',
         use_function=iu.cast_magicmissile,
-        params=(pwr, range)  # power/radius
+        params=(pwr, spell_range)  # power/radius
     )
     return i
 

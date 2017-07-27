@@ -42,7 +42,7 @@ def is_visible_tile(x, y):
         return False
     elif y >= settings.MAP_HEIGHT or y < 0:
         return False
-    elif gv.game_map.transparent[x][y] == True:
+    elif gv.game_map.transparent[x][y]:
         return True
     else:
         return False

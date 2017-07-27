@@ -27,9 +27,9 @@ def gen_monsters():
             # Get a good position for the monster
             x, y = room.ranpos()
             i = 0
-            while sum([obj.x, obj.y] == [x, y] for obj in gv.actors) > 0:
+            while any([obj.x, obj.y] == [x, y] for obj in gv.actors):
                 x, y = room.ranpos()
-                i += 1
+                i += 1  # WTF how do we escape this if it keeps climbing?
                 if i == 0:
                     break
 
@@ -63,9 +63,9 @@ def gen_Orc(x, y):
         pwr=3,
         df=0,
         ai=BasicMonster(),
-        blurbs=(('The ' + name + ' growls.'),
-                ('The ' + name + ' screeches!'),
-                ('The ' + name + ' screams in a strange language.')),
+        blurbs=(('The {} growls.'.format(name)),
+                ('The {} screeches!'.format(name)),
+                ('The {} screams in a strange language.'.format(name))),
         descr=descr)
     return ent
 
@@ -85,7 +85,7 @@ def gen_Troll(x, y):
         pwr=4,
         df=1,
         ai=BasicMonster(),
-        blurbs=(('The ' + name + ' stares at you.'),
-                ('The ' + name + ' licks his lips.')),
+        blurbs=(('The {} stares at you.'.format(name)),
+                ('The {} licks his lips.'.format(name))),
         descr=descr)
     return ent

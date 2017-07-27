@@ -116,7 +116,7 @@ def process_input(action):
             gv.player.is_running = True
 
     elif 'look' in action:
-        if gv.gamestate == GameStates.CURSOR_ACTIVE:
+        if gv.gamestate is GameStates.CURSOR_ACTIVE:
             Message('You stop looking around.')
             gv.cursor.deactivate()
             gv.gamestate = GameStates.PLAYERS_TURN
@@ -140,18 +140,18 @@ def process_input(action):
         item = None
         # get all items at the player's feet
         items = [obj for obj in gv.gameobjects if [obj.x, obj.y] == [gv.player.x, gv.player.y] and obj.is_item]
-        if len(items) == 0:
+        if not items:
             Message('There is nothing to pick up here!')
         elif len(items) == 1:
             item = 0
         else:
             item = menu('What do you want to pick up?', [item.name for item in items], 40)
-        if not item == None:
+        if item is not None:
             items[item].pick_up(gv.player)
             Message('You picked up ' + items[item].name.title() + '!', colors.green)
 
     elif 'inventory' in action:
-        if len(gv.player.inventory) == 0:
+        if not gv.player.inventory:
             Message('Your inventory is empty!')
 
         # Display the inventory, if it is not already active

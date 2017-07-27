@@ -36,7 +36,7 @@ class Fighter(GameObject):
 
     def take_damage(self, damage):
         '''apply damage if possible'''
-        if damage > 0:
+        if damage:
             self.hp -= damage
         if self.hp <= 0:
             self.death()
@@ -44,20 +44,17 @@ class Fighter(GameObject):
     def attack(self, target):
         '''a simple formula for attack damage'''
         damage = self.power - target.defense
-        if damage > 0:
+        if damage:
             #make the target take some damage
-            Message(
-                self.name.capitalize() + ' attacks ' + target.name + ' for ' + str(damage) + ' hit points.',
+            Message('{} attacks {} for {} hit points.'.format(self.name.capitalize(), target.name, str(damage)),
                 log=gv.combat_log)
             target.take_damage(damage)
         else:
-            Message(self.name.capitalize() + ' attacks ' + target.name + ' but it has no effect!', log=gv.combat_log)
+            Message('{} attacks {} but it has no effect!'.format(self.name.capitalize(), target.name), log=gv.combat_log)
 
     def heal(self, amount):
         #heal by the given amount, without going over the maximum
-        self.hp += amount
-        if self.hp > self.max_hp:
-            self.hp = self.max_hp
+        self.hp = max(self.hp + amount, self.max_hp)
 
     def modpwr(self, amount):
         self.power += amount
@@ -79,7 +76,7 @@ class Fighter(GameObject):
 
     def death(self):
         ''' Generic death for all actors '''
-        Message('The ' + self.name.capitalize() + ' is dead!', log=gv.combat_log, color=colors.green)
+        Message('The {} is dead!'.format(self.name.capitalize()), log=gv.combat_log, color=colors.green)
         x, y = (self.x, self.y)
         item = gen_Corpse(x, y, self)
         #item = Useable(self.x,self.y, (self.name + ' corpse'), '%', colors.dark_red,use_function=iu.eat_corpse,params=self.name)
@@ -127,25 +124,24 @@ class Player(Fighter):
             check = True
             for obj in gv.gameobjects:
                 target = None
-                if [obj.x, obj.y] == [self.x + dx, self.y + dy
-                                      ] and obj.blocks:  # check if there is something in the way
+                # check if there is something in the way
+                if [obj.x, obj.y] == [self.x + dx, self.y + dy] and obj.blocks:
                     check = False
                     if obj in gv.actors and (not obj == gv.player):  # if it's another actor, target it
                         target = obj
                     break
-            if check and target == None:
+            if check and target is None:
                 self.x += dx
                 self.y += dy
 
                 # if entity is running, re-call the move function once
                 if (running):
-
                     self.move(dx, dy, running=False)
 
             # if blocking object is an enemy target
-            elif not check and not target == None:
+            elif not check and target not is None:
                 if running:
-                    Message('You bump into the ' + target.name, colors.red)
+                    Message('You bump into the {}.'.format(target.name), colors.red)
                     self.is_running = False
                 else:
                     self.attack(target)

@@ -11,11 +11,11 @@ import settings
 class GameMap:
     ''' the basic game map '''
 
-    def __init__(self, width, height, rooms=[]):
+    def __init__(self, width, height, rooms=None):
         self.width = width
         self.height = height
         #super().__init__(width, height)
-        self.rooms = rooms
+        self.rooms = list() if rooms is None else rooms
         # This loops through a list of range (width), for every step looping through a list of range (height), filling every index with a False value. Eg: [[False,False],[False,False]]
         self.explored = [[False for y in range(height)] for x in range(width)]
         self.gibbed = [[False for y in range(height)] for x in range(width)]

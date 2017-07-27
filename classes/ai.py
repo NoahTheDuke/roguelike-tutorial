@@ -25,7 +25,7 @@ class BasicMonster:
                 self.move_astar(gv.player)
 
             #close enough, attack! (if the player is still alive.)
-            elif gv.player.hp > 0:
+            elif gv.player.hp:
                 monster.attack(gv.player)
 
             # 25% chance to produce a sound
@@ -36,8 +36,9 @@ class BasicMonster:
         ''' Move the monster, after checking if the target space is legitimate '''
 
         x, y = self.owner.x, self.owner.y
-        if gv.game_map.walkable[x + dx][y + dy]:
-            if sum([obj.x, obj.y] == [x + dx, y + dy] for obj in gv.actors) == 0:
+        to_x, to_y = x + dx, y + dy
+        if gv.game_map.walkable[to_x][to_y]:
+            if not any([obj.x, obj.y] == [to_x, to_y] for obj in gv.actors):
                 self.owner.x += dx
                 self.owner.y += dy
 
@@ -101,7 +102,7 @@ class BasicMonster:
 
     def blurb(self):
         ''' make some sounds '''
-        if not self.owner.blurbs == None:
+        if not self.owner.blurbs is None:
             Message(random.choice(self.owner.blurbs), color=colors.desaturated_red)
 
 
@@ -113,7 +114,7 @@ class ConfusedMonster:
         self.num_turns = num_turns
 
     def take_turn(self):
-        if self.num_turns > 0:  #still confused...
+        if self.num_turns:  #still confused...
             #move in a random direction, and decrease the number of turns confused
             self.move()
             self.num_turns -= 1
@@ -126,16 +127,17 @@ class ConfusedMonster:
         ''' Confused monsters stumble around and attack randomly '''
         x, y = self.owner.x, self.owner.y
         dx, dy = randint(-1, 1), randint(-1, 1)
-        if gv.game_map.walkable[x + dx][y + dy]:
+        to_x, to_y = x + dx, y + dy
+        if gv.game_map.walkable[to_x][to_y]:
             check = True
             for obj in gv.gameobjects:
                 target = None
-                if [obj.x, obj.y] == [x + dx, y + dy] and obj.blocks:  # check if there is something in the way
+                if [obj.x, obj.y] == [to_x, to_y] and obj.blocks:  # check if there is something in the way
                     check = False
                     if obj in gv.actors:
                         target = obj
                     break
-            if check and target == None:
+            if check and target is None:
                 self.owner.x += dx
                 self.owner.y += dy
                 Message('The ' + self.owner.name + ' stumbles around.', colors.white)

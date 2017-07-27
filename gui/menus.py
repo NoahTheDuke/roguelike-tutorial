@@ -36,7 +36,7 @@ def item_selection_menu():
         # elif it's an arrow key or pageup/pagedown, scroll the inventory:
         #
         # for any other key, check if a corresponding item exists in the player's inventory
-        elif len(char) > 0:
+        elif char:
             index = ord(char) - ord('a')
             if 0 <= index < len(gv.player.inventory):
                 item = gv.player.inventory[index]
@@ -75,10 +75,10 @@ def item_interaction_menu(item):
             return 'equip'
 
 
-def inventory_popup_menu(caption='Select item:', filter=None):
+def inventory_popup_menu(caption='Select item:', item_filter=None):
     '''show a menu next to the player, with all or a filtered selection of items as options'''
-    if filter is not None:  # if filter is set, only display items of a certain class
-        inventory = [item for item in gv.player.inventory if type(item).__name__ == filter]
+    if item_filter is not None:  # if item_filter is set, only display items of a certain class
+        inventory = [item for item in gv.player.inventory if type(item).__name__ == item_filter]
     else:
         inventory = gv.player.inventory
 
@@ -101,7 +101,7 @@ def inventory_popup_menu(caption='Select item:', filter=None):
         # elif it's an arrow key or pageup/pagedown, scroll the inventory:
         #
         # for any other key, check if a corresponding item exists in the player's inventory
-        elif len(char) > 0:
+        elif len(char):
             index = ord(char) - ord('a')
             if 0 <= index < len(inventory):
                 item = inventory[index]

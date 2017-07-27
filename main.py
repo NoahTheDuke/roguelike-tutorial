@@ -72,7 +72,7 @@ def main_loop():
     while not tdl.event.is_window_closed():
         turnnumber += 1
         if gv.stairs_down.descended:
-            #msgbox('You descend further downwards %s' % settings.DUNGEONNAME,colors.dark_red)
+            #msgbox('You descend further downwards {}'.format(settings.DUNGEONNAME), colors.dark_red)
             gen_game(newgame=False)
 
         render_all()
@@ -83,20 +83,20 @@ def main_loop():
         #gv.player.is_active = True # Player is considered active by default
         print('main loop waiting on input in turn {0}!'.format(turnnumber))
         player_action = handle_keys(tdl.event.key_wait())
-        #print('Gamestate: %s' % gv.gamestate)
+        #print('Gamestate: {}.format(gv.gamestate))
 
         # if the action is recognized, proceed
         if not player_action == None:
             if 'exit' in player_action:
                 # if the player action is exit, prompt if he wants to quit the game
                 if gv.gamestate == GameStates.PLAYERS_TURN:
-                    choice = menu('Save & Quit the %s' % settings.DUNGEONNAME + ' ?', ['Yes', 'No'], 24)
+                    choice = menu('Save & Quit the {}?'.format(settings.DUNGEONNAME), ['Yes', 'No'], 24)
                     if choice == 0:
                         save_game()
                         break
 
                 elif gv.gamestate == GameStates.PLAYER_DEAD:
-                    choice = menu('Quit the %s' % settings.DUNGEONNAME + ' ?', ['Yes', 'No'], 24)
+                    choice = menu('Quit the {}?'.format(settings.DUNGEONNAME), ['Yes', 'No'], 24)
                     if choice == 0:
                         break
 
@@ -112,7 +112,7 @@ def main_loop():
 
             else:
                 if gv.gamestate in [GameStates.PLAYERS_TURN, GameStates.CURSOR_ACTIVE, GameStates.INVENTORY_ACTIVE]:
-                    print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
+                    print('Gamestate: {}, should be PLAYER_ACTIVE or CURSOR_ACTIVE'.format(gv.gamestate))
                     process_input(player_action)
 
                 # If player has done an active turn
@@ -162,7 +162,7 @@ def load_game():
         gv.stairs_up = gv.gameobjects[savefile['su_index']]
 
         Message(
-            'Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME, gv.dungeon_level),
+            'Welcome back stranger to {}! You are on level {}.'.format(settings.DUNGEONNAME, gv.dungeon_level),
             color=colors.red)
 
 

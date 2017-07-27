@@ -27,7 +27,7 @@ def target_tile():
         tdl.flush()
 
         player_action = handle_keys(tdl.event.key_wait())
-        if not player_action == None:
+        if player_action is not None:
             if 'move' in player_action:  # if key is a movement key process input as normal (will move the cursor)
                 process_input(player_action)
             elif 'confirm' in player_action:  # if enter was pressed, return the coordinates of the cursor

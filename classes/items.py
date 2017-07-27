@@ -21,7 +21,7 @@ class Item(GameObject):
         super().__init__(x, y, name, char, color, blocks=False, item=True, render_order=RenderOrder.ITEM, always_visible=True)
 
         self.description = description
-        if description == None:
+        if description is None:
             description = '{0} lacks a description!'.format[str(self.name)]
             print(str(self.name) + ' lacks a description!')
 

@@ -109,7 +109,7 @@ def render_all():
             if gv.game_map.visible[obj.x][obj.y]:
                 obj.draw(con)
             # if obj is not in FOV but should always be visible
-            elif not gv.game_map.visible[obj.x][obj.y] and gv.game_map.explored[obj.x][ obj.y] and obj.always_visible:
+            elif gv.game_map.explored[obj.x][obj.y] and obj.always_visible:
                 obj.draw(con, fgcolor=settings.COLOR_DARK_WALL_fg, bgcolor=settings.COLOR_DARK_GROUND)
 
     # Draw borders for the map window
@@ -126,5 +126,5 @@ def render_all():
     render_panels(root, visible_tiles)
 
     # If the cursor is active, draw the spotted window
-    if gv.gamestate == GameStates.CURSOR_ACTIVE:
+    if gv.gamestate is GameStates.CURSOR_ACTIVE:
         draw_spotted_window()

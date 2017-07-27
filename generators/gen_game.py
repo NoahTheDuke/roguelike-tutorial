@@ -128,7 +128,8 @@ def gen_game(newgame):
         gen_inventory()
 
         # introductionary messages
-        msgbox('Welcome stranger! Prepare to perish in %s.' % settings.DUNGEONNAME, width=35, text_color=colors.red)
+        msgbox('Welcome stranger! Prepare to perish in {}.'.format(settings.DUNGEONNAME), width=35,
+               text_color=colors.red)
         Message('Press ? to open the manual.', color=colors.green)
 
     else:  # new dungeon level
@@ -142,7 +143,7 @@ def gen_game(newgame):
         gv.actors = [gv.player]
 
         msgbox(
-            'You are now on level %s of the %s' % (gv.dungeon_level, settings.DUNGEONNAME),
+            'You are now on level {} of the {}'.format(gv.dungeon_level, settings.DUNGEONNAME),
             width=30,
             text_color=colors.red)
 

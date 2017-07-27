@@ -22,7 +22,7 @@ def render_panels(root, visible_tiles):
     draw_combat_panel(gv.combat_panel, root, visible_tiles)
 
     # if the cursor is active, try drawing the description panel
-    if gv.gamestate == GameStates.CURSOR_ACTIVE:
+    if gv.gamestate is GameStates.CURSOR_ACTIVE:
         try:
             gv.combat_panel.caption = 'Description'
             draw_description_panel(gv.combat_panel, root)
@@ -44,7 +44,7 @@ def draw_stat_panel(panel, root):
     setup_panel(panel)
 
     # Show the player's name and stats
-    panel.draw_str(1, 2, 'Name: %s' % gv.player.name, bg=None, fg=colors.gold)
+    panel.draw_str(1, 2, 'Name: {}'.format(gv.player.name), bg=None, fg=colors.gold)
     render_bar(1, 4, panel, settings.BAR_WIDTH, 'HP', gv.player.hp, gv.player.max_hp, colors.light_red,
                colors.darker_red)
     render_bar(1, 6, panel, settings.BAR_WIDTH, 'PWR', gv.player.power, gv.player.max_power, colors.black,
@@ -63,7 +63,7 @@ def draw_spotteditems_panel(panel):
     # Draw what the player can see at his feet
 
     spotted = [obj.name for obj in gv.gameobjects if (obj.x, obj.y) == gv.player.pos() and obj.is_item]
-    if len(spotted) > 0:  # if more than one object is present, output the names as a message
+    if spotted:  # if more than one object is present, output the names as a message
         x = 2
         y = settings.STAT_PANEL_HEIGHT // 2
         panel.draw_str(x, settings.STAT_PANEL_HEIGHT // 2, 'At your feet:', bg=None, fg=colors.white)
@@ -85,7 +85,7 @@ def draw_spotteditems_panel(panel):
 def draw_inv_panel(panel, root):
     ''' panel containing the inventory '''
 
-    if gv.gamestate == GameStates.INVENTORY_ACTIVE:
+    if gv.gamestate is GameStates.INVENTORY_ACTIVE:
         panel.border_color = settings.PANELS_BORDER_COLOR_ACTIVE
         panel.caption = 'Select item:'
     else:
@@ -95,7 +95,7 @@ def draw_inv_panel(panel, root):
     # sets up the panel's basic functionality
     setup_panel(panel)
 
-    if len(gv.player.inventory) > 0:
+    if gv.player.inventory:
         y = 2  # offset from the top of the panel
         x = 1  # offset from the left of the panel
         li = ord('a')  # index used to display the letters next to the inventory
@@ -152,7 +152,7 @@ def draw_combat_panel(panel, root, visible_tiles):
     # check for monsters in FOV
     spotted = [ent for ent in gv.actors if (ent.x, ent.y) in visible_tiles and ent is not gv.player]
 
-    if len(spotted) > 0:
+    if spotted:
         x = 2
         y = 2
         spotted.sort(key=gv.player.distance_to)  # sort the spotted array by distance to player
@@ -177,7 +177,7 @@ def draw_description_panel(panel, root):
 
     # get the first entity from the actors array under the cursor position
     # (if this fails, the except in render_panels() catches it)
-    ent = next(ent for ent in gv.actors if (ent.x, ent.y) == (gv.cursor.pos()))
+    ent = next(ent for ent in gv.actors if (ent.x, ent.y) == gv.cursor.pos())
 
     x = 2
     y = 2
@@ -203,7 +203,7 @@ def render_bar(x, y, panel, total_width, name, value, maximum, bar_color, back_c
     panel.draw_rect(x, y, total_width, 1, None, bg=back_color)
 
     #now render the bar on top
-    if bar_width > 0:
+    if bar_width:
         panel.draw_rect(x, y, bar_width, 1, None, bg=bar_color)
 
     #finally, some centered text with the values
