@@ -9,9 +9,20 @@ import global_vars as gv
 
 from gui.render_main import RenderOrder
 
+
 class GameObject:
     ''' Main class of game objects'''
-    def __init__(self, x, y,name,char,color,blocks=False, item=False,always_visible=False,render_order=RenderOrder.CORPSE):
+
+    def __init__(self,
+                 x,
+                 y,
+                 name,
+                 char,
+                 color,
+                 blocks=False,
+                 item=False,
+                 always_visible=False,
+                 render_order=RenderOrder.CORPSE):
         self.x = x
         self.y = y
         self.char = char
@@ -22,22 +33,22 @@ class GameObject:
         self.always_visible = always_visible
 
         self.render_order = render_order
-        
+
         gv.gameobjects.append(self)
 
-    def draw(self,con,fgcolor=None,bgcolor = colors.black):
+    def draw(self, con, fgcolor=None, bgcolor=colors.black):
         ''' Draw the object '''
         if fgcolor == None:
             fgcolor = self.color
-        con.draw_char(self.x, self.y, self.char, fgcolor,bgcolor)
+        con.draw_char(self.x, self.y, self.char, fgcolor, bgcolor)
 
-    def clear(self,con):
+    def clear(self, con):
         ''' Clear the object '''
         con.draw_char(self.x, self.y, ' ', self.color, bg=None)
 
     def pos(self):
         ''' Returns the x,y coordinates of the object '''
-        return (self.x,self.y)
+        return (self.x, self.y)
 
     def is_player(self):
         ''' returns true if the object is the player '''
@@ -51,8 +62,8 @@ class GameObject:
 
     def distance_to_coord(self, x, y):
         ''' return the distance to some coordinates '''
-        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2) 
-    
+        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+
     def delete(self):
         '''remove the object from the game'''
         if self in gv.gameobjects:
@@ -61,34 +72,38 @@ class GameObject:
             gv.actors.remove(self)
         del self
 
+
 class Cursor(GameObject):
     '''cursor object '''
-    def __init__(self, x, y):
-        super().__init__(x, y,'cursor',None,None)
 
-    def move (self,dx,dy):
+    def __init__(self, x, y):
+        super().__init__(x, y, 'cursor', None, None)
+
+    def move(self, dx, dy):
         if gv.game_map.visible[self.x + dx][self.y + dy]:
             self.x += dx
             self.y += dy
-    
-    def draw(self,con):
+
+    def draw(self, con):
         ''' Draw the object '''
         if not self.color == None:
-            con.draw_char(self.x, self.y, self.char,self.color)
-    
-    def activate(self,char,color):
+            con.draw_char(self.x, self.y, self.char, self.color)
+
+    def activate(self, char, color):
         self.char = char
         self.color = color
         self.x = gv.player.x
         self.y = gv.player.y
         self.render_order = RenderOrder.CURSOR
-    
+
     def deactivate(self):
         self.render_order = RenderOrder.NONE
 
+
 class Stairs(GameObject):
     '''stair object '''
-    def __init__(self, x, y,down=True):
+
+    def __init__(self, x, y, down=True):
         if down:
             name = 'downward stairs'
             char = '<'
@@ -97,5 +112,5 @@ class Stairs(GameObject):
             name = 'upward stairs'
             char = '>'
 
-        super().__init__(x, y,name,char,colors.white,always_visible=True)
+        super().__init__(x, y, name, char, colors.white, always_visible=True)
         self.down = down

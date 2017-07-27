@@ -8,10 +8,9 @@ import settings
 import colors
 import global_vars as gv
 
-
 import item_use as iu
 from gui.render_main import RenderOrder
-from classes.items import Useable,Equipment
+from classes.items import Useable, Equipment
 
 # Constants for item generation
 CHAR_POTION = '!'
@@ -19,181 +18,179 @@ CHAR_SCROLL = '='
 
 COLOR_SCROLL = colors.light_yellow
 
+
 def gen_items():
     '''creates a new item at the given position'''
-    
+
     generators = {
-        'p_heal':(70,gen_P_Heal),
-        'p_pwr':(50,gen_P_Power),
-        'scr_frb':(30,gen_Scr_Frb),
-        'scr_ltng':(30,gen_Scr_Ltng),
-        'scr_conf':(30,gen_Scr_Conf),
-        'scr_mm': (30,gen_Scr_Mami)
-    }
+        'p_heal': (70, gen_P_Heal),
+        'p_pwr': (50, gen_P_Power),
+        'scr_frb': (30, gen_Scr_Frb),
+        'scr_ltng': (30, gen_Scr_Ltng),
+        'scr_conf': (30, gen_Scr_Conf),
+        'scr_mm': (30, gen_Scr_Mami)}
 
     # Randomly pick an item from the list
     for room in gv.game_map.rooms:
-        for i in range(randint(1,settings.MAX_ROOM_ITEMS)):
+        for i in range(randint(1, settings.MAX_ROOM_ITEMS)):
             gen = random.choice(list(generators.keys()))
-            while (randint(0,100) > generators[gen][0]):
+            while (randint(0, 100) > generators[gen][0]):
                 gen = random.choice(list(generators.keys()))
-        
-            # Get a good position for the item
-            x,y = room.ranpos()
 
-            # Place it  
-            i = generators[gen][1](x,y)
+            # Get a good position for the item
+            x, y = room.ranpos()
+
+            # Place it
+            i = generators[gen][1](x, y)
+
 
 def gen_inventory():
     ''' creates an initial inventory (PLACEHOLDER) '''
-    gen_P_Heal(0,0).pick_up(gv.player)
-    gen_Scr_Mami(0,0).pick_up(gv.player)
-    gen_Scr_Frb(0,0).pick_up(gv.player)
+    gen_P_Heal(0, 0).pick_up(gv.player)
+    gen_Scr_Mami(0, 0).pick_up(gv.player)
+    gen_Scr_Frb(0, 0).pick_up(gv.player)
 
-#    ____       _   _                 
-#  |  _ \ ___ | |_(_) ___  _ __  ___ 
+
+#   ____       _   _
+#  |  _ \ ___ | |_(_) ___  _ __  ___
 #  | |_) / _ \| __| |/ _ \| '_ \/ __|
 #  |  __/ (_) | |_| | (_) | | | \__ \
 #  |_|   \___/ \__|_|\___/|_| |_|___/
-                                    
-def gen_P_Heal(x,y):
+
+
+def gen_P_Heal(x, y):
     ''' basic healing potion '''
 
     name = 'healing potion'
-    pwr = randint(6,10)
+    pwr = randint(6, 10)
     descr = 'This potion will heal you for a small amount.'
 
-    i = Useable(
-        x,y,
-        name,
-        CHAR_POTION,
-        colors.violet,
-        description = descr,
-        use_function=iu.cast_heal,
-        params= pwr
-    )
+    i = Useable(x, y, name, CHAR_POTION, colors.violet, description=descr, use_function=iu.cast_heal, params=pwr)
     return i
 
-def gen_P_Power(x,y):
+
+def gen_P_Power(x, y):
     ''' basic power potion - can be cursed '''
 
     name = 'potion of power'
     descr = 'A potion of power will heighten your strength.'
 
-    if randint(0,100) > 20: 
+    if randint(0, 100) > 20:
         pwr = 1
-    else:   # 20% chance of being cursed
+    else:  # 20% chance of being cursed
         pwr = -1
 
-    i = Useable(
-        x,y,
-        name,
-        CHAR_POTION,
-        colors.red,
-        description = descr,
-        use_function=iu.cast_powerup,
-        params=pwr
-    )
+    i = Useable(x, y, name, CHAR_POTION, colors.red, description=descr, use_function=iu.cast_powerup, params=pwr)
     return i
 
-#   ____                 _ _     
-#  / ___|  ___ _ __ ___ | | |___ 
+
+#   ____                 _ _
+#  / ___|  ___ _ __ ___ | | |___
 #  \___ \ / __| '__/ _ \| | / __|
 #   ___) | (__| | | (_) | | \__ \
 #  |____/ \___|_|  \___/|_|_|___/
-                               
-def gen_Scr_Ltng(x,y):
+
+
+def gen_Scr_Ltng(x, y):
     name = 'scroll of lightning bolt'
     descr = 'A scroll of lightning bolt. It will strike one of the nearest enemies.'
-    pwr = randint(8,10)
+    pwr = randint(8, 10)
     range = 3
     i = Useable(
-        x,y,
+        x,
+        y,
         name,
         CHAR_SCROLL,
         COLOR_SCROLL,
-        description = descr,
+        description=descr,
         use_function=iu.cast_lightning,
-        params=(pwr,range) # power/radius
-    )
+        params=(pwr, range))  # power/radius
     return i
 
-def gen_Scr_Frb(x,y):
+
+def gen_Scr_Frb(x, y):
     name = 'scroll of fireball'
     pwr = 12
     range = 3
     i = Useable(
-        x,y,
+        x,
+        y,
         name,
         CHAR_SCROLL,
         COLOR_SCROLL,
-        description = 'A scroll of fireball. It will burn anything in a small radius.',
+        description='A scroll of fireball. It will burn anything in a small radius.',
         use_function=iu.cast_fireball,
-        params=(pwr,range) # power/radius
-    )
+        params=(pwr, range))  # power/radius
     return i
 
-def gen_Scr_Conf(x,y):
+
+def gen_Scr_Conf(x, y):
     name = 'scroll of confusion'
-    pwr = randint(4,6)
-    if randint(0,100) > 85: # 15% chance to be cursed
+    pwr = randint(4, 6)
+    if randint(0, 100) > 85:  # 15% chance to be cursed
         range = -1
     else:
         range = 3
     i = Useable(
-        x,y,
+        x,
+        y,
         name,
         CHAR_SCROLL,
         COLOR_SCROLL,
-        description = 'A scroll of confusion. It will turn a foes brain into mush temporarily.',
+        description='A scroll of confusion. It will turn a foes brain into mush temporarily.',
         use_function=iu.cast_confusion,
-        params=(pwr,range) # power/radius
+        params=(pwr, range)  # power/radius
     )
     return i
 
-def gen_Scr_Mami(x,y):
+
+def gen_Scr_Mami(x, y):
     name = 'scroll of magic missile'
-    pwr = randint(4,8)
+    pwr = randint(4, 8)
     range = 6
     i = Useable(
-        x,y,
+        x,
+        y,
         name,
         CHAR_SCROLL,
         COLOR_SCROLL,
-        description = 'A scroll of magic missile. Inflicts direct damage on a single enemy.',
+        description='A scroll of magic missile. Inflicts direct damage on a single enemy.',
         use_function=iu.cast_magicmissile,
-        params=(pwr,range) # power/radius
+        params=(pwr, range)  # power/radius
     )
     return i
 
-#    ___ _   _               
-#   /___\ |_| |__   ___ _ __ 
+
+#    ___ _   _
+#   /___\ |_| |__   ___ _ __
 #  //  // __| '_ \ / _ \ '__|
-# / \_//| |_| | | |  __/ |   
-# \___/  \__|_| |_|\___|_|   
-                           
-def gen_Corpse(x,y,origin):
+# / \_//| |_| | | |  __/ |
+# \___/  \__|_| |_|\___|_|
+
+
+def gen_Corpse(x, y, origin):
     i = Useable(
-        x,y,
+        x,
+        y,
         '{0} corpse'.format(origin.name),
         '%',
         colors.red,
-        description = 'The brutalized corpse of a {0}'.format(origin.name),
+        description='The brutalized corpse of a {0}'.format(origin.name),
         use_function=iu.eat_corpse,
-        params=origin.name
-    )
+        params=origin.name)
     i.render_order = RenderOrder.CORPSE
     return i
 
-def gen_Corpsebits(x,y,origin):
+
+def gen_Corpsebits(x, y, origin):
     i = Useable(
-        x,y,
+        x,
+        y,
         '{0} bits'.format(origin.name),
         '~',
         colors.red,
-        description = 'Little chunks of a {0}'.format(origin.name),
+        description='Little chunks of a {0}'.format(origin.name),
         use_function=iu.eat_corpse,
-        params=origin.name
-    )
+        params=origin.name)
     i.render_order = RenderOrder.CORPSE
     return i

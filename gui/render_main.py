@@ -3,7 +3,7 @@
 import tdl
 #import tcod
 #from textwrap import wrap
-from enum import Enum,auto
+from enum import Enum, auto
 
 import settings
 import colors
@@ -15,6 +15,7 @@ from gui.windows import draw_spotted_window
 
 from game_states import GameStates
 
+
 class RenderOrder(Enum):
     ''' the RenderOrder class is a component of all objects and determines their render priority '''
 
@@ -24,9 +25,10 @@ class RenderOrder(Enum):
     ACTOR = auto()
     CURSOR = auto()
 
+
 def initialize_window():
     ''' initializes & launches the game '''
-    
+
     # Set custom font
     tdl.set_font('resources/terminal12x12_gs_ro.png', greyscale=True)
 
@@ -35,8 +37,8 @@ def initialize_window():
     gv.con = tdl.Console(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
 
     # initialize the panels
-    gv.stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.STAT_PANEL_HEIGHT)
-    gv.inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH,settings.INV_PANEL_HEIGHT)
+    gv.stat_panel = tdl.Console(settings.SIDE_PANEL_WIDTH, settings.STAT_PANEL_HEIGHT)
+    gv.inv_panel = tdl.Console(settings.SIDE_PANEL_WIDTH, settings.INV_PANEL_HEIGHT)
     gv.gamelog_panel = tdl.Console(settings.BOTTOM_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
     gv.combat_panel = tdl.Console(settings.COMBAT_PANEL_WIDTH, settings.BOTTOM_PANEL_HEIGHT)
 
@@ -47,9 +49,10 @@ def initialize_window():
     gv.combat_panel.caption = 'Enemies'
 
     # set the default border color and mode for all panels
-    for panel in [gv.stat_panel,gv.inv_panel,gv.gamelog_panel,gv.combat_panel]:
+    for panel in [gv.stat_panel, gv.inv_panel, gv.gamelog_panel, gv.combat_panel]:
         panel.mode = 'default'
         panel.border_color = settings.PANELS_BORDER_COLOR
+
 
 def render_all():
     ''' draw all game objects '''
@@ -60,22 +63,29 @@ def render_all():
     con.clear(fg=colors.white, bg=colors.black)
 
     # render the dungeon map and it's objects
-    px,py = gv.player.x, gv.player.y
-    visible_tiles = (tdl.map.quick_fov(px, py,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS))
+    px, py = gv.player.x, gv.player.y
+    visible_tiles = (tdl.map.quick_fov(
+        px,
+        py,
+        is_visible_tile,
+        fov=settings.FOV_ALGO,
+        radius=settings.TORCH_RADIUS,
+        lightWalls=settings.FOV_LIGHT_WALLS))
+
     for y in range(settings.MAP_HEIGHT):
         for x in range(settings.MAP_WIDTH):
             wall = not gv.game_map.transparent[x][y]
             #if not gv.game_map.fov[x, y]:
             visible = (x, y) in visible_tiles
-            
+
             #tdl.map.quick_fov(px, py,is_visible_tile,fov=settings.FOV_ALGO,radius=settings.TORCH_RADIUS,lightWalls=settings.FOV_LIGHT_WALLS)
             if not visible:
                 #it's out of the gv.player's.visible[self.x + dx][self.y+dy]but explored
                 if gv.game_map.explored[x][y]:
                     if wall:
-                        con.draw_char(x, y,'#', fg=settings.COLOR_DARK_GROUND_fg, bg=settings.COLOR_DARK_GROUND)
+                        con.draw_char(x, y, '#', fg=settings.COLOR_DARK_GROUND_fg, bg=settings.COLOR_DARK_GROUND)
                     else:
-                        con.draw_char(x, y,'.', fg=settings.COLOR_DARK_WALL_fg, bg=settings.COLOR_DARK_WALL)
+                        con.draw_char(x, y, '.', fg=settings.COLOR_DARK_WALL_fg, bg=settings.COLOR_DARK_WALL)
                 gv.game_map.visible[x][y] = False
             else:
                 #it's visible
@@ -83,14 +93,14 @@ def render_all():
                     fgcolor = colors.red
                 else:
                     fgcolor = settings.COLOR_LIGHT_GROUND
-                
+
                 if wall:
-                    con.draw_char(x, y,'#', fg=fgcolor, bg=colors.black)
+                    con.draw_char(x, y, '#', fg=fgcolor, bg=colors.black)
                 else:
-                    con.draw_char(x, y,'.', fg=fgcolor, bg=colors.black)
+                    con.draw_char(x, y, '.', fg=fgcolor, bg=colors.black)
                 gv.game_map.explored[x][y] = True
                 gv.game_map.visible[x][y] = True
-    
+
     # sort the objects according to their render order
     sorted_objects = sorted(gv.gameobjects, key=lambda x: x.render_order.value)
     # then render them accordingly
@@ -98,21 +108,22 @@ def render_all():
         if obj.render_order is not RenderOrder.NONE:
             if gv.game_map.visible[obj.x][obj.y]:
                 obj.draw(con)
-            elif not gv.game_map.visible[obj.x][obj.y] and gv.game_map.explored[obj.x][obj.y] and obj.always_visible: # if obj is not in FOV but should always be visible
-                obj.draw(con,fgcolor=settings.COLOR_DARK_WALL_fg,bgcolor=settings.COLOR_DARK_GROUND)
-    
+            # if obj is not in FOV but should always be visible
+            elif not gv.game_map.visible[obj.x][obj.y] and gv.game_map.explored[obj.x][ obj.y] and obj.always_visible:
+                obj.draw(con, fgcolor=settings.COLOR_DARK_WALL_fg, bgcolor=settings.COLOR_DARK_GROUND)
+
     # Draw borders for the map window
-    if gv.gamestate in [GameStates.PLAYERS_TURN,GameStates.CURSOR_ACTIVE]:
+    if gv.gamestate in [GameStates.PLAYERS_TURN, GameStates.CURSOR_ACTIVE]:
         map_border = settings.PANELS_BORDER_COLOR_ACTIVE
     else:
         map_border = settings.PANELS_BORDER_COLOR
 
-    draw_window_borders(con,width=settings.MAP_WIDTH,height=settings.MAP_HEIGHT,color=map_border)    
+    draw_window_borders(con, width=settings.MAP_WIDTH, height=settings.MAP_HEIGHT, color=map_border)
 
     root.blit(con, 0, 0, settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT, 0, 0)
 
     # render the panels containing the GUI
-    render_panels(root,visible_tiles)
+    render_panels(root, visible_tiles)
 
     # If the cursor is active, draw the spotted window
     if gv.gamestate == GameStates.CURSOR_ACTIVE:

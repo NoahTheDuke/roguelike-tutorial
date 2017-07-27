@@ -15,7 +15,7 @@ import settings
 # GUI
 from gui.render_main import render_all, initialize_window
 from gui.menus import menu
-from gui.messages import MessageLog,Message, msgbox
+from gui.messages import MessageLog, Message, msgbox
 from gui.manual import display_manual
 
 # Generators
@@ -24,6 +24,7 @@ from generators.gen_game import gen_game
 # Game-related modules
 from game_states import GameStates
 from input_util import handle_keys, process_input
+
 
 def main_menu():
     img = image_load('resources\menu_background3.png')
@@ -35,17 +36,17 @@ def main_menu():
         #show the game's title, and some credits!
         title = 'THE PITS BELOW'
         center = (settings.SCREEN_WIDTH - len(title)) // 2
-        gv.root.draw_str(center, settings.SCREEN_HEIGHT//2-4, title, bg=None, fg=colors.light_yellow)
+        gv.root.draw_str(center, settings.SCREEN_HEIGHT // 2 - 4, title, bg=None, fg=colors.light_yellow)
 
         title = 'By Wolfenswan'
         center = (settings.SCREEN_WIDTH - len(title)) // 2
-        gv.root.draw_str(center, settings.SCREEN_HEIGHT-2, title, bg=None, fg=colors.light_yellow)
- 
+        gv.root.draw_str(center, settings.SCREEN_HEIGHT - 2, title, bg=None, fg=colors.light_yellow)
+
         #show options and wait for the player's choice
         #choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
         choice = menu('', ['Play a new game', 'Quit'], 24)
 
-        if choice == 0: # new game:
+        if choice == 0:  # new game:
             gen_game(True)
             main_loop()
         # elif choice == 1:
@@ -54,8 +55,9 @@ def main_menu():
         #         main_loop()
         #     except:
         #         msgbox('\n No saved game to load.\n', 24)
-        elif choice == 1: #quit
+        elif choice == 1:  #quit
             break
+
 
 def main_loop():
     ''' begin main game loop '''
@@ -77,42 +79,42 @@ def main_loop():
         tdl.flush()
         for obj in gv.gameobjects:
             obj.clear(gv.con)
-        
+
         #gv.player.is_active = True # Player is considered active by default
         print('main loop waiting on input in turn {0}!'.format(turnnumber))
         player_action = handle_keys(tdl.event.key_wait())
         #print('Gamestate: %s' % gv.gamestate)
-        
+
         # if the action is recognized, proceed
         if not player_action == None:
             if 'exit' in player_action:
                 # if the player action is exit, prompt if he wants to quit the game
                 if gv.gamestate == GameStates.PLAYERS_TURN:
-                    choice = menu('Save & Quit the %s' % settings.DUNGEONNAME + ' ?',['Yes','No'],24)
+                    choice = menu('Save & Quit the %s' % settings.DUNGEONNAME + ' ?', ['Yes', 'No'], 24)
                     if choice == 0:
                         save_game()
                         break
 
                 elif gv.gamestate == GameStates.PLAYER_DEAD:
-                    choice = menu('Quit the %s' % settings.DUNGEONNAME + ' ?',['Yes','No'],24)
+                    choice = menu('Quit the %s' % settings.DUNGEONNAME + ' ?', ['Yes', 'No'], 24)
                     if choice == 0:
                         break
 
             # Esc cancels inventory interaction or cursor mode
-            elif 'cancel' in player_action and gv.gamestate in [GameStates.INVENTORY_ACTIVE,GameStates.CURSOR_ACTIVE]:
-                gv.gamestate = GameStates.PLAYERS_TURN    
-                    
+            elif 'cancel' in player_action and gv.gamestate in [GameStates.INVENTORY_ACTIVE, GameStates.CURSOR_ACTIVE]:
+                gv.gamestate = GameStates.PLAYERS_TURN
+
             elif 'fullscreen' in player_action:
                 tdl.set_fullscreen(not tdl.get_fullscreen())
-            
+
             elif 'manual' in player_action:
                 display_manual()
 
-            else:              
+            else:
                 if gv.gamestate in [GameStates.PLAYERS_TURN, GameStates.CURSOR_ACTIVE, GameStates.INVENTORY_ACTIVE]:
                     print('Gamestate: %s, should be PLAYER_ACTIVE or CURSOR_ACTIVE' % gv.gamestate)
                     process_input(player_action)
-                
+
                 # If player has done an active turn
                 if gv.gamestate == GameStates.ENEMY_TURN:
                     #AI takes turn, if player is not considered inactive and is roughly in FOV
@@ -121,6 +123,7 @@ def main_loop():
                             obj.ai.take_turn()
                     if gv.gamestate is not GameStates.PLAYER_DEAD:
                         gv.gamestate = GameStates.PLAYERS_TURN
+
 
 def save_game():
     ''' open a new empty shelve (possibly overwriting an old one) to write the game data '''
@@ -137,8 +140,9 @@ def save_game():
         savefile['c_index'] = gv.gameobjects.index(gv.cursor)
         savefile['sd_index'] = gv.gameobjects.index(gv.stairs_down)
         savefile['su_index'] = gv.gameobjects.index(gv.stairs_up)
-        
+
         savefile.close()
+
 
 def load_game():
     ''' load an existing savegame '''
@@ -157,7 +161,10 @@ def load_game():
         gv.stairs_down = gv.gameobjects[savefile['sd_index']]
         gv.stairs_up = gv.gameobjects[savefile['su_index']]
 
-        Message('Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME,gv.dungeon_level), color=colors.red)
+        Message(
+            'Welcome back stranger to %s! You are on level %s.' % (settings.DUNGEONNAME, gv.dungeon_level),
+            color=colors.red)
+
 
 if __name__ == '__main__':
     initialize_window()
